@@ -194,6 +194,38 @@ body{width:1280px;height:720px;overflow:hidden;font-family:"Segoe UI",Roboto,"He
 .spot .info .settings{padding:0;gap:11px}
 .spot .searchrow{padding:10px 14px}
 .spot .searchrow .search{position:static;width:100%;height:34px;background:#221a17;border-radius:10px}
+
+/* ---------- K: LARP (blau, Wappen DIH) ---------- */
+.larp{--acc:#e0b95a;--acc2:#7fb2ff;--text:#f3e9cf;--text2:#b9c6e2;--muted:#7f93bb;--off:#1b3566;--line:#3a5a9c;font-family:Georgia,"Palatino Linotype",serif;font-size:12.5px}
+.larp .world{filter:saturate(.55) hue-rotate(-12deg) brightness(.7)}
+.larp .dim{background:radial-gradient(ellipse at 50% 35%,rgba(16,40,92,.35),rgba(4,10,26,.82) 78%)}
+.larp .panel{background:linear-gradient(180deg,#112a58,#0b1d40);border:2px solid #b38f3d;border-radius:4px;box-shadow:0 0 0 1px #07142e,inset 0 0 0 3px #0c2147,inset 0 0 0 4px rgba(224,185,90,.45),0 10px 26px rgba(0,0,20,.6);position:relative}
+.larp .panel::before,.larp .panel::after{content:"";position:absolute;top:5px;width:6px;height:6px;background:radial-gradient(circle at 35% 35%,#ffe9a8,#b38f3d);border-radius:50%;z-index:2}
+.larp .panel::before{left:5px}.larp .panel::after{right:5px}
+.larp .head{height:42px;margin:0 -2px;background:linear-gradient(180deg,#1f4a9a,#143574);border-bottom:2px solid #b38f3d;color:#f7e7b8;font-variant:small-caps;letter-spacing:2px;font-size:15px;text-shadow:0 1px 0 #061430;justify-content:center;gap:10px;position:relative}
+.larp .head .n0::before{content:"⚜ ";color:var(--acc)}.larp .head .n0::after{content:" ⚜";color:var(--acc)}
+.larp .head .n{position:absolute;right:12px;font-size:10px;color:#9cb4e3;letter-spacing:0}
+.larp .mod{height:25px;color:var(--text2);border-bottom:1px solid rgba(58,90,156,.35);margin:0 4px}
+.larp .mod .nm::before{content:"◇ ";color:var(--muted)}
+.larp .mod.on{color:var(--text);background:linear-gradient(90deg,rgba(224,185,90,.20),rgba(224,185,90,0))}
+.larp .mod.on .nm::before{content:"◆ ";color:var(--acc);text-shadow:0 0 6px rgba(224,185,90,.8)}
+.larp .sw{display:none}
+.larp .key{border-color:#b38f3d;color:#e0b95a;background:#0a1a36}
+.larp .bar{gap:0}
+.larp .bar .title{width:96px;height:68px;margin-top:-6px;background:linear-gradient(180deg,#2a5fc0,#143574);color:#f7e7b8;font-size:24px;font-weight:700;letter-spacing:2px;display:flex;align-items:center;justify-content:center;clip-path:polygon(0 0,100% 0,100% 62%,50% 100%,0 62%);border:none;text-shadow:0 2px 0 #061430;position:relative;padding-bottom:10px}
+.larp .crest{position:relative;width:104px;height:74px;margin-top:-6px;display:flex;align-items:center;justify-content:center}
+.larp .crest::before{content:"";position:absolute;inset:0;background:#e0b95a;clip-path:polygon(0 0,100% 0,100% 62%,50% 100%,0 62%)}
+.larp .crest::after{content:"";position:absolute;inset:3px;background:linear-gradient(180deg,#2a5fc0,#123068);clip-path:polygon(0 0,100% 0,100% 62%,50% 100%,0 62%)}
+.larp .crest span{position:relative;z-index:2;font-size:22px;font-weight:700;letter-spacing:2px;color:#f7e7b8;text-shadow:0 2px 0 #061430;margin-top:-10px}
+.larp .crest small{position:absolute;z-index:2;top:6px;font-size:9px;color:#e0b95a;letter-spacing:3px}
+.larp .swd{color:#e0b95a;font-size:22px;margin:0 12px}
+.larp .search{width:250px;height:32px;background:linear-gradient(180deg,#112a58,#0b1d40);border:2px solid #b38f3d;border-radius:16px;color:#9cb4e3;font-style:italic}
+.larp .settings{background:rgba(5,16,40,.7);border-top:1px solid #b38f3d;margin:0 4px}
+.larp .slider{height:5px;background:#07142e;border:1px solid #3a5a9c}.larp .slider i{background:linear-gradient(90deg,#b38f3d,#f3d98b);border-radius:2px}
+.larp .slider b{border-radius:1px;transform:rotate(45deg);width:11px;height:11px;background:#f3d98b;border:1px solid #7a5d1d;top:-4px}
+.larp .sel{background:#07142e;border:1px solid #b38f3d;border-radius:2px;color:#f3e9cf}
+.larp .chip{border-radius:2px;border-color:#b38f3d}
+.larp .label{font-family:"Segoe UI",sans-serif}
 </style></head>
 <body class="VARIANT">
 <div class="world"></div><div class="dim"></div>
@@ -202,8 +234,9 @@ body{width:1280px;height:720px;overflow:hidden;font-family:"Segoe UI",Roboto,"He
 <div class="label" id="l"></div>
 <script>
 const v=new URLSearchParams(location.search).get('v')||'glas';
+if(v==='larp'){const t=document.getElementById('t');t.outerHTML='<span class="swd">⚔</span><div class="crest"><small>EST.</small><span>DIH</span></div><span class="swd" style="transform:scaleX(-1)">⚔</span>';}
 document.body.className=v;
-const L={"glas": "1 · Glas", "flat": "2 · Flach & minimal", "neon": "3 · Neon-Verlauf", "card": "4 · Karten", "term": "5 · Terminal", "pixel": "6 · Pixel-Retro", "paper": "7 · Papier (hell)", "bp": "8 · Blueprint", "side": "9 · Seitenleiste (neues Layout)", "spot": "10 · Spotlight (neues Layout)"};
+const L={"glas": "1 · Glas", "flat": "2 · Flach & minimal", "neon": "3 · Neon-Verlauf", "card": "4 · Karten", "term": "5 · Terminal", "pixel": "6 · Pixel-Retro", "paper": "7 · Papier (hell)", "bp": "8 · Blueprint", "side": "9 · Seitenleiste (neues Layout)", "spot": "10 · Spotlight (neues Layout)", "larp": "11 · LARP (blau) mit DIH-Wappen"};
 document.getElementById('l').textContent=L[v];
 const cats=[
  ['Combat','⚔',[['KillAura','R',1],['AutoTotem','',1],['Criticals','',0],['Surround','',1],['TriggerBot','',0],['Reach','',0]],'Angriff'],
