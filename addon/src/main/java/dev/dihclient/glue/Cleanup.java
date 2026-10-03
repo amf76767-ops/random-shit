@@ -20,7 +20,7 @@ public final class Cleanup {
     static final Set<String> REMOVED = Set.of(
             "AutoPot", "MaceCombo", "Step", "ReverseStep", "AutoReconnect", "InvManager", "SurvivalAlerts", "MoneyHud",
             "Xray", "Chams", "DamageNumbers", "Waypoints", "DihChat", "Friends", "Enemies", "NewChunks", "BaseTraces",
-            "Watchlist", "PacketBuffer", "PacketFly", "HammerTool");
+            "Watchlist", "PacketBuffer", "PacketFly", "HammerTool", "Fullbright", "SafeWalk", "BoatNoClip");
 
     /** Light / normal / heavy for the Performance module. */
     public enum Quality { LIGHT, NORMAL, HEAVY }

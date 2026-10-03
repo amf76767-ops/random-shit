@@ -41,3 +41,10 @@ extends class_2828$class_5911 class_2828
 extends class_1109 class_1101     # PositionedSoundInstance -> AbstractSoundInstance
 implements class_1101 class_1113  # -> SoundInstance
 interface class_1113
+extends class_408 class_437      # ChatScreen
+extends class_7743 class_437     # sign edit
+extends class_471 class_437
+extends class_473 class_437
+extends class_481 class_437
+interface class_364
+implements class_342 class_364   # EditBox

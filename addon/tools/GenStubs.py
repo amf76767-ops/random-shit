@@ -99,6 +99,8 @@ for n in list(extends) + list(extends.values()) + list(enums) + list(ifaces):
     ensure(n)
 for n in re.findall(r'L((?:net/minecraft|com/mojang)/[^;<]+);', txt):
     ensure(n)
+for n in re.findall(r'// class ((?:net/minecraft|com/mojang)/[^\s;<]+)', txt):
+    ensure(n)
 
 def default(t):
     if t in ('int', 'short', 'byte', 'char', 'long', 'float', 'double'): return '0'
