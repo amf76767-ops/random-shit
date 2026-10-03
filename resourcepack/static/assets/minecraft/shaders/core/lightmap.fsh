@@ -14,6 +14,8 @@ layout(std140) uniform LightmapInfo {
 
 // DIH Visuals: Fullbright. Jede Lichtstufe wird mindestens so hell. 1.0 = alles voll hell, 0.0 = wieder Vanilla.
 const float FULLBRIGHT = 1.0;
+// DIH Scenes: Farbstich des Lichts (1,1,1 = keiner). Wird zur Laufzeit vom Modul Scenes gesetzt.
+const vec3 LIGHT_TINT = vec3(1.0, 1.0, 1.0);
 
 in vec2 texCoord;
 
@@ -33,7 +35,7 @@ vec3 notGamma(vec3 color) {
 void main() {
     // Voll hell: gar nichts rechnen. Das umgeht auch die Division durch 0 in notGamma() bei völliger Dunkelheit (NaN).
     if (FULLBRIGHT >= 1.0) {
-        fragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        fragColor = vec4(LIGHT_TINT, 1.0);
         return;
     }
 
@@ -76,5 +78,5 @@ void main() {
     color = mix(color, notGamma, lightmapInfo.BrightnessFactor);
     color = mix(color, vec3(0.75), 0.04);
 
-    fragColor = vec4(max(color, vec3(FULLBRIGHT)), 1.0);
+    fragColor = vec4(max(color, vec3(FULLBRIGHT)) * LIGHT_TINT, 1.0);
 }

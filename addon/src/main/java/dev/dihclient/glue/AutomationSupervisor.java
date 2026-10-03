@@ -119,7 +119,7 @@ public class AutomationSupervisor extends Module {
             return;
         }
         this.configure();
-        List<Module> watch = this.resolve(this.watched.get());
+        List<Module> watch = this.resolve(this.watched.get() + ",Demolish");
         List<Module> guard = this.resolve(this.guarded.get());
         guard.removeAll(watch);
 

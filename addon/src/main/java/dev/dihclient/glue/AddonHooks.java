@@ -54,6 +54,12 @@ public final class AddonHooks {
             add.invoke(modules, new VisualPack());
             add.invoke(modules, new CustomModel());
             add.invoke(modules, new FakeTime());
+            add.invoke(modules, new Scenes());
+            add.invoke(modules, new ModelBuild());
+            add.invoke(modules, new Demolish());
+            Emotes emotes = new Emotes();
+            add.invoke(modules, emotes);
+            emotes.setEnabledSilently(true); // idle until a key is pressed
             BuildPath path = new BuildPath();
             add.invoke(modules, path);
             path.setEnabledSilently(true); // harmless: draws only while AutoBuild walks

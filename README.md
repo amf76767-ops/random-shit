@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.4.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.5.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -141,5 +141,21 @@ bei allen Spielern in der Nähe oder als Statuen. Nur du siehst es (Client-seiti
   enthält die Auswahl. Fullbright zeichnet die Lightmap jetzt einfach weiß (vorher konnte `notGamma` bei völliger Dunkelheit NaN liefern). Neu: unsichtbarer Regen.
 - **Fake Time** (Misc): Tageszeit nur auf deinem Bildschirm, fest oder mit eigener Geschwindigkeit (`ClientWorld.setTime`, per Reflection).
 - **Radar** und **Chunk Radar** neu gezeichnet (runde Scheibe, Sweep, Sichtkegel, Himmelsrichtungen, Pfeile für hoch/tief; Schachbrett, Kacheln, Blickrichtung).
+- Nicht im Spiel getestet.
+
+### 6.5.0
+- **Scenes** (Render): ein Schalter für die Stimmung: Vanilla, Cozy, Cyber, Horror, Winter, Dreamy, Sunny. Setzt Himmels-, Wolken- und Lichtfarbe
+  (neue Shader-Konstanten `LIGHT_TINT`, `SKY_MUL_H/Z`, `SKY_ADD_H/Z`, `CLOUD_MUL/ADD`, die `Look.patch` beim Zusammenbauen des Packs einträgt),
+  dazu Tageszeit (Fake Time) und Wetter (Fake Weather). Schaltet VisualPack bei Bedarf ein und gibt alles beim Ausschalten zurück.
+- **ModelBuild** (World): macht aus einem Modell aus `dihclient/models` ein Blockbild (`Voxelizer`: Oberfläche dicht abtasten, Farbe aus Textur ×
+  Materialfarbe; `BlockPalette`: nächster Block per Farbabstand aus Beton/Wolle/Terracotta/Planken/Sand/Schnee), schreibt `.schem` nach `dihclient/schematics`
+  und öffnet die AutoBuild-Vorschau. Einstellungen: Height, Palette, Block Types, Solid. Mit Tung Tung Tung Sahur bei 40 Blöcken ca. 1860 Blöcke, das Gesicht ist erkennbar.
+- **Demolish** (Automation): nimmt einen AutoBuild-Bau von oben nach unten ab. Nur Blöcke des geladenen Plans, die noch genau so dastehen. Fragt einmal nach
+  (zweites Einschalten innerhalb 20 s), läuft mit dem Pfad-Planer (`PathWalker`: Standplätze mit den meisten Blöcken in Reichweite und Sicht), zielt wie ein Spieler,
+  nimmt das beste Werkzeug aus der Hotbar und sammelt am Ende die Drops. Ausschalten pausiert, *Stop* beendet. Der AutoSupervisor pausiert und startet es wieder.
+- **Emotes** (Fun): Taste an das Modul binden. Dance, Spin, Backflip, Bow, Hop, Sleep, Wiggle, No, Faint. Alle mit DIHClient auf demselben Server sehen sie, über das
+  kostenlose Relay ntfy.sh (gesendet werden Spielername, Emote und ein Hash der Serveradresse als "Raum"; *Share* und *Show Others* schalten das ab).
+  Auf dem normalen Körper (Mixin am Ende von `setupTransforms`) und auf dem eigenen 3D-Modell (CustomModel). Die Pose reist im Render-State (`LivingStateMixin`).
+  Das Relay ist nicht abgesichert: jemand kann den Namen eines anderen eintragen und ihn tanzen lassen. Mehr geht damit nicht.
 - Nicht im Spiel getestet.
 

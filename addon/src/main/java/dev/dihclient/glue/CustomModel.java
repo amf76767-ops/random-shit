@@ -1,6 +1,7 @@
 package dev.dihclient.glue;
 
 import dev.dihclient.DIHClient;
+import dev.dihclient.emote.EmotePose;
 import dev.dihclient.model3d.Model;
 import dev.dihclient.model3d.ModelLoader;
 import dev.dihclient.model3d.Rig;
@@ -386,7 +387,7 @@ public class CustomModel extends Module {
                 }
             }
             for (double[] s : this.statues) {
-                this.drawModel(r, m, this.idleAnim, this.statueTime(now), s[0], s[1], s[2], (float) s[3], false, 0);
+                this.drawModel(r, m, this.idleAnim, this.statueTime(now), s[0], s[1], s[2], (float) s[3], false, null);
             }
         } catch (Throwable e) {
             DIHClient.LOG.warn("[DIHClient] model draw failed", e);
@@ -433,11 +434,11 @@ public class CustomModel extends Module {
                 anim = this.idleAnim;
             }
         }
-        this.drawModel(r, m, anim, time, x, y, z, yaw, p.method_5715(), 0);
+        this.drawModel(r, m, anim, time, x, y, z, yaw, p.method_5715(), Emotes.poseOf(p));
     }
 
     private void drawModel(Render3D r, Model m, Model.Animation anim, double time, double x, double y, double z, float yaw,
-                           boolean sneaking, int unused) {
+                           boolean sneaking, EmotePose pose) {
         if (!this.animate.get() || !m.hasAnimations()) {
             anim = null;
         }
@@ -466,20 +467,39 @@ public class CustomModel extends Module {
             this.outNrm = new float[n * 3];
         }
         class_243 cam = r.camera();
-        double theta = -Math.toRadians(yaw + this.turn.get());
+        EmotePose ep = pose == null ? EmotePose.NONE : pose;
+        double theta = -Math.toRadians(yaw + this.turn.get() + ep.yaw());
         float c = (float) Math.cos(theta), s = (float) Math.sin(theta);
         float sy = sneaking ? scale * 0.9f : scale;
-        double bx = x - cam.field_1352, by = y - cam.field_1351 - m.minY * sy, bz = z - cam.field_1350;
+        double bx = x - cam.field_1352, by = y - cam.field_1351 - m.minY * sy + ep.dy(), bz = z - cam.field_1350;
+        float centre = (m.minY + m.maxY) * 0.5f * sy;
+        float cr = (float) Math.cos(Math.toRadians(ep.roll())), sr = (float) Math.sin(Math.toRadians(ep.roll()));
+        float cp = (float) Math.cos(Math.toRadians(ep.pitch())), sp = (float) Math.sin(Math.toRadians(ep.pitch()));
+        boolean tilt = ep.roll() != 0 || ep.pitch() != 0;
         float[] tp = this.outPos, tn = this.outNrm;
         for (int v = 0; v < n; v++) {
             int o = v * 3;
             float px = p[o] * scale, py = p[o + 1] * sy, pz = p[o + 2] * scale;
+            float nx0 = nr[o], ny0 = nr[o + 1], nz0 = nr[o + 2];
+            if (tilt) { // emote: roll around Z, then pitch around X, both around the middle of the body
+                float ly = py - centre;
+                float x1 = px * cr - ly * sr, y1 = px * sr + ly * cr;
+                float y2 = y1 * cp - pz * sp, z2 = y1 * sp + pz * cp;
+                px = x1;
+                py = y2 + centre;
+                pz = z2;
+                float nx1 = nx0 * cr - ny0 * sr, ny1 = nx0 * sr + ny0 * cr;
+                float ny2 = ny1 * cp - nz0 * sp, nz2 = ny1 * sp + nz0 * cp;
+                nx0 = nx1;
+                ny0 = ny2;
+                nz0 = nz2;
+            }
             tp[o] = (float) (bx + px * c + pz * s);
             tp[o + 1] = (float) (by + py);
             tp[o + 2] = (float) (bz - px * s + pz * c);
-            tn[o] = nr[o] * c + nr[o + 2] * s;
-            tn[o + 1] = nr[o + 1];
-            tn[o + 2] = -nr[o] * s + nr[o + 2] * c;
+            tn[o] = nx0 * c + nz0 * s;
+            tn[o + 1] = ny0;
+            tn[o + 2] = -nx0 * s + nz0 * c;
         }
         int light = this.glow.get() ? 15728880 : class_761.method_23794((class_1920) mc.field_1687, class_2338.method_49637(x, y + 0.5, z));
         int tris = m.triCount;

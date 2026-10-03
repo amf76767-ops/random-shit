@@ -37,7 +37,7 @@ public class VisualPack extends Module {
     private record Effect(BoolSetting on, String... files) {
     }
 
-    private final BoolSetting fullbright = this.bool("Fullbright", "Everything is fully bright, also in caves and at night (lightmap shader).", true)
+    public final BoolSetting fullbright = this.bool("Fullbright", "Everything is fully bright, also in caves and at night (lightmap shader).", true)
             .onChange(this::changed);
     private final BoolSetting rain = this.bool("Invisible Rain", "Rain is not drawn. You still hear it.", true).onChange(this::changed);
     private final BoolSetting clouds = this.bool("Clear Clouds", "See-through clouds (shader).", true).onChange(this::changed);
@@ -60,10 +60,29 @@ public class VisualPack extends Module {
             new Effect(this.totem, MC + "models/item/totem_of_undying.json"));
 
     private boolean dirty;
+    private static Look look = Look.NONE;
+    private static VisualPack instance;
 
     public VisualPack() {
         super("VisualPack", Category.RENDER,
                 "Resource pack with Fullbright, invisible rain, clear clouds and water, sky gradient, colour glint and more. Every part has a switch.");
+        instance = this;
+    }
+
+    /** The colour mood from Scenes. The pack is rebuilt and the resources reload (when the module is on). */
+    public void setLook(Look next) {
+        if (look != next) {
+            look = next;
+            this.dirty = true;
+        }
+    }
+
+    public Look look() {
+        return look;
+    }
+
+    public static VisualPack instance() {
+        return instance;
     }
 
     private void changed() {
@@ -103,7 +122,8 @@ public class VisualPack extends Module {
                 bits |= 1 << i;
             }
         }
-        return PREFIX + "-" + Integer.toHexString(0x1000 | bits) + ".zip";
+        String mood = look == Look.NONE ? "" : "-" + look.id().replaceAll("[^a-z0-9]", "");
+        return PREFIX + "-" + Integer.toHexString(0x1000 | bits) + mood + ".zip";
     }
 
     private void apply(boolean on) {
@@ -148,7 +168,7 @@ public class VisualPack extends Module {
             if (in == null) {
                 throw new IOException("Pack fehlt in der JAR");
             }
-            bytes = PackFilter.copy(in, this::skip);
+            bytes = PackFilter.copy(in, this::skip, look::patch);
         }
         Path tmp = dir.resolve(name + ".tmp");
         Files.write(tmp, bytes);

@@ -19,5 +19,6 @@ public abstract class CustomModelMixin {
         if (CustomModel.hides(entity)) {
             state.field_53453 = 1.0E-4F;
         }
+        dev.dihclient.glue.Emotes.capture(entity, state);
     }
 }

@@ -9,7 +9,7 @@ import net.minecraft.class_310;
 import net.minecraft.class_2338.class_2339;
 
 /** The loaded world as the path search sees it. Answers are cached for one planning round. */
-final class McTerrain implements Nav.Terrain {
+public final class McTerrain implements Nav.Terrain {
     private static final String[] HAZARD = {"lava", "fire", "cactus", "magma", "campfire", "berry_bush", "wither_rose", "powder_snow",
             "cobweb", "pointed_dripstone", "bubble_column", "end_portal", "nether_portal"};
     private static final String[] NO_FLOOR = {"fence", "_wall", "iron_bars", "glass_pane"};
@@ -19,7 +19,7 @@ final class McTerrain implements Nav.Terrain {
     private final Map<Long, Byte> cache = new HashMap<>();
     private final class_2339 pos = new class_2339();
 
-    void reset() {
+    public void reset() {
         this.cache.clear();
     }
 
