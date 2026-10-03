@@ -226,6 +226,25 @@ body{width:1280px;height:720px;overflow:hidden;font-family:"Segoe UI",Roboto,"He
 .larp .sel{background:#07142e;border:1px solid #b38f3d;border-radius:2px;color:#f3e9cf}
 .larp .chip{border-radius:2px;border-color:#b38f3d}
 .larp .label{font-family:"Segoe UI",sans-serif}
+
+/* ---------- L: DIH (Eigenlook, schwarz + Flamme) ---------- */
+.dih{--acc:#e53935;--acc2:#ff8a3d;--text:#f4f5f8;--text2:#9298a8;--muted:#626877;--off:#2a2d36;--line:#3a2420}
+.dih .world{filter:grayscale(.5) brightness(.55)}
+.dih .dim{background:linear-gradient(180deg,rgba(6,6,8,.5),rgba(26,6,4,.78))}
+.dih .panel{background:#0c0d11;border:1px solid rgba(255,90,61,.30);border-radius:2px;box-shadow:0 8px 24px rgba(0,0,0,.6),0 0 0 1px #000;overflow:hidden}
+.dih .head{height:34px;background:linear-gradient(90deg,#e53935,#ff8a3d);color:#fff;font-weight:800;letter-spacing:2px;text-transform:uppercase;font-size:11.5px;text-shadow:0 1px 0 rgba(0,0,0,.35);clip-path:polygon(0 0,100% 0,100% 100%,10px 100%,0 calc(100% - 8px))}
+.dih .head .n{color:rgba(255,255,255,.85);font-weight:600;letter-spacing:0}
+.dih .mod{height:26px;color:var(--text2);position:relative}
+.dih .mod.on{color:#fff;background:linear-gradient(90deg,rgba(229,57,53,.28),rgba(255,138,61,.04))}
+.dih .mod.on::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#e53935,#ff8a3d)}
+.dih .sw{width:26px;height:10px;border-radius:1px;transform:skewX(-14deg)}.dih .sw::after{border-radius:0;top:1px;width:8px;height:8px}
+.dih .on .sw{background:linear-gradient(90deg,#e53935,#ff8a3d);box-shadow:0 0 8px rgba(255,90,61,.7)}.dih .on .sw::after{left:16px}
+.dih .key{border-color:rgba(255,90,61,.5);color:#ff8a3d;border-radius:1px}
+.dih .bar .title{background:#0c0d11;border:1px solid rgba(255,90,61,.45);border-radius:2px;height:30px;padding:0 16px;display:flex;align-items:center;font-weight:900;letter-spacing:3px;font-size:15px;background:linear-gradient(90deg,#e53935,#ff8a3d);-webkit-background-clip:padding-box;color:#fff;clip-path:polygon(10px 0,100% 0,calc(100% - 10px) 100%,0 100%)}
+.dih .search{background:#0c0d11;border:1px solid rgba(255,90,61,.30);border-radius:2px;height:30px}
+.dih .settings{background:#090a0d;border-top:1px solid rgba(255,90,61,.3)}
+.dih .slider{height:4px;border-radius:0;background:#2a2d36}.dih .slider i{border-radius:0;background:linear-gradient(90deg,#e53935,#ff8a3d)}.dih .slider b{border-radius:1px;width:6px;height:12px;top:-4px;background:#fff}
+.dih .sel,.dih .chip{border-radius:1px}
 </style></head>
 <body class="VARIANT">
 <div class="world"></div><div class="dim"></div>
@@ -236,7 +255,7 @@ body{width:1280px;height:720px;overflow:hidden;font-family:"Segoe UI",Roboto,"He
 const v=new URLSearchParams(location.search).get('v')||'glas';
 if(v==='larp'){const t=document.getElementById('t');t.outerHTML='<span class="swd">⚔</span><div class="crest"><small>EST.</small><span>DIH</span></div><span class="swd" style="transform:scaleX(-1)">⚔</span>';}
 document.body.className=v;
-const L={"glas": "1 · Glas", "flat": "2 · Flach & minimal", "neon": "3 · Neon-Verlauf", "card": "4 · Karten", "term": "5 · Terminal", "pixel": "6 · Pixel-Retro", "paper": "7 · Papier (hell)", "bp": "8 · Blueprint", "side": "9 · Seitenleiste (neues Layout)", "spot": "10 · Spotlight (neues Layout)", "larp": "11 · LARP (blau) mit DIH-Wappen"};
+const L={"glas": "1 · Glas", "flat": "2 · Flach & minimal", "neon": "3 · Neon-Verlauf", "card": "4 · Karten", "term": "5 · Terminal", "pixel": "6 · Pixel-Retro", "paper": "7 · Papier (hell)", "bp": "8 · Blueprint", "side": "9 · Seitenleiste (neues Layout)", "spot": "10 · Spotlight (neues Layout)", "larp": "11 · LARP (blau)", "dih": "12 · DIH (Flamme)"};
 document.getElementById('l').textContent=L[v];
 const cats=[
  ['Combat','⚔',[['KillAura','R',1],['AutoTotem','',1],['Criticals','',0],['Surround','',1],['TriggerBot','',0],['Reach','',0]],'Angriff'],
