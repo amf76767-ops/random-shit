@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.2.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.3.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -103,3 +103,21 @@ mehr durch oder hinter Blöcke, von der Rückseite einer Fläche oder außer Rei
 - **Entfernt:** SafeWalk, BoatNoClip (der Server prüft Bootsbewegungen, ein Client kann das nicht aushebeln).
 - **AutoLog:** war im Kreativmodus ausgeschaltet, jetzt nur noch im Zuschauermodus.
 - **InventoryMove:** im Überlebens-Inventar zählte vermutlich die Rezeptbuch-Suche als Texteingabe und schaltete das Modul ab.
+
+### 6.3.0: CustomModel (3D-Modelle aus Blender)
+Neues Modul **CustomModel** (Kategorie Fun). Es zeigt ein eigenes 3D-Modell statt des Spielermodells: nur bei dir,
+bei allen Spielern in der Nähe oder als Statuen. Nur du siehst es (Client-seitig).
+- **Dateien:** `.minecraft/dihclient/models/` (beim ersten Start mit Beispiel-Roboter und README). Formate: **.glb / .gltf**
+  (Blender: *File → Export → glTF 2.0*, Format *glTF Binary*) und **.obj** (+ .mtl + Bild). `.blend` selbst geht nicht.
+- **Unterstützt:** Meshes, Normalen, UVs, Vertex-Farben, Material-Farbe und -Bild (mehrere Bilder werden zu einem Atlas),
+  Node-Hierarchie, **Skinning** (Skelett) und **Animationen** (Position/Drehung/Skalierung, linear, step, cubic spline).
+  Animationen mit "idle" im Namen laufen im Stehen, "walk"/"run" beim Gehen (anders benennbar in den Einstellungen).
+- **Nicht unterstützt:** komprimierte glTF (Draco/Meshopt), Morph-Targets, WebP-Texturen, mehrere UV-Sets, Licht/Kamera.
+- **Einstellungen:** Model, Replace (Self / Everyone / Nobody), Height, Rotation, Glow, Animations, Range, Max Triangles;
+  Aktionen *Open Models Folder*, *Next Model*, *Reload*, *Place Statue*, *Remove Statues*.
+- **Technik:** `dev.dihclient.model3d` (Parser, Skelett, Atlas; reines Java, getestet mit `Model3dTests`; mit den
+  Khronos-Beispielen CesiumMan und Fox ausprobiert). `glue/CustomModel` zeichnet mit der Entity-Textur-Ebene, die auch
+  Pet benutzt. `CustomModelMixin` schrumpft den Vanilla-Spieler auf fast null. `Render3D` kommt mit zwei neuen Methoden
+  aus `addon/src/override`. Beispielmodell: `tools/make_example_model.py`.
+- **Nicht im Spiel getestet.** Das Zeichnen im echten Minecraft (Licht, Tiefe, Verstecken des Spielers) konnte hier nicht laufen.
+

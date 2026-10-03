@@ -48,3 +48,6 @@ extends class_473 class_437
 extends class_481 class_437
 interface class_364
 implements class_342 class_364   # EditBox
+extends class_1043 class_1044     # NativeImageBackedTexture -> AbstractTexture
+interface class_1920              # BlockRenderView
+implements class_1937 class_1920

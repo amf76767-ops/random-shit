@@ -101,7 +101,7 @@ public final class Patcher {
                                 throw new IllegalStateException(gone + " not found in dihclient.mixins.json");
                             }
                         }
-                        String withFallback = cfg.replace("\"KeyboardInputMixin\",", "\"KeyboardInputMixin\",\n    \"InputFallbackMixin\",\n    \"KeyBindingSoftMixin\",\n    \"DummyHitMixin\",");
+                        String withFallback = cfg.replace("\"KeyboardInputMixin\",", "\"KeyboardInputMixin\",\n    \"InputFallbackMixin\",\n    \"KeyBindingSoftMixin\",\n    \"DummyHitMixin\",\n    \"CustomModelMixin\",");
                         if (withFallback.equals(cfg)) {
                             throw new IllegalStateException("KeyboardInputMixin not found in dihclient.mixins.json");
                         }

@@ -52,6 +52,7 @@ public final class AddonHooks {
             // on by default; the saved config, loaded right after this, wins as soon as the player has switched it off
             supervisor.setEnabledSilently(true);
             add.invoke(modules, new VisualPack());
+            add.invoke(modules, new CustomModel());
         });
         step("3x3 pickaxe name", () -> Cleanup.linkHammer(modules));
         step("PacketFly in Flight", () -> Cleanup.mergePacketFly(modules.get(dev.dihclient.modules.movement.Flight.class),
