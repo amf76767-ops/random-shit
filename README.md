@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.8.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.8.1**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -181,9 +181,5 @@ Hook in `ConfigManager.apply`), ohne neue Werte zu überschreiben.
 - **FlipFinder heißt jetzt AutoFlipper** (der alte Name findet das Modul weiter, die Einstellungen ziehen um).
 - Nicht im Spiel getestet. Die Namen und Reihenfolgen in der Config ändern sich; bei Problemen alte `config.json` zurücksetzen.
 
-### 6.8.0: zwei neue GUI-Themen
-- ClickGUI → *Theme* hat zwei neue Werte: **Larp** (Königsblau mit Gold: blaue Flächen, goldene Rahmen und Akzent, Text in Pergament-Weiß, leicht gerundet)
-  und **DIH** (der eigene Look des Clients: Schwarz mit rot-orangem Flammen-Verlauf als Akzent, fast eckig). Sie wirken auf beide Layouts (Modern und Meteor).
-- Umgesetzt über die Farbtabelle der Skins (`gui/theme/Skin`, `ClickGui.Look`), also ohne neue Zeichencode-Teile. Die Entwürfe mit Wappen, Lilien und
-  schrägen Bannern stehen in `gui-mockups/thema-larp.png` und `thema-dih.png`; diese Verzierungen sind noch nicht im Spiel.
-
+### 6.8.1
+- Die GUI-Themen Larp und DIH aus 6.8.0 sind wieder draußen (der Auftrag waren nur Entwürfe). Die Bilder liegen weiter in `gui-mockups/` (`thema-*.png`, `themen-uebersicht.png`).
