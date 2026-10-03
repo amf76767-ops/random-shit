@@ -104,6 +104,7 @@ public final class LegalPlace {
         s.airPlace = false;
         s.anyFace = false;
         s.legitFallback = false;
+        s.giveCommand = false; // /give is gone for good (it needs OP and is not something a player does)
         s.reach = Math.min(s.reach, LegalPlaceMath.REACH);
         PlacementSolver.visibleOnly = true;
     }
@@ -112,6 +113,8 @@ public final class LegalPlace {
     public static void prepare(AutoBuild build) throws ReflectiveOperationException {
         build.airPlace.visibleWhen(() -> false);
         build.legitFallback.visibleWhen(() -> false);
+        build.giveCommand.visibleWhen(() -> false);
+        build.giveCommand.set(false);
         build.visibleOnly.visibleWhen(() -> false);
         DoubleSetting reach = build.reach;
         Field max = DoubleSetting.class.getDeclaredField("max");

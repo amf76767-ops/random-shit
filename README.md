@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.5.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.6.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -158,4 +158,11 @@ bei allen Spielern in der Nähe oder als Statuen. Nur du siehst es (Client-seiti
   Auf dem normalen Körper (Mixin am Ende von `setupTransforms`) und auf dem eigenen 3D-Modell (CustomModel). Die Pose reist im Render-State (`LivingStateMixin`).
   Das Relay ist nicht abgesichert: jemand kann den Namen eines anderen eintragen und ihn tanzen lassen. Mehr geht damit nicht.
 - Nicht im Spiel getestet.
+
+### 6.6.0
+- **/give ist weg** (Einstellung versteckt und immer aus; `LegalPlace.enforce` setzt es vor jedem Tick zurück).
+- **Schematic-Browser** (`SchematicBrowserScreen` aus `addon/src/override`): neuer Reiter **OPTIONS** mit den wichtigsten AutoBuild-Einstellungen
+  (Schalter, Zahlen mit - / +, Auswahl wie Mode/Order/Sneak Place), die auch im Modul geändert werden. Unter den Knöpfen eine zweite Reihe
+  mit Schnellschaltern: WALK, SMART PATH, PILLAR, HUMAN, RESTOCK, FIX WRONG, CLEAR AREA. Entwurf des Aussehens: `gui-mockups/browser-optionen.png`
+  (kein echter Spiel-Screenshot).
 

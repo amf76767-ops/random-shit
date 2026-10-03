@@ -1,0 +1,51 @@
+<!doctype html><meta charset="utf-8">
+<title>AutoBuild Browser (Entwurf)</title>
+<style>
+html,body{margin:0;background:#1b2a1b}
+#s{position:relative;width:640px;height:360px;transform:scale(3);transform-origin:0 0;font:8px/8px "DejaVu Sans Mono",monospace;color:#e9ecf2;overflow:hidden;
+ background:linear-gradient(180deg,#3a5a3a 0%,#2c4a2c 55%,#4a3a28 100%)}
+#s div{position:absolute;box-sizing:border-box;white-space:nowrap;overflow:hidden}
+.t{height:8px}
+</style>
+<div id="s"></div>
+<script>
+const s=document.getElementById('s'), ACC='#e53935';
+function box(x,y,w,h,bg,r,extra){const d=document.createElement('div');d.style.cssText=`left:${x}px;top:${y}px;width:${w}px;height:${h}px;background:${bg};border-radius:${r||0}px;${extra||''}`;s.appendChild(d);return d}
+function text(str,x,y,col){const d=document.createElement('div');d.className='t';d.style.cssText=`left:${x}px;top:${y}px;color:${col||'#e9ecf2'};text-shadow:1px 1px 0 rgba(0,0,0,.45)`;d.textContent=str;s.appendChild(d)}
+function tw(str){return Math.round(str.length*5.4)}
+function ctext(str,cx,y,col){text(str,cx-tw(str)/2,y,col)}
+function panel(x,y,w,h){box(x,y,w,h,'rgba(14,16,21,.95)',4,'border:1px solid rgba(255,255,255,.10)');box(x+4,y,w-8,1,ACC)}
+function btn(x,y,w,h,label,on,hover){box(x,y,w,h,on?ACC:'#1d212a',3,on?'':'border:1px solid #2a303d');ctext(label,x+w/2,y+(h-8)/2+0,on?'#fff':'#e9ecf2')}
+const W=640,H=360,v7=28,W8=600,x0=20,PH=H-v7-72;
+// background hint
+box(0,0,W,H,'rgba(0,0,0,.35)');
+text('AutoBuild · Schematics',x0,10,ACC);
+const dir='.minecraft/dihclient/schematics';text(dir,x0+W8-tw(dir),10,'#8c93a4');
+// left panel
+panel(x0,v7,180,PH);
+box(x0+4,v7+4,172,14,'#1d212a',3);text('Type to search …',x0+8,v7+7,'#8c93a4');
+const files=['house_small.litematic','model_tung_tung_tung_sahur_40.schem','castle_keep.schem','farm_wheat.litematic','mapart_logo_2x2_flat.schem','tower_ender.schem','villa_modern.litematic','bridge_stone.schem','spawn_hub.litematic','wall_oak.schem','pyramid.schem','shop_stall.schem','lighthouse.litematic','dock_long.schem'];
+files.forEach((f,i)=>{const y=v7+22+i*14;if(y+14>v7+PH)return;if(i===1)box(x0+2,y,176,13,'rgba(229,57,53,.35)');text(f.length>26?f.slice(0,25)+'…':f,x0+6,y+3,i===1?'#fff':'#e9ecf2')});
+// right panel
+const rx=x0+180+8, rw=W8-180-8;
+panel(rx,v7,rw,PH);
+text('model_tung_tung_tung_sahur_40',rx+6,v7+6,'#fff');
+text('Sponge · 23×40×24 · 1861 blocks',rx+6,v7+18,'#8c93a4');
+btn(rx+rw-150,v7+4,72,14,'Rotate 0°',false);btn(rx+rw-74,v7+4,70,14,'Mirror off',false);
+btn(rx+6,v7+32,70,14,'MATERIALS',false);btn(rx+80,v7+32,60,14,'LAYERS',false);btn(rx+144,v7+32,70,14,'OPTIONS',true);
+// options
+const opts=[['Mode','e','AUTO'],['Order','e','LAYERS'],['Walk','b',1],['Smart Path','b',1],['Pillar Up','b',1],['Supports','b',1],['Remove Supports','b',1],['Escape Water','b',1],['Human Rotations','b',1],['Predict','b',1],['Fix Wrong Blocks','b',0],['Clear Area','b',0],['Adjust States','b',1],['Restock From Chests','b',1],['Creative Stacks','b',1],['AutoBuild (/ah)','b',0],['Sneak Place','e','OFF'],['Reach','n','4.5'],['Rotate Speed','n','32'],['Randomness','n','25'],['Max Fall','n','3'],['From Layer','n','1'],['To Layer','n','0']];
+const oy=v7+52, oh=PH-56, rows=Math.floor(oh/18);
+opts.slice(0,rows).forEach((o,i)=>{const y=oy+i*18;if(i%2===0)box(rx+3,y,rw-6,17,'rgba(0,0,0,.08)');
+  text(o[0],rx+8,y+5,'#e9ecf2');
+  if(o[1]==='b')btn(rx+rw-58,y+2,50,14,o[2]?'ON':'OFF',!!o[2]);
+  else if(o[1]==='e')btn(rx+rw-118,y+2,110,14,o[2],false);
+  else{btn(rx+rw-98,y+2,16,14,'-',false);ctext(o[2],rx+rw-56,y+5,'#fff');btn(rx+rw-26,y+2,16,14,'+',false)}});
+text(opts.length+' options · scroll for more',rx+8,oy+rows*18+2,'#8c93a4');
+// bottom row 1
+const by=v7+PH+6;
+[['PREVIEW',x0,70,1],['BUILD HERE',x0+74,80,1],['VERIFY',x0+158,60,1],['RESUME',x0+222,62,0],['EXPORT',x0+288,56,0],['FOLDER',x0+348,56,0],['REFRESH',x0+408,60,0],['CLOSE',x0+W8-60,60,0]].forEach(b=>btn(b[1],by,b[2],16,b[0],!!b[3]));
+// bottom row 2: quick toggles
+let qx=x0;[['WALK',1],['SMART PATH',1],['PILLAR',1],['HUMAN',1],['RESTOCK',1],['FIX WRONG',0],['CLEAR AREA',0]].forEach(q=>{const w=tw(q[0])+16;btn(qx,by+20,w,14,q[0],!!q[1]);qx+=w+4});
+text('Preview: aim with the crosshair, R/M/arrows/PgUp/PgDn, Enter builds',x0,by+38,'#8c93a4');
+</script>

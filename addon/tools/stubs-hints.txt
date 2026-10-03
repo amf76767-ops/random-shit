@@ -55,3 +55,7 @@ returns class_638 method_18112 java.lang.Iterable<net.minecraft.class_1297>
 extends class_1588 class_1309      # HostileEntity (shortened chain)
 extends class_2338$class_2339 class_2338   # BlockPos.Mutable
 returns class_638 method_8335 java.util.List<net.minecraft.class_1297>
+enum class_2470      # BlockRotation
+enum class_2415      # BlockMirror
+interface class_1935
+implements class_1792 class_1935
