@@ -19,6 +19,20 @@ SLF4J=$(mvn_get org.slf4j slf4j-api 2.0.13)
 MIXIN=$(mvn_get net.fabricmc sponge-mixin "0.17.3+mixin.0.8.7")
 ASM=$(mvn_get org.ow2.asm asm 9.7):$(mvn_get org.ow2.asm asm-tree 9.7)
 BASE=../base/dihclient-v5.6.jar
+# libraries that Minecraft itself ships; only needed so javac can read the real game classes (never packed into the jar)
+EXTRA=""
+for coord in io.netty:netty-transport:4.1.118.Final io.netty:netty-buffer:4.1.118.Final io.netty:netty-common:4.1.118.Final \
+  io.netty:netty-codec:4.1.118.Final io.netty:netty-handler:4.1.118.Final com.google.guava:guava:33.3.1-jre it.unimi.dsi:fastutil:8.5.15 \
+  org.apache.commons:commons-lang3:3.17.0 org.apache.logging.log4j:log4j-api:2.24.1 org.lwjgl:lwjgl:3.3.3 org.lwjgl:lwjgl-glfw:3.3.3 \
+  org.lwjgl:lwjgl-opengl:3.3.3 org.lwjgl:lwjgl-stb:3.3.3 org.lwjgl:lwjgl-tinyfd:3.3.3; do
+  IFS=: read -r g a v <<<"$coord"
+  EXTRA="$EXTRA:$(mvn_get "$g" "$a" "$v")"
+done
+# Optional: the real Minecraft 1.21.11 in intermediary names (vanilla client jar remapped with FabricMC/intermediary, see
+# tools/README-mc-int.txt). When it is there, the add-on is compiled against it, so new code can use every Minecraft method.
+MC_INT="${MC_INT:-/tmp/mc-int.jar}"
+[ -s "$MC_INT" ] || MC_INT=""
+MCP="${MC_INT:+$MC_INT:}"
 
 rm -rf "$BUILD/stubs" "$BUILD/gen" "$BUILD/classes" "$BUILD/override" "$BUILD/tools" "$BUILD/test"
 mkdir -p "$BUILD/stubs" "$BUILD/gen" "$BUILD/classes" "$BUILD/override" "$BUILD/tools" "$BUILD/test"
@@ -29,10 +43,10 @@ python3 tools/GenStubs.py "$BASE" tools/stubs-hints.txt "$BUILD/gen"
 javac -nowarn -cp "$JOML" -d "$BUILD/stubs" $(find stubs "$BUILD/gen" -name '*.java')
 # 1b. rewritten modules: same class names as in the old jar, they replace the old classes
 if [ -d src/override ]; then
-  javac -proc:none -nowarn -Xlint:none -d "$BUILD/override" -cp "$BASE:$BUILD/stubs:$GSON:$SLF4J:$MIXIN:$ASM:$JOML" $(find src/override -name '*.java')
+  javac -proc:none -nowarn -Xlint:none -d "$BUILD/override" -cp "$MCP$BASE:$BUILD/stubs:$GSON:$SLF4J:$MIXIN:$ASM:$JOML$EXTRA" $(find src/override -name '*.java')
 fi
 # 2. the add-on itself, compiled against the old jar
-javac -proc:none -nowarn -Xlint:none -d "$BUILD/classes" -cp "$BUILD/override:$BASE:$BUILD/stubs:$GSON:$SLF4J:$MIXIN:$ASM:$JOML" $(find src/main -name '*.java')
+javac -proc:none -nowarn -Xlint:none -d "$BUILD/classes" -cp "$BUILD/override:$MCP$BASE:$BUILD/stubs:$GSON:$SLF4J:$MIXIN:$ASM:$JOML$EXTRA" $(find src/main -name '*.java')
 # 3. tests that need no Minecraft
 javac -nowarn -d "$BUILD/test" -cp "$BUILD/classes:$GSON" $(find src/test -name '*.java')
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.UpdateTests

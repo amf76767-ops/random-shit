@@ -105,6 +105,14 @@ public final class Patcher {
                         if (withFallback.equals(cfg)) {
                             throw new IllegalStateException("KeyboardInputMixin not found in dihclient.mixins.json");
                         }
+                        // every mixin class the add-on keeps in dev/dihclient/mixin/port/ is listed automatically
+                        StringBuilder portMixins = new StringBuilder();
+                        for (String a : added) {
+                            if (a.startsWith("dev/dihclient/mixin/port/") && a.endsWith("Mixin.class")) {
+                                portMixins.append("\n    \"port.").append(a.substring("dev/dihclient/mixin/port/".length(), a.length() - 6)).append("\",");
+                            }
+                        }
+                        withFallback = withFallback.replace("\"EmoteTransformMixin\",", "\"EmoteTransformMixin\"," + portMixins);
                         data = withFallback.getBytes(StandardCharsets.UTF_8);
                     }
                     case "fabric.mod.json" -> {
