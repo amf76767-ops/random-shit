@@ -27,7 +27,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 /**
  * Builds the new DIHClient jar from the old one: hooks three existing methods and adds the compiled add-on classes.
  *
- * usage: Patcher base.jar addonClassesDir out.jar newVersion
+ * usage: Patcher base.jar addonClassesDir out.jar newVersion [bundledPack.zip]
  */
 public final class Patcher {
     private static final String HOOKS = "dev/dihclient/glue/AddonHooks";
@@ -87,6 +87,13 @@ public final class Patcher {
             }
             if (!(dih && mm && mod)) {
                 throw new IllegalStateException("base jar is missing an expected file");
+            }
+            if (args.length > 4) {
+                ZipEntry pe = new ZipEntry("dihclient/DIH-Visuals.zip");
+                pe.setTime(zin.getEntry("fabric.mod.json").getTime());
+                zout.putNextEntry(pe);
+                zout.write(Files.readAllBytes(Path.of(args[4])));
+                zout.closeEntry();
             }
             for (String name : added) {
                 ZipEntry ne = new ZipEntry(name);

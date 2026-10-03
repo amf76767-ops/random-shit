@@ -33,7 +33,8 @@ java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.SupervisorTests
 # 4. patch + pack
 javac -nowarn -d "$BUILD/tools" -cp "$ASM" tools/Patcher.java tools/MixinCheck.java
 OUT="../dist/dihclient-v${VERSION}+mc${MC}.jar"
-java -cp "$BUILD/tools:$ASM" Patcher "$BASE" "$BUILD/classes" "$OUT" "${VERSION}+mc${MC}"
+python3 ../resourcepack/build.py >/dev/null
+java -cp "$BUILD/tools:$ASM" Patcher "$BASE" "$BUILD/classes" "$OUT" "${VERSION}+mc${MC}" ../dist/DIH-Visuals-1.21.11.zip
 # 5. the base jar must show the known problem, the new jar must not have any
 if java -cp "$BUILD/tools:$ASM" MixinCheck "$BASE" >/dev/null; then echo "note: base jar has no mixin problem any more"; fi
 java -cp "$BUILD/tools:$ASM" MixinCheck "$OUT"

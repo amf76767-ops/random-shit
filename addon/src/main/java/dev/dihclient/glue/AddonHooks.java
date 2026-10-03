@@ -38,6 +38,7 @@ public final class AddonHooks {
             add.invoke(modules, supervisor);
             // on by default; the saved config, loaded right after this, wins as soon as the player has switched it off
             supervisor.setEnabledSilently(true);
+            add.invoke(modules, new VisualPack());
         } catch (Throwable t) {
             DIHClient.LOG.warn("[DIHClient] AutoSupervisor could not be registered", t);
         }

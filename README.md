@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **5.7.1**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **5.8.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -60,3 +60,9 @@ Der Build führt zuerst die Tests aus (`UpdateTests`, `SupervisorTests`). Sie la
   Aufrufe, die in der 5.6-JAR schon vorkommen. Die eingehängten Aufrufe wurden mit `javap` gegen das Original verglichen.
 - **Nicht getestet:** das Spiel selbst. Minecraft und Fabric waren beim Bauen nicht erreichbar. Das Fenster, der
   Supervisor im echten Spiel und der Austausch unter Windows wurden nicht ausprobiert.
+
+## VisualPack (Modul, Kategorie Render)
+Schaltet das mitgelieferte Resourcepack `DIH Visuals` (Quelle: `resourcepack/`) per Modul-Schalter an und aus: Stone als
+Tiefenschiefer, klares Wasser, bunter Glanz, kleines Totem. Beim Einschalten wird es nach `resourcepacks/DIH-Visuals.zip`
+kopiert und die Ressourcen werden einmal neu geladen. Die Minecraft-Aufrufe werden per Reflexion gefunden, ein Fehler
+erscheint als Meldung im Spiel. **Nicht im Spiel getestet.**
