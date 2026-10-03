@@ -3,75 +3,179 @@ package dev.dihclient.glue;
 import dev.dihclient.DIHClient;
 import dev.dihclient.module.Category;
 import dev.dihclient.module.Module;
+import dev.dihclient.setting.BoolSetting;
 import dev.dihclient.util.Notifications;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * Switches the bundled "DIH Visuals" resource pack (Tiefenschiefer-Stone, klares Wasser, bunter Glanz, kleines Totem) on and off.
- * The pack ships inside this jar and is copied to {@code resourcepacks/DIH-Visuals.zip} when the module is turned on.
+ * Switches the bundled "DIH Visuals" resource pack on and off. Every effect has its own switch: the pack is rebuilt from
+ * the copy in this jar without the parts that are switched off and put into {@code resourcepacks/}. The file name
+ * contains the choice, so a new combination never has to overwrite a pack that the game still has open.
+ *
+ * What is in it: Fullbright (lightmap shader), invisible rain, clear clouds and a sky gradient (shaders), a colour-changing
+ * enchant glint (shader and picture), Deepslate-style stone, clear water, round sun, small totem.
  *
  * The Minecraft calls are found by signature through reflection, so a wrong guess shows up as a message in the game
- * instead of a crash. Turning the module on or off reloads the resources once.
+ * instead of a crash. Turning the module on or off, or changing a switch, reloads the resources once.
  */
 public class VisualPack extends Module {
     private static final String RESOURCE = "/dihclient/DIH-Visuals.zip";
-    private static final String FILE = "DIH-Visuals.zip";
-    private static final String PACK_ID = "file/" + FILE;
+    private static final String PREFIX = "DIH-Visuals";
+    private static final String MC = "assets/minecraft/";
+
+    /** One switch of the pack and the files of the pack that belong to it. */
+    private record Effect(BoolSetting on, String... files) {
+    }
+
+    private final BoolSetting fullbright = this.bool("Fullbright", "Everything is fully bright, also in caves and at night (lightmap shader).", true)
+            .onChange(this::changed);
+    private final BoolSetting rain = this.bool("Invisible Rain", "Rain is not drawn. You still hear it.", true).onChange(this::changed);
+    private final BoolSetting clouds = this.bool("Clear Clouds", "See-through clouds (shader).", true).onChange(this::changed);
+    private final BoolSetting sky = this.bool("Sky Gradient", "Sky with a colour gradient (shader).", true).onChange(this::changed);
+    private final BoolSetting glint = this.bool("Colour Glint", "Enchant glint that changes its colour (shader and picture).", true).onChange(this::changed);
+    private final BoolSetting stone = this.bool("Deepslate Stone", "Stone looks like deepslate.", true).onChange(this::changed);
+    private final BoolSetting water = this.bool("Clear Water", "See-through, animated water.", true).onChange(this::changed);
+    private final BoolSetting sun = this.bool("Round Sun", "Round sun with a glow.", true).onChange(this::changed);
+    private final BoolSetting totem = this.bool("Small Totem", "The totem pop picture is smaller.", true).onChange(this::changed);
+
+    private final List<Effect> effects = List.of(
+            new Effect(this.fullbright, MC + "shaders/core/lightmap.fsh"),
+            new Effect(this.rain, MC + "textures/environment/rain.png"),
+            new Effect(this.clouds, MC + "shaders/core/rendertype_clouds.fsh"),
+            new Effect(this.sky, MC + "shaders/core/sky.fsh", MC + "shaders/core/sky.vsh"),
+            new Effect(this.glint, MC + "shaders/core/glint.fsh", MC + "textures/misc/enchanted_glint_"),
+            new Effect(this.stone, MC + "textures/block/stone.png"),
+            new Effect(this.water, MC + "textures/block/water_"),
+            new Effect(this.sun, MC + "textures/environment/celestial/sun.png"),
+            new Effect(this.totem, MC + "models/item/totem_of_undying.json"));
+
+    private boolean dirty;
 
     public VisualPack() {
         super("VisualPack", Category.RENDER,
-                "Aktiviert das mitgelieferte Resourcepack: Stone als Tiefenschiefer, klares Wasser, bunter Glanz, kleines Totem.");
+                "Resource pack with Fullbright, invisible rain, clear clouds and water, sky gradient, colour glint and more. Every part has a switch.");
+    }
+
+    private void changed() {
+        this.dirty = true;
     }
 
     @Override
     protected void onEnable() {
+        this.dirty = false;
         this.apply(true);
     }
 
     @Override
     protected void onDisable() {
+        this.dirty = false;
         this.apply(false);
+    }
+
+    @Override
+    public void onTick() {
+        if (this.dirty && mc.field_1724 != null) {
+            this.dirty = false; // several switches changed together (a loaded config) cost one reload
+            this.apply(true);
+        }
+    }
+
+    @Override
+    public String getInfo() {
+        long n = this.effects.stream().filter(e -> e.on().get()).count();
+        return n + "/" + this.effects.size();
+    }
+
+    private String packName() {
+        int bits = 0;
+        for (int i = 0; i < this.effects.size(); i++) {
+            if (this.effects.get(i).on().get()) {
+                bits |= 1 << i;
+            }
+        }
+        return PREFIX + "-" + Integer.toHexString(0x1000 | bits) + ".zip";
     }
 
     private void apply(boolean on) {
         try {
+            String name = this.packName();
             if (on) {
-                this.install();
+                this.install(name);
             }
-            if (!this.switchPack(on)) {
-                return; // already in the wanted state, nothing to reload
+            boolean reloaded = this.switchPack(on, "file/" + name);
+            this.cleanOld(on ? name : null);
+            if (reloaded) {
+                Notifications.info(this.name(), on ? "Pack an (" + this.getInfo() + "), Ressourcen laden neu" : "Pack aus, Ressourcen laden neu");
             }
-            Notifications.info(this.name(), on ? "Resourcepack an, Ressourcen laden neu" : "Resourcepack aus, Ressourcen laden neu");
         } catch (Throwable t) {
             DIHClient.LOG.warn("[DIHClient] VisualPack failed", t);
             Notifications.warn(this.name(), "Fehlgeschlagen: " + t.getClass().getSimpleName() + " " + t.getMessage());
         }
     }
 
-    private void install() throws IOException {
+    private boolean skip(String entry) {
+        for (Effect e : this.effects) {
+            if (!e.on().get()) {
+                for (String f : e.files()) {
+                    if (entry.startsWith(f)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private void install(String name) throws IOException {
         Path dir = FabricLoader.getInstance().getGameDir().resolve("resourcepacks");
         Files.createDirectories(dir);
+        Path target = dir.resolve(name);
+        if (Files.isRegularFile(target)) {
+            return;
+        }
+        byte[] bytes;
         try (InputStream in = VisualPack.class.getResourceAsStream(RESOURCE)) {
             if (in == null) {
                 throw new IOException("Pack fehlt in der JAR");
             }
-            Files.copy(in, dir.resolve(FILE), StandardCopyOption.REPLACE_EXISTING);
+            bytes = PackFilter.copy(in, this::skip);
+        }
+        Path tmp = dir.resolve(name + ".tmp");
+        Files.write(tmp, bytes);
+        Files.move(tmp, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    /** Removes the packs of earlier choices. A file the game still holds open is left for the next start. */
+    private void cleanOld(String keep) {
+        Path dir = FabricLoader.getInstance().getGameDir().resolve("resourcepacks");
+        try (DirectoryStream<Path> ds = Files.newDirectoryStream(dir, PREFIX + "*.zip")) {
+            for (Path p : ds) {
+                if (keep == null || !p.getFileName().toString().equals(keep)) {
+                    try {
+                        Files.deleteIfExists(p);
+                    } catch (IOException ignored) {
+                        // in use, next time
+                    }
+                }
+            }
+        } catch (IOException ignored) {
+            // no folder, nothing to clean
         }
     }
 
     /** @return true when the list of enabled packs changed and the resources were reloaded */
     @SuppressWarnings("unchecked")
-    private boolean switchPack(boolean on) throws Exception {
+    private boolean switchPack(boolean on, String id) throws Exception {
         Object manager = null;
         for (Method m : mc.getClass().getMethods()) {
             if (m.getParameterCount() == 0 && m.getReturnType().getName().equals("net.minecraft.class_3283")) {
@@ -86,13 +190,12 @@ public class VisualPack extends Module {
         invoke(mgr, manager, "method_14445"); // scanPacks, findet die neu kopierte Datei
         Collection<String> enabled = (Collection<String>) invoke(mgr, manager, "method_29210"); // getEnabledIds
         List<String> next = new ArrayList<>(enabled);
-        if (on == next.contains(PACK_ID)) {
-            return false;
-        }
+        next.removeIf(e -> e.startsWith("file/" + PREFIX)); // earlier choices of this pack
         if (on) {
-            next.add(PACK_ID); // ganz oben: spätere Einträge gewinnen
-        } else {
-            next.remove(PACK_ID);
+            next.add(id); // ganz oben: spätere Einträge gewinnen
+        }
+        if (next.equals(new ArrayList<>(enabled))) {
+            return false;
         }
         Method set = null;
         for (Method m : mgr.getMethods()) {

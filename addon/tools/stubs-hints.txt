@@ -51,3 +51,6 @@ implements class_342 class_364   # EditBox
 extends class_1043 class_1044     # NativeImageBackedTexture -> AbstractTexture
 interface class_1920              # BlockRenderView
 implements class_1937 class_1920
+returns class_638 method_18112 java.lang.Iterable<net.minecraft.class_1297>
+extends class_1588 class_1309      # HostileEntity (shortened chain)
+extends class_2338$class_2339 class_2338   # BlockPos.Mutable

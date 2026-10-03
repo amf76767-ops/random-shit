@@ -22,6 +22,13 @@ public final class Cleanup {
             "Xray", "Chams", "DamageNumbers", "Waypoints", "DihChat", "Friends", "Enemies", "NewChunks", "BaseTraces",
             "Watchlist", "PacketBuffer", "PacketFly", "HammerTool", "Fullbright", "SafeWalk", "BoatNoClip");
 
+    /** Removed by display name (several modules share a class, like the hotbar macros). Glowstone Macro was only Anchor Macro again. */
+    static final Set<String> REMOVED_NAMES = Set.of("Glowstone Macro");
+
+    private static boolean gone(Module m) {
+        return REMOVED.contains(m.getClass().getSimpleName()) || REMOVED_NAMES.contains(m.name());
+    }
+
     /** Light / normal / heavy for the Performance module. */
     public enum Quality { LIGHT, NORMAL, HEAVY }
 
@@ -33,11 +40,11 @@ public final class Cleanup {
         Field modulesField = ModuleManager.class.getDeclaredField("modules");
         modulesField.setAccessible(true);
         List<Module> modules = (List<Module>) modulesField.get(manager);
-        modules.removeIf(m -> REMOVED.contains(m.getClass().getSimpleName()));
+        modules.removeIf(Cleanup::gone);
         Field namesField = ModuleManager.class.getDeclaredField("byName");
         namesField.setAccessible(true);
         Map<String, Module> byName = (Map<String, Module>) namesField.get(manager);
-        byName.values().removeIf(m -> REMOVED.contains(m.getClass().getSimpleName()));
+        byName.values().removeIf(Cleanup::gone);
     }
 
     /** PacketFly lives on as a hidden helper of Flight: its settings are added to Flight and only show in Packet mode. */

@@ -118,5 +118,14 @@ public final class LegalPlace {
         max.setAccessible(true);
         max.setDouble(reach, LegalPlaceMath.REACH);
         reach.set(Math.min(reach.get(), LegalPlaceMath.REACH));
+
+        // path planning of the build walk (stand spots with the most blocks in reach, real paths instead of running into walls)
+        dev.dihclient.setting.BoolSetting smart = new dev.dihclient.setting.BoolSetting("Smart Path",
+                "Plans where to stand so the most blocks are in reach and walks there on a real path (around walls, steps, drops).", true);
+        smart.onChange(() -> dev.dihclient.autobuild.BuildPilot.enabled = smart.get());
+        java.lang.reflect.Method add = dev.dihclient.module.Module.class.getDeclaredMethod("add", dev.dihclient.setting.Setting.class);
+        add.setAccessible(true);
+        add.invoke(build, smart);
+        dev.dihclient.autobuild.BuildPilot.enabled = smart.get();
     }
 }

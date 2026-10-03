@@ -53,6 +53,10 @@ public final class AddonHooks {
             supervisor.setEnabledSilently(true);
             add.invoke(modules, new VisualPack());
             add.invoke(modules, new CustomModel());
+            add.invoke(modules, new FakeTime());
+            BuildPath path = new BuildPath();
+            add.invoke(modules, path);
+            path.setEnabledSilently(true); // harmless: draws only while AutoBuild walks
         });
         step("3x3 pickaxe name", () -> Cleanup.linkHammer(modules));
         step("PacketFly in Flight", () -> Cleanup.mergePacketFly(modules.get(dev.dihclient.modules.movement.Flight.class),
@@ -69,6 +73,11 @@ public final class AddonHooks {
 
     /** Called at the start of every client tick. */
     public static void tick(class_310 mc) {
+        try {
+            AutomationSupervisor.creativeGuard();
+        } catch (Throwable t) {
+            DIHClient.LOG.warn("[DIHClient] creative guard failed", t);
+        }
         try {
             UpdateManager.tick();
             if (UpdateManager.state() != UpdateManager.State.AVAILABLE && UpdateManager.state() != UpdateManager.State.FAILED) {

@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.3.1**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.4.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -123,3 +123,23 @@ bei allen Spielern in der Nähe oder als Statuen. Nur du siehst es (Client-seiti
 
 ### 6.3.1
 - **CustomModel** startet mit **Tung Tung Tung Sahur** (`.obj` aus `models/make_tungtung.py`) als Standardmodell. Die drei Dateien werden bei Bedarf in `dihclient/models` kopiert.
+
+### 6.4.0
+- **AutoBuild, Smart Path** (`autobuild/BuildPilot`, Schalter *Smart Path*): Statt geradeaus zum nächsten Block zu laufen, sucht der Client
+  zuerst per Dijkstra alle erreichbaren Standplätze (`nav/Nav`: Schritt, Sprung 1 Block, Diagonale, Fall bis *Max Fall*; eine 2 Block hohe Wand
+  ist eine Wand) und wählt den Platz, von dem die meisten offenen Blöcke der Ebene in Reichweite *und* Sichtlinie liegen
+  (`nav/StandPlanner`, kleiner Abzug für den Weg). Erreicht kein Platz einen Block, geht er zur nächsten erreichbaren Zelle und baut dort (falls an)
+  einen Pfeiler. Klappt ein Platz nicht, wird er eine Weile gemieden. Wirft etwas einen Fehler, läuft wieder der alte Code. Das Modul *BuildPath*
+  zeichnet die Route (grün: Platz mit Blöcken, orange: so nah wie möglich). Eingehängt per ASM (`Patcher.redirectWalk`): der zweite `walkTo`-Aufruf in
+  `BuildRuntime.tick` und der in `tickReposition`.
+- **Weniger ruckartig:** `HumanAim` beschleunigt und bremst jetzt (Winkelgeschwindigkeit mit Beschleunigungsgrenze, 60 % des Tempolimits),
+  `RotationUtil.approachAngle` bremst vor dem Ziel. Das gilt für alle Automation-Module, die diese Hilfen benutzen.
+- **Kreativ:** Startet Kreativ-Flug, während ein Automation-Modul läuft und du selbst nicht Springen gedrückt hast, wird er wieder ausgeschaltet.
+- **Entfernt:** Glowstone Macro.
+- **VisualPack:** jeder Effekt hat einen Schalter (Fullbright, Invisible Rain, Clear Clouds, Sky Gradient, Colour Glint, Deepslate Stone, Clear Water,
+  Round Sun, Small Totem). Das Pack wird aus der Kopie in der JAR ohne die abgeschalteten Teile neu zusammengesetzt (`PackFilter`); der Dateiname
+  enthält die Auswahl. Fullbright zeichnet die Lightmap jetzt einfach weiß (vorher konnte `notGamma` bei völliger Dunkelheit NaN liefern). Neu: unsichtbarer Regen.
+- **Fake Time** (Misc): Tageszeit nur auf deinem Bildschirm, fest oder mit eigener Geschwindigkeit (`ClientWorld.setTime`, per Reflection).
+- **Radar** und **Chunk Radar** neu gezeichnet (runde Scheibe, Sweep, Sichtkegel, Himmelsrichtungen, Pfeile für hoch/tief; Schachbrett, Kacheln, Blickrichtung).
+- Nicht im Spiel getestet.
+

@@ -123,6 +123,9 @@ public final class Patcher {
                         if (e.getName().startsWith("dev/dihclient/autobuild/Worker") || e.getName().startsWith("dev/dihclient/autobuild/BuildRuntime")) {
                             data = routeInteract(data, e.getName());
                         }
+                        if (e.getName().equals("dev/dihclient/autobuild/BuildRuntime.class")) {
+                            data = redirectWalk(data);
+                        }
                         if (e.getName().equals("dev/dihclient/modules/client/Profiles.class")) {
                             data = renameModule(data, "Profiles", "Configs");
                         }
@@ -385,6 +388,47 @@ public final class Patcher {
         }
         routed += n;
         System.out.println("legal placement gate: " + n + " click(s) in " + name);
+        ClassWriter cw = new ClassWriter(0);
+        cn.accept(cw);
+        return cw.toByteArray();
+    }
+
+    private static final String PILOT = "dev/dihclient/autobuild/BuildPilot";
+    private static final String WALK_DESC = "(Ldev/dihclient/autobuild/BuildRuntime;Lnet/minecraft/class_243;D)V";
+
+    /**
+     * The walk to the next layer (second walkTo call in tick) and the walk to a re-position spot (tickReposition) go through
+     * BuildPilot, which plans a real path and falls back to the old walkTo by itself. The walk to a restock chest and the
+     * walk out of the cleanup stay as they were.
+     */
+    static byte[] redirectWalk(byte[] data) {
+        ClassNode cn = read(data);
+        int layer = 0, point = 0;
+        for (MethodNode m : cn.methods) {
+            boolean tick = m.name.equals("tick") && m.desc.equals("(Ldev/dihclient/autobuild/BuildRuntime$Settings;)V");
+            boolean reposition = m.name.equals("tickReposition");
+            if (!tick && !reposition) {
+                continue;
+            }
+            int seen = 0;
+            for (AbstractInsnNode in : m.instructions.toArray()) {
+                if (in instanceof MethodInsnNode mi && mi.getOpcode() == Opcodes.INVOKEVIRTUAL && mi.name.equals("walkTo")
+                        && mi.owner.equals("dev/dihclient/autobuild/BuildRuntime") && mi.desc.equals("(Lnet/minecraft/class_243;D)V")) {
+                    seen++;
+                    if (tick && seen == 2) {
+                        m.instructions.set(mi, new MethodInsnNode(Opcodes.INVOKESTATIC, PILOT, "walkLayer", WALK_DESC, false));
+                        layer++;
+                    } else if (reposition) {
+                        m.instructions.set(mi, new MethodInsnNode(Opcodes.INVOKESTATIC, PILOT, "walkPoint", WALK_DESC, false));
+                        point++;
+                    }
+                }
+            }
+        }
+        if (layer != 1 || point != 1) {
+            throw new IllegalStateException("BuildRuntime walkTo call sites not as expected: layer " + layer + ", point " + point);
+        }
+        System.out.println("smart path: walk calls redirected in BuildRuntime");
         ClassWriter cw = new ClassWriter(0);
         cn.accept(cw);
         return cw.toByteArray();

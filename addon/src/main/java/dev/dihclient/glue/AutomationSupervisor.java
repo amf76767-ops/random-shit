@@ -44,6 +44,10 @@ public class AutomationSupervisor extends Module {
             "Modules that are only paused in danger, because waiting is normal for them. Separate with commas.",
             "AutoFish,AutoCraft,AutoTrade,AutoSell,AuctionHouse,FlipFinder", 300);
 
+    private static AutomationSupervisor instance;
+    private static int lastPhysicalJump = -1000;
+    private static boolean wasFlying;
+
     private final SupervisorEngine.Config cfg = new SupervisorEngine.Config();
     private final SupervisorEngine engine = new SupervisorEngine(this.cfg);
     private long tick;
@@ -51,6 +55,42 @@ public class AutomationSupervisor extends Module {
     public AutomationSupervisor() {
         super("AutoSupervisor", Category.AUTOMATION,
                 "Keeps AutoMine, AutoFarm, Tunnel and the other automation safe: pauses in danger, restarts what gets stuck.");
+        instance = this;
+    }
+
+    /**
+     * Creative mode: the automation presses jump by itself, and two presses within a third of a second switch creative flight on.
+     * When flight starts while an automation module runs and you did not press jump yourself, it is switched off again.
+     * Called at the start of every client tick.
+     */
+    public static void creativeGuard() {
+        if (mc.field_1724 == null || mc.field_1690 == null) {
+            wasFlying = false;
+            return;
+        }
+        var abilities = mc.field_1724.method_31549();
+        int now = mc.field_1724.field_6012;
+        if (dev.dihclient.util.KeyUtil.isPhysicallyDown(mc.field_1690.field_1903)) {
+            lastPhysicalJump = now;
+        }
+        boolean flying = abilities.field_7479;
+        AutomationSupervisor s = instance;
+        if (flying && !wasFlying && s != null && abilities.field_7477 && now - lastPhysicalJump > 10 && s.automationRunning()) {
+            abilities.field_7479 = false;
+            flying = false;
+        }
+        wasFlying = flying;
+    }
+
+    private boolean automationRunning() {
+        for (String csv : new String[]{this.watched.get(), this.guarded.get()}) {
+            for (Module m : this.resolve(csv)) {
+                if (m.isEnabled()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override

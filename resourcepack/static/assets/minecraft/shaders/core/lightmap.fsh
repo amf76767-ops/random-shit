@@ -31,6 +31,12 @@ vec3 notGamma(vec3 color) {
 }
 
 void main() {
+    // Voll hell: gar nichts rechnen. Das umgeht auch die Division durch 0 in notGamma() bei völliger Dunkelheit (NaN).
+    if (FULLBRIGHT >= 1.0) {
+        fragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        return;
+    }
+
     float block_brightness = get_brightness(floor(texCoord.x * 16) / 15) * lightmapInfo.BlockFactor;
     float sky_brightness = get_brightness(floor(texCoord.y * 16) / 15) * lightmapInfo.SkyFactor;
 

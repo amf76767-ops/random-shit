@@ -40,6 +40,9 @@ java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.SupervisorTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.SoftKeysTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.LegalPlaceTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.Model3dTests
+java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.NavTests
+python3 ../resourcepack/build.py >/dev/null
+java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.PackTests
 # 4. patch + pack
 javac -nowarn -d "$BUILD/tools" -cp "$ASM" tools/Patcher.java tools/MixinCheck.java
 OUT="../dist/dihclient-v${VERSION}+mc${MC}.jar"

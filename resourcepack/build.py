@@ -107,6 +107,7 @@ def files():
     yield mc + "textures/block/water_flow.png", water(32, 32, True)
     yield mc + "textures/block/water_flow.png.mcmeta", json.dumps({"animation": {}}).encode()
     yield mc + "textures/environment/celestial/sun.png", sun()
+    yield mc + "textures/environment/rain.png", png(32, 32, [(0, 0, 0, 0)] * (32 * 32))  # Regen unsichtbar (Geräusch bleibt)
     glint_meta = json.dumps({"texture": {"blur": True}}).encode()
     yield mc + "textures/misc/enchanted_glint_item.png.mcmeta", glint_meta
     yield mc + "textures/misc/enchanted_glint_armor.png.mcmeta", glint_meta
