@@ -66,6 +66,13 @@ public final class Patcher {
                     }
                     case "dihclient.mixins.json" -> {
                         String cfg = new String(data, StandardCharsets.UTF_8);
+                        for (String gone : new String[]{"PauseMenuMixin", "PauseMouseMixin", "PauseKeyboardMixin"}) {
+                            String before = cfg;
+                            cfg = cfg.replaceAll("\\s*\"" + gone + "\",?", "");
+                            if (cfg.equals(before)) {
+                                throw new IllegalStateException(gone + " not found in dihclient.mixins.json");
+                            }
+                        }
                         String withFallback = cfg.replace("\"KeyboardInputMixin\",", "\"KeyboardInputMixin\",\n    \"InputFallbackMixin\",\n    \"KeyBindingSoftMixin\",");
                         if (withFallback.equals(cfg)) {
                             throw new IllegalStateException("KeyboardInputMixin not found in dihclient.mixins.json");
@@ -87,6 +94,9 @@ public final class Patcher {
                         }
                         if (e.getName().startsWith("dev/dihclient/autobuild/Worker") || e.getName().startsWith("dev/dihclient/autobuild/BuildRuntime")) {
                             data = routeInteract(data, e.getName());
+                        }
+                        if (e.getName().equals("dev/dihclient/modules/client/Profiles.class")) {
+                            data = renameModule(data, "Profiles", "Configs");
                         }
                         if (e.getName().equals("dev/dihclient/modules/world/AutoBuild.class")) {
                             data = enforceBeforeTick(data);
@@ -240,6 +250,29 @@ public final class Patcher {
             }
         }
         throw new IllegalStateException("@Mixin not found in " + cn.name);
+    }
+
+    /** Replaces the module name given to super(...) in the constructor. */
+    static byte[] renameModule(byte[] data, String from, String to) {
+        ClassNode cn = read(data);
+        int n = 0;
+        for (MethodNode m : cn.methods) {
+            if (!m.name.equals("<init>")) {
+                continue;
+            }
+            for (AbstractInsnNode in : m.instructions.toArray()) {
+                if (in instanceof org.objectweb.asm.tree.LdcInsnNode ldc && from.equals(ldc.cst)) {
+                    ldc.cst = to;
+                    n++;
+                }
+            }
+        }
+        if (n != 1) {
+            throw new IllegalStateException("expected one \"" + from + "\" in constructor of " + cn.name + ", found " + n);
+        }
+        ClassWriter cw = new ClassWriter(0);
+        cn.accept(cw);
+        return cw.toByteArray();
     }
 
     private static final String LEGAL = "dev/dihclient/glue/LegalPlace";

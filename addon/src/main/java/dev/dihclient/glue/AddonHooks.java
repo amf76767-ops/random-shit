@@ -39,6 +39,8 @@ public final class AddonHooks {
             // on by default; the saved config, loaded right after this, wins as soon as the player has switched it off
             supervisor.setEnabledSilently(true);
             add.invoke(modules, new VisualPack());
+            Cleanup.performance(modules.get(dev.dihclient.modules.client.Performance.class));
+            Cleanup.removeModules(modules);
             dev.dihclient.modules.world.AutoBuild build = modules.get(dev.dihclient.modules.world.AutoBuild.class);
             if (build != null) {
                 LegalPlace.prepare(build);
