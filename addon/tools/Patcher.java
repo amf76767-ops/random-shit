@@ -85,6 +85,12 @@ public final class Patcher {
                         if (e.getName().startsWith("dev/dihclient/mixin/") && e.getName().endsWith(".class")) {
                             data = fixMixinAnnotations(data);
                         }
+                        if (e.getName().startsWith("dev/dihclient/autobuild/Worker") || e.getName().startsWith("dev/dihclient/autobuild/BuildRuntime")) {
+                            data = routeInteract(data, e.getName());
+                        }
+                        if (e.getName().equals("dev/dihclient/modules/world/AutoBuild.class")) {
+                            data = enforceBeforeTick(data);
+                        }
                         if (e.getName().equals("dev/dihclient/mixin/PlayerEntityRendererMixin.class")) {
                             data = raiseMixinPriority(data, 2000);
                         }
@@ -95,6 +101,9 @@ public final class Patcher {
                 zout.putNextEntry(ne);
                 zout.write(data);
                 zout.closeEntry();
+            }
+            if (routed < 4) {
+                throw new IllegalStateException("fewer block clicks routed than expected: " + routed);
             }
             if (!(dih && mm && mod)) {
                 throw new IllegalStateException("base jar is missing an expected file");
@@ -231,6 +240,58 @@ public final class Patcher {
             }
         }
         throw new IllegalStateException("@Mixin not found in " + cn.name);
+    }
+
+    private static final String LEGAL = "dev/dihclient/glue/LegalPlace";
+    private static int routed;
+
+    /** Every block click of the build code goes through LegalPlace.interact, which only lets legal clicks pass. */
+    static byte[] routeInteract(byte[] data, String name) {
+        ClassNode cn = read(data);
+        int n = 0;
+        for (MethodNode m : cn.methods) {
+            for (AbstractInsnNode in : m.instructions.toArray()) {
+                if (in instanceof MethodInsnNode mi && mi.getOpcode() == Opcodes.INVOKEVIRTUAL
+                        && mi.owner.equals("net/minecraft/class_636") && mi.name.equals("method_2896")) {
+                    m.instructions.set(mi, new MethodInsnNode(Opcodes.INVOKESTATIC, LEGAL, "interact",
+                            "(Lnet/minecraft/class_636;Lnet/minecraft/class_746;Lnet/minecraft/class_1268;Lnet/minecraft/class_3965;)Lnet/minecraft/class_1269;", false));
+                    n++;
+                }
+            }
+        }
+        if (n == 0) {
+            return data;
+        }
+        routed += n;
+        System.out.println("legal placement gate: " + n + " click(s) in " + name);
+        ClassWriter cw = new ClassWriter(0);
+        cn.accept(cw);
+        return cw.toByteArray();
+    }
+
+    /** AutoBuild takes back its illegal options right before the build runtime ticks. */
+    static byte[] enforceBeforeTick(byte[] data) {
+        ClassNode cn = read(data);
+        int n = 0;
+        for (MethodNode m : cn.methods) {
+            for (AbstractInsnNode in : m.instructions.toArray()) {
+                if (in instanceof MethodInsnNode mi && mi.getOpcode() == Opcodes.INVOKEVIRTUAL
+                        && mi.owner.equals("dev/dihclient/autobuild/BuildRuntime") && mi.name.equals("tick")
+                        && mi.desc.equals("(Ldev/dihclient/autobuild/BuildRuntime$Settings;)V")) {
+                    InsnList call = new InsnList();
+                    call.add(new InsnNode(Opcodes.DUP));   // stack: runtime, settings -> runtime, settings, settings
+                    call.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGAL, "enforce", "(Ldev/dihclient/autobuild/BuildRuntime$Settings;)V", false));
+                    m.instructions.insertBefore(mi, call);
+                    n++;
+                }
+            }
+        }
+        if (n != 1) {
+            throw new IllegalStateException("expected exactly one BuildRuntime.tick call in AutoBuild, found " + n);
+        }
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        cn.accept(cw);
+        return cw.toByteArray();
     }
 
     private static void requireFresh(MethodNode m) {

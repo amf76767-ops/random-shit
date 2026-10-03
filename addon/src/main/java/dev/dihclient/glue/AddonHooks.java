@@ -39,6 +39,10 @@ public final class AddonHooks {
             // on by default; the saved config, loaded right after this, wins as soon as the player has switched it off
             supervisor.setEnabledSilently(true);
             add.invoke(modules, new VisualPack());
+            dev.dihclient.modules.world.AutoBuild build = modules.get(dev.dihclient.modules.world.AutoBuild.class);
+            if (build != null) {
+                LegalPlace.prepare(build);
+            }
         } catch (Throwable t) {
             DIHClient.LOG.warn("[DIHClient] AutoSupervisor could not be registered", t);
         }
