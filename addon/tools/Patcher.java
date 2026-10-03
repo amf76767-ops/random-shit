@@ -64,6 +64,14 @@ public final class Patcher {
                         data = patchModuleManager(data);
                         mm = true;
                     }
+                    case "dihclient.mixins.json" -> {
+                        String cfg = new String(data, StandardCharsets.UTF_8);
+                        String withFallback = cfg.replace("\"KeyboardInputMixin\",", "\"KeyboardInputMixin\",\n    \"InputFallbackMixin\",");
+                        if (withFallback.equals(cfg)) {
+                            throw new IllegalStateException("KeyboardInputMixin not found in dihclient.mixins.json");
+                        }
+                        data = withFallback.getBytes(StandardCharsets.UTF_8);
+                    }
                     case "fabric.mod.json" -> {
                         String json = new String(data, StandardCharsets.UTF_8);
                         String patched = json.replaceFirst("\"version\"\\s*:\\s*\"[^\"]*\"", "\"version\": \"" + version + "\"");
@@ -76,6 +84,9 @@ public final class Patcher {
                     default -> {
                         if (e.getName().startsWith("dev/dihclient/mixin/") && e.getName().endsWith(".class")) {
                             data = fixMixinAnnotations(data);
+                        }
+                        if (e.getName().equals("dev/dihclient/mixin/PlayerEntityRendererMixin.class")) {
+                            data = raiseMixinPriority(data, 2000);
                         }
                     }
                 }
@@ -186,6 +197,40 @@ public final class Patcher {
         ClassWriter cw = new ClassWriter(0);
         cn.accept(cw);
         return cw.toByteArray();
+    }
+
+    /**
+     * Cape mods (Better Capes, WaveyCapes) hook the same render-state method. Mixin applies higher priorities later, so a
+     * higher number lets the DIHClient cape be the last word when it is switched on.
+     */
+    static byte[] raiseMixinPriority(byte[] data, int priority) {
+        ClassNode cn = read(data);
+        List<AnnotationNode> all = new ArrayList<>();
+        if (cn.invisibleAnnotations != null) {
+            all.addAll(cn.invisibleAnnotations);
+        }
+        if (cn.visibleAnnotations != null) {
+            all.addAll(cn.visibleAnnotations);
+        }
+        for (AnnotationNode an : all) {
+            if (an.desc.equals("Lorg/spongepowered/asm/mixin/Mixin;")) {
+                if (an.values == null) {
+                    an.values = new ArrayList<>();
+                }
+                for (int i = 0; i < an.values.size(); i += 2) {
+                    if ("priority".equals(an.values.get(i))) {
+                        throw new IllegalStateException("priority already set");
+                    }
+                }
+                an.values.add("priority");
+                an.values.add(priority);
+                System.out.println("priority " + priority + " for " + cn.name);
+                ClassWriter cw = new ClassWriter(0);
+                cn.accept(cw);
+                return cw.toByteArray();
+            }
+        }
+        throw new IllegalStateException("@Mixin not found in " + cn.name);
     }
 
     private static void requireFresh(MethodNode m) {

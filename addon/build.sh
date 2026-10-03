@@ -16,6 +16,7 @@ mvn_get() { # group artifact version
 }
 GSON=$(mvn_get com.google.code.gson gson 2.11.0)
 SLF4J=$(mvn_get org.slf4j slf4j-api 2.0.13)
+MIXIN=$(mvn_get net.fabricmc sponge-mixin "0.17.3+mixin.0.8.7")
 ASM=$(mvn_get org.ow2.asm asm 9.7):$(mvn_get org.ow2.asm asm-tree 9.7)
 BASE=../base/dihclient-v5.6.jar
 
@@ -25,7 +26,7 @@ mkdir -p "$BUILD/stubs" "$BUILD/classes" "$BUILD/tools" "$BUILD/test"
 # 1. stand-ins for the few Minecraft/Fabric classes the add-on touches (never shipped)
 javac -nowarn -d "$BUILD/stubs" $(find stubs -name '*.java')
 # 2. the add-on itself, compiled against the old jar
-javac -nowarn -Xlint:none -d "$BUILD/classes" -cp "$BASE:$BUILD/stubs:$GSON:$SLF4J" $(find src/main -name '*.java')
+javac -proc:none -nowarn -Xlint:none -d "$BUILD/classes" -cp "$BASE:$BUILD/stubs:$GSON:$SLF4J:$MIXIN:$ASM" $(find src/main -name '*.java')
 # 3. tests that need no Minecraft
 javac -nowarn -d "$BUILD/test" -cp "$BUILD/classes:$GSON" $(find src/test -name '*.java')
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.UpdateTests
