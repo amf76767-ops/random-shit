@@ -1,0 +1,128 @@
+<!doctype html><html><head><meta charset="utf-8"><title>DIHClient GUI Entwürfe</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{width:1280px;height:720px;overflow:hidden;font-family:"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:12px;color:#e9ecf2;
+ background:linear-gradient(180deg,#3d5f8f 0%,#6f93bd 38%,#9db7d3 52%,#4b7a3d 52.2%,#3c6a30 70%,#2c4f25 100%);position:relative}
+.world{position:absolute;inset:0;background:
+ radial-gradient(circle at 18% 22%,rgba(255,255,255,.55) 0 30px,transparent 32px),
+ radial-gradient(circle at 70% 16%,rgba(255,255,255,.35) 0 44px,transparent 46px),
+ linear-gradient(90deg,transparent 0 55%,rgba(0,0,0,.18) 55% 62%,transparent 62%);filter:blur(1.5px)}
+.dim{position:absolute;inset:0;background:rgba(5,8,14,.55)}
+.label{position:absolute;left:14px;bottom:10px;font-size:13px;color:#fff;background:rgba(0,0,0,.55);padding:4px 10px;border-radius:5px;z-index:9}
+.bar{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;gap:10px;align-items:center;z-index:5}
+.search{width:260px;height:28px;padding:0 12px;display:flex;align-items:center;color:var(--muted)}
+.title{font-weight:700;letter-spacing:.5px}
+.panels{position:absolute;top:58px;left:28px;right:28px;display:flex;gap:16px;align-items:flex-start;z-index:4}
+.panel{width:236px;flex:none}
+.head{display:flex;align-items:center;justify-content:space-between;height:34px;padding:0 12px;font-weight:700}
+.mod{display:flex;align-items:center;justify-content:space-between;height:28px;padding:0 12px;color:var(--text2)}
+.mod.on{color:var(--text)}
+.key{font-size:10px;padding:1px 6px;color:var(--muted);border:1px solid var(--line);border-radius:4px;margin-right:6px}
+.right{display:flex;align-items:center}
+.sw{width:30px;height:14px;border-radius:8px;background:var(--off);position:relative}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:#9aa1b2;transition:.2s}
+.on .sw{background:var(--acc)}.on .sw::after{left:18px;background:#fff}
+.settings{padding:8px 12px 10px;display:flex;flex-direction:column;gap:9px}
+.row{display:flex;justify-content:space-between;align-items:center;color:var(--text2)}
+.slider{margin-top:3px;height:6px;border-radius:3px;background:var(--off);position:relative}
+.slider i{position:absolute;left:0;top:0;bottom:0;width:48%;border-radius:3px;background:var(--acc)}
+.slider b{position:absolute;left:48%;top:-3px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#fff}
+.sel{padding:3px 8px;border-radius:4px;background:var(--off);color:var(--text)}
+.chip{width:22px;height:14px;border-radius:4px;background:var(--acc);border:1px solid rgba(255,255,255,.4)}
+.desc{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* ---------- AKTUELL (Basis) ---------- */
+.cur{--acc:#e53935;--acc2:#ff8a3d;--text:#e9ecf2;--text2:#aab0bf;--muted:#8c93a4;--off:#252a35;--line:#2a2f3b}
+.cur .panel{background:#0e1015f2;border:1px solid #ffffff17}
+.cur .head{background:#161920;border-bottom:2px solid var(--acc)}
+.cur .mod{height:24px;font-size:12px}
+.cur .mod.on{background:#252a35;border-left:2px solid var(--acc)}
+.cur .sw{display:none}
+.cur .search,.cur .bar .title{background:#161920;border:1px solid #ffffff17}
+.cur .settings{background:#161920}
+
+/* ---------- A: GLAS ---------- */
+.glas{--acc:#6ea8ff;--acc2:#b48cff;--text:#fff;--text2:#c9d2e6;--muted:#9aa6c0;--off:rgba(255,255,255,.14);--line:rgba(255,255,255,.18)}
+.glas .dim{background:rgba(10,14,28,.35)}
+.glas .panel{background:rgba(22,27,44,.52);backdrop-filter:blur(14px) saturate(140%);border:1px solid rgba(255,255,255,.16);border-radius:14px;box-shadow:0 10px 34px rgba(0,0,0,.35);overflow:hidden}
+.glas .head{height:38px;font-size:13px;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,0))}
+.glas .mod{margin:2px 6px;border-radius:8px;height:28px}
+.glas .mod:hover{background:rgba(255,255,255,.08)}
+.glas .mod.on{background:linear-gradient(90deg,rgba(110,168,255,.30),rgba(180,140,255,.18));box-shadow:inset 0 0 0 1px rgba(150,190,255,.35)}
+.glas .search,.glas .bar .title{background:rgba(22,27,44,.52);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.16);border-radius:16px}
+.glas .search{height:32px}
+.glas .settings{background:rgba(0,0,0,.18);margin:2px 6px 6px;border-radius:10px}
+.glas .slider i{background:linear-gradient(90deg,var(--acc),var(--acc2))}
+
+/* ---------- B: FLACH MINIMAL ---------- */
+.flat{--acc:#2ee6a6;--acc2:#2ee6a6;--text:#f4f6fb;--text2:#7d8596;--muted:#6a7183;--off:#1b1f29;--line:#262b36}
+.flat .dim{background:rgba(0,0,0,.62)}
+.flat .panel{background:#0b0d12;border:1px solid #1c2029;border-radius:3px}
+.flat .head{height:30px;font-size:11px;text-transform:uppercase;letter-spacing:1.4px;color:#cfd5e3;border-bottom:1px solid #1c2029;position:relative}
+.flat .head::after{content:"";position:absolute;left:0;bottom:-1px;width:36px;height:2px;background:var(--acc)}
+.flat .mod{height:26px;position:relative}
+.flat .mod.on::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:3px;background:var(--acc);border-radius:0 2px 2px 0}
+.flat .mod:not(.on) .sw{opacity:.0}.flat .mod.on .sw{width:8px;height:8px;border-radius:50%;background:var(--acc)}.flat .sw::after{display:none}
+.flat .search,.flat .bar .title{background:#0b0d12;border:1px solid #1c2029;border-radius:3px;height:28px;display:flex;align-items:center;padding:0 12px}
+.flat .settings{background:#10131a;border-top:1px solid #1c2029}
+.flat .slider{height:3px}.flat .slider b{width:8px;height:8px;border-radius:2px;top:-2.5px}
+
+/* ---------- C: NEON VERLAUF ---------- */
+.neon{--acc:#ff3d81;--acc2:#7a5cff;--text:#fff;--text2:#b9b3d6;--muted:#8b84b3;--off:#241f3d;--line:#352d5c}
+.neon .dim{background:rgba(8,4,20,.66)}
+.neon .panel{background:#0f0b1d;border-radius:10px;position:relative;box-shadow:0 0 22px rgba(122,92,255,.30)}
+.neon .panel::before{content:"";position:absolute;inset:-1px;border-radius:11px;padding:1px;background:linear-gradient(135deg,var(--acc),var(--acc2));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.neon .head{height:36px;background:linear-gradient(90deg,rgba(255,61,129,.55),rgba(122,92,255,.55));border-radius:10px 10px 0 0;text-shadow:0 0 8px rgba(255,255,255,.5)}
+.neon .mod.on{color:#fff;background:linear-gradient(90deg,rgba(255,61,129,.22),rgba(122,92,255,.0));box-shadow:inset 2px 0 0 var(--acc)}
+.neon .mod.on .sw{background:linear-gradient(90deg,var(--acc),var(--acc2));box-shadow:0 0 10px var(--acc)}
+.neon .search,.neon .bar .title{background:#0f0b1d;border:1px solid var(--acc2);border-radius:18px;box-shadow:0 0 14px rgba(122,92,255,.4)}
+.neon .search{height:34px}
+.neon .slider i{background:linear-gradient(90deg,var(--acc),var(--acc2));box-shadow:0 0 8px var(--acc)}
+.neon .settings{background:#150f2a}
+
+/* ---------- D: KARTEN ---------- */
+.card{--acc:#ffb020;--acc2:#ff7a18;--text:#fff;--text2:#dfe3ee;--muted:#8d95a8;--off:#2a2f3c;--line:#343a4a}
+.card .dim{background:rgba(6,8,12,.6)}
+.card .panel{background:#14171f;border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.card .head{height:36px;padding:0 6px;font-size:14px;justify-content:flex-start;gap:8px}
+.card .head .ic{width:24px;height:24px;border-radius:50%;background:var(--acc);color:#14171f;display:flex;align-items:center;justify-content:center;font-size:12px}
+.card .head .n{margin-left:auto;color:var(--muted);font-weight:400;font-size:11px}
+.card .mod{height:42px;margin-top:5px;background:#1c202a;border-radius:9px;padding:0 10px}
+.card .mod.on{background:#2a2418;box-shadow:inset 0 0 0 1px rgba(255,176,32,.55)}
+.card .mod .nm{font-size:13px;font-weight:600}
+.card .search,.card .bar .title{background:#14171f;border-radius:10px;border:1px solid #2a2f3c;height:34px;display:flex;align-items:center;padding:0 14px}
+.card .settings{background:#1c202a;border-radius:9px;margin-top:5px}
+.card .slider i{background:var(--acc)}
+</style></head>
+<body class="VARIANT">
+<div class="world"></div><div class="dim"></div>
+<div class="bar"><div class="title" id="t">DIHClient 5.9</div><div class="search">Module suchen …</div></div>
+<div class="panels" id="p"></div>
+<div class="label" id="l"></div>
+<script>
+const v=new URLSearchParams(location.search).get('v')||'cur';
+document.body.className=v;
+document.getElementById('l').textContent={cur:'Aktuell (Vergleich)',glas:'Entwurf A: Glas',flat:'Entwurf B: Flach & minimal',neon:'Entwurf C: Neon-Verlauf',card:'Entwurf D: Karten'}[v];
+const cats=[
+ ['Combat','⚔',[['KillAura','R',1],['AutoTotem','',1],['Criticals','',0],['Surround','',1],['TriggerBot','',0],['AutoPot','',0],['Reach','',0]],'Angriff'],
+ ['Movement','➤',[['Flight','F',0],['Sprint','',1],['NoFall','',1],['Step','',0],['Jesus','',0],['ElytraBot','',0],['Parkour','',0]],'Bewegung'],
+ ['Automation','⚙',[['AutoMine','M',1,true],['AutoFarm','',0],['Tunnel','',0],['AutoBuild','B',0],['StashSorter','',0],['AutoSupervisor','',1]],'Automatik'],
+ ['Render','◉',[['Esp','',1],['Xray','X',0],['Fullbright','',1],['Freecam','',0],['Trajectories','',1],['VisualPack','',1]],'Grafik']
+];
+const descs={KillAura:'Greift Gegner in Reichweite an',AutoTotem:'Totem automatisch in die Nebenhand',Criticals:'Kritische Treffer',Surround:'Mauert dich ein',TriggerBot:'Schlägt, wenn du zielst',AutoPot:'Tränke automatisch werfen',Reach:'Mehr Reichweite',Flight:'Fliegen',Sprint:'Immer sprinten',NoFall:'Kein Fallschaden',Step:'Höhere Stufen',Jesus:'Auf Wasser laufen',ElytraBot:'Fliegt automatisch',Parkour:'Springt an Kanten',AutoMine:'Erze suchen und abbauen',AutoFarm:'Ernten und neu pflanzen',Tunnel:'Gräbt Tunnel',AutoBuild:'Baut Schematics',StashSorter:'Sortiert Kisten',AutoSupervisor:'Pausiert bei Gefahr',Esp:'Spieler und Items sichtbar',Xray:'Erze durch Wände',Fullbright:'Immer hell',Freecam:'Freie Kamera',Trajectories:'Flugbahnen',VisualPack:'Resourcepack an/aus'};
+let h='';
+for(const [n,ic,mods,sub] of cats){
+ h+=`<div class="panel"><div class="head"><span class="ic">${ic}</span><span class="n0">${n}</span><span class="n">${mods.filter(m=>m[2]).length}/${mods.length}</span></div>`;
+ for(const [m,k,on,open] of mods){
+  h+=`<div class="mod ${on?'on':''}"><div><div class="nm">${m}</div>${v=='card'?`<div class="desc">${descs[m]||''}</div>`:''}</div><div class="right">${k?`<span class="key">${k}</span>`:''}<span class="sw"></span></div></div>`;
+  if(open) h+=`<div class="settings"><div class="row"><span>Vein Mine</span><span class="sw" style="background:var(--acc)"></span></div>
+   <div><div class="row"><span>Search Radius</span><span>24</span></div><div class="slider"><i></i><b></b></div></div>
+   <div class="row"><span>Rotations</span><span class="sel">Human ▾</span></div>
+   <div class="row"><span>Farbe</span><span class="chip"></span></div></div>`;
+ }
+ h+='</div>';
+}
+document.getElementById('p').innerHTML=h;
+if(v!='card')document.querySelectorAll('.head .ic').forEach(e=>e.style.display='none');
+if(v=='card')document.querySelectorAll('.head .n0').forEach(e=>e.style.fontWeight=700);
+</script></body></html>
