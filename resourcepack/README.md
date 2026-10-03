@@ -1,13 +1,18 @@
-# DIH Visuals (Resourcepack, 1.21.11)
+# DIH Visuals (Resourcepack, 1.21.11, pack_format 75)
 
-Bauen: `python3 resourcepack/build.py` -> `dist/DIH-Visuals-1.21.11.zip`. Alle Texturen entstehen im Code, nichts Fremdes drin.
+Bauen: `python3 resourcepack/build.py` -> `dist/DIH-Visuals-1.21.11.zip`. Shader prüfen: `python3 resourcepack/validate_shaders.py <entpackte Vanilla-Assets>`
+(braucht `glslangValidator`). Texturen entstehen im Code, Shader sind Kopien der Vanilla-Shader mit kleinen Änderungen.
 
-| Datei | Wirkung |
-|---|---|
-| `textures/block/stone.png` | Stone sieht aus wie Tiefenschiefer (eigene Textur, nicht die von Barebones) |
-| `textures/block/water_still/flow.png` + `.mcmeta` | Wasser mit Alpha ca. 0.45, animiert |
-| `textures/misc/enchanted_glint_item/armor.png` | Cyan-violetter Glanz |
-| `models/item/totem_of_undying.json` | Totem kleiner (Item-Rahmen, evtl. Pop-Animation) |
+| Datei | Wirkung | Abschalten |
+|---|---|---|
+| `shaders/core/rendertype_clouds.fsh` | Wolken durchsichtig | `CLOUD_ALPHA = 1.0` |
+| `shaders/core/sky.fsh` + `sky.vsh` | Himmel mit Farbverlauf | `SKY_GRADIENT = 0.0` |
+| `shaders/core/glint.fsh` | Glanz wechselt die Farbe (Item und Rüstung) | `GLINT_SPEED = 0.0` |
+| `textures/block/stone.png` | Stone als Tiefenschiefer (eigene Textur) | |
+| `textures/block/water_*.png` | Wasser ca. 45 % deckend, animiert | |
+| `textures/environment/celestial/sun.png` | Runde Sonne mit Lichthof | |
+| `textures/misc/enchanted_glint_*.png` | Cyan-violetter Glanz | |
+| `models/item/totem_of_undying.json` | Totem kleiner | |
 
-Nicht drin: eigene Shader. Sie müssen auf den Vanilla-Shadern von 1.21.11 aufbauen, die hier nicht abrufbar waren.
-Ungetestet im Spiel: `pack_format 75`, Wassertransparenz, Totem-Größe.
+Die Shader ändern nur die Fragment-Shader (und `sky.vsh`), alle Uniforms und Importe bleiben wie bei Vanilla.
+Sie laufen ohne Iris und Beryl. Gegen GLSL 330 geprüft (wie Vanilla). Im Spiel, auch mit VulkanMod, ungetestet.

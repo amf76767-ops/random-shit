@@ -46,8 +46,8 @@ def stone():
 
 
 def glint():
-    """Schillernder Verzauberungsglanz (Item und Rüstung). 64x64, schwarz = kein Glanz."""
-    w = 64
+    """Schillernder Verzauberungsglanz (Item und Rüstung). 128x128, schwarz = kein Glanz."""
+    w = 128
     px = []
     for y in range(w):
         for x in range(w):
@@ -58,6 +58,20 @@ def glint():
             col = lerp((70, 220, 255), (190, 90, 255), hue)
             px.append((round(col[0] * band), round(col[1] * band), round(col[2] * band), 255))
     return png(w, w, px)
+
+
+def sun():
+    """Weiche, runde Sonne mit Lichthof (wird additiv gezeichnet). 32x32."""
+    px = []
+    for y in range(32):
+        for x in range(32):
+            r = math.hypot(x - 15.5, y - 15.5) / 16.0
+            core = clamp01((0.36 - r) / 0.06)
+            halo = clamp01(math.exp(-(r - 0.30) * 5.5)) * clamp01((1.0 - r) / 0.35) if r > 0.30 else 1.0
+            a = max(core, halo * 0.75)
+            c = lerp((255, 190, 100), (255, 248, 215), core)
+            px.append((c[0], c[1], c[2], round(255 * clamp01(a))))
+    return png(32, 32, px)
 
 
 def water(size, frames, flowing):
@@ -84,14 +98,21 @@ def water(size, frames, flowing):
 def files():
     mc = "assets/minecraft/"
     yield "pack.mcmeta", json.dumps({"pack": {"pack_format": FORMAT, "min_format": FORMAT, "max_format": FORMAT,
-                                              "description": "DIH Visuals: Stone als Tiefenschiefer, klares Wasser, bunter Glanz, kleines Totem"}}, indent=2).encode()
+                                              "description": "DIH Visuals: Tiefenschiefer-Stone, klares Wasser, durchsichtige Wolken, Himmelverlauf, Glanz, kleines Totem"}}, indent=2).encode()
     yield mc + "textures/block/stone.png", stone()
     yield mc + "textures/misc/enchanted_glint_item.png", glint()
     yield mc + "textures/misc/enchanted_glint_armor.png", glint()
     yield mc + "textures/block/water_still.png", water(16, 32, False)
     yield mc + "textures/block/water_still.png.mcmeta", json.dumps({"animation": {"frametime": 2}}).encode()
     yield mc + "textures/block/water_flow.png", water(32, 32, True)
-    yield mc + "textures/block/water_flow.png.mcmeta", json.dumps({"animation": {"frametime": 2}}).encode()
+    yield mc + "textures/block/water_flow.png.mcmeta", json.dumps({"animation": {}}).encode()
+    yield mc + "textures/environment/celestial/sun.png", sun()
+    glint_meta = json.dumps({"texture": {"blur": True}}).encode()
+    yield mc + "textures/misc/enchanted_glint_item.png.mcmeta", glint_meta
+    yield mc + "textures/misc/enchanted_glint_armor.png.mcmeta", glint_meta
+    for path in sorted((ROOT / "static").rglob("*")):
+        if path.is_file():
+            yield path.relative_to(ROOT / "static").as_posix(), path.read_bytes()
     # Totem kleiner: gilt für Item-Rahmen und die Pop-Animation, falls sie den Kontext "fixed" nutzt
     yield mc + "models/item/totem_of_undying.json", json.dumps({
         "parent": "minecraft:item/generated",
