@@ -29,9 +29,22 @@ public final class AddonHooks {
         }
     }
 
+    /** One step of the module set-up; a failing step is logged and does not stop the others. */
+    private interface Step {
+        void run() throws Throwable;
+    }
+
+    private static void step(String what, Step step) {
+        try {
+            step.run();
+        } catch (Throwable t) {
+            DIHClient.LOG.warn("[DIHClient] set-up step failed: " + what, t);
+        }
+    }
+
     /** Called at the end of {@code ModuleManager.registerAll}. */
     public static void registerModules(ModuleManager modules) {
-        try {
+        step("add modules", () -> {
             Method add = ModuleManager.class.getDeclaredMethod("add", dev.dihclient.module.Module.class);
             add.setAccessible(true);
             AutomationSupervisor supervisor = new AutomationSupervisor();
@@ -39,15 +52,18 @@ public final class AddonHooks {
             // on by default; the saved config, loaded right after this, wins as soon as the player has switched it off
             supervisor.setEnabledSilently(true);
             add.invoke(modules, new VisualPack());
-            Cleanup.performance(modules.get(dev.dihclient.modules.client.Performance.class));
-            Cleanup.removeModules(modules);
+        });
+        step("3x3 pickaxe name", () -> Cleanup.linkHammer(modules));
+        step("PacketFly in Flight", () -> Cleanup.mergePacketFly(modules.get(dev.dihclient.modules.movement.Flight.class),
+                modules.get(dev.dihclient.modules.movement.PacketFly.class)));
+        step("Performance quality", () -> Cleanup.performance(modules.get(dev.dihclient.modules.client.Performance.class)));
+        step("remove modules", () -> Cleanup.removeModules(modules));
+        step("legal AutoBuild", () -> {
             dev.dihclient.modules.world.AutoBuild build = modules.get(dev.dihclient.modules.world.AutoBuild.class);
             if (build != null) {
                 LegalPlace.prepare(build);
             }
-        } catch (Throwable t) {
-            DIHClient.LOG.warn("[DIHClient] AutoSupervisor could not be registered", t);
-        }
+        });
     }
 
     /** Called at the start of every client tick. */

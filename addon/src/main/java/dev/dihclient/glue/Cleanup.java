@@ -20,7 +20,7 @@ public final class Cleanup {
     static final Set<String> REMOVED = Set.of(
             "AutoPot", "MaceCombo", "Step", "ReverseStep", "AutoReconnect", "InvManager", "SurvivalAlerts", "MoneyHud",
             "Xray", "Chams", "DamageNumbers", "Waypoints", "DihChat", "Friends", "Enemies", "NewChunks", "BaseTraces",
-            "Watchlist", "PacketBuffer");
+            "Watchlist", "PacketBuffer", "PacketFly", "HammerTool");
 
     /** Light / normal / heavy for the Performance module. */
     public enum Quality { LIGHT, NORMAL, HEAVY }
@@ -38,6 +38,46 @@ public final class Cleanup {
         namesField.setAccessible(true);
         Map<String, Module> byName = (Map<String, Module>) namesField.get(manager);
         byName.values().removeIf(m -> REMOVED.contains(m.getClass().getSimpleName()));
+    }
+
+    /** PacketFly lives on as a hidden helper of Flight: its settings are added to Flight and only show in Packet mode. */
+    @SuppressWarnings("unchecked")
+    public static void mergePacketFly(dev.dihclient.modules.movement.Flight flight, dev.dihclient.modules.movement.PacketFly pf)
+            throws ReflectiveOperationException {
+        Method add = Module.class.getDeclaredMethod("add", dev.dihclient.setting.Setting.class);
+        add.setAccessible(true);
+        for (dev.dihclient.setting.Setting<?> s : List.copyOf(pf.settings())) {
+            s.visibleWhen(() -> flight.mode.get() == dev.dihclient.modules.movement.Flight.Mode.PACKET);
+            add.invoke(flight, s);
+        }
+    }
+
+    /**
+     * The 3x3 pickaxe is no module any more: every automation module with a "3x3 Pickaxe" switch gets the tool-name field
+     * itself (it is the same setting everywhere, so it only has to be typed once).
+     */
+    public static void linkHammer(ModuleManager manager) throws ReflectiveOperationException {
+        dev.dihclient.modules.player.HammerTool tool = manager.get(dev.dihclient.modules.player.HammerTool.class);
+        Method add = Module.class.getDeclaredMethod("add", dev.dihclient.setting.Setting.class);
+        add.setAccessible(true);
+        java.util.List<dev.dihclient.setting.BoolSetting> switches = new java.util.ArrayList<>();
+        java.util.List<Module> owners = new java.util.ArrayList<>();
+        for (Module m : manager.all()) {
+            try {
+                Object field = m.getClass().getField("hammer").get(m);
+                if (field instanceof dev.dihclient.setting.BoolSetting hammer) {
+                    switches.add(hammer);
+                    owners.add(m);
+                }
+            } catch (NoSuchFieldException ignored) {
+                // this module has no 3x3 switch
+            }
+        }
+        // one shared setting, shown wherever any of the 3x3 switches is on
+        tool.names.visibleWhen(() -> switches.stream().anyMatch(dev.dihclient.setting.BoolSetting::get));
+        for (Module m : owners) {
+            add.invoke(m, tool.names);
+        }
     }
 
     /** Performance gets one switch instead of four separate sliders and toggles. */

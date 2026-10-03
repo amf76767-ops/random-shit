@@ -20,13 +20,19 @@ MIXIN=$(mvn_get net.fabricmc sponge-mixin "0.17.3+mixin.0.8.7")
 ASM=$(mvn_get org.ow2.asm asm 9.7):$(mvn_get org.ow2.asm asm-tree 9.7)
 BASE=../base/dihclient-v5.6.jar
 
-rm -rf "$BUILD/stubs" "$BUILD/classes" "$BUILD/tools" "$BUILD/test"
-mkdir -p "$BUILD/stubs" "$BUILD/classes" "$BUILD/tools" "$BUILD/test"
+rm -rf "$BUILD/stubs" "$BUILD/gen" "$BUILD/classes" "$BUILD/override" "$BUILD/tools" "$BUILD/test"
+mkdir -p "$BUILD/stubs" "$BUILD/gen" "$BUILD/classes" "$BUILD/override" "$BUILD/tools" "$BUILD/test"
 
-# 1. stand-ins for the few Minecraft/Fabric classes the add-on touches (never shipped)
-javac -nowarn -d "$BUILD/stubs" $(find stubs -name '*.java')
+# 1. stand-ins for the Minecraft classes the old jar uses (generated from its bytecode) and for Fabric (never shipped)
+JOML=$(mvn_get org.joml joml 1.10.8)
+python3 tools/GenStubs.py "$BASE" tools/stubs-hints.txt "$BUILD/gen"
+javac -nowarn -cp "$JOML" -d "$BUILD/stubs" $(find stubs "$BUILD/gen" -name '*.java')
+# 1b. rewritten modules: same class names as in the old jar, they replace the old classes
+if [ -d src/override ]; then
+  javac -proc:none -nowarn -Xlint:none -d "$BUILD/override" -cp "$BASE:$BUILD/stubs:$GSON:$SLF4J:$MIXIN:$ASM:$JOML" $(find src/override -name '*.java')
+fi
 # 2. the add-on itself, compiled against the old jar
-javac -proc:none -nowarn -Xlint:none -d "$BUILD/classes" -cp "$BASE:$BUILD/stubs:$GSON:$SLF4J:$MIXIN:$ASM" $(find src/main -name '*.java')
+javac -proc:none -nowarn -Xlint:none -d "$BUILD/classes" -cp "$BUILD/override:$BASE:$BUILD/stubs:$GSON:$SLF4J:$MIXIN:$ASM:$JOML" $(find src/main -name '*.java')
 # 3. tests that need no Minecraft
 javac -nowarn -d "$BUILD/test" -cp "$BUILD/classes:$GSON" $(find src/test -name '*.java')
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.UpdateTests
@@ -37,7 +43,7 @@ java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.LegalPlaceTests
 javac -nowarn -d "$BUILD/tools" -cp "$ASM" tools/Patcher.java tools/MixinCheck.java
 OUT="../dist/dihclient-v${VERSION}+mc${MC}.jar"
 python3 ../resourcepack/build.py >/dev/null
-java -cp "$BUILD/tools:$ASM" Patcher "$BASE" "$BUILD/classes" "$OUT" "${VERSION}+mc${MC}" ../dist/DIH-Visuals-1.21.11.zip
+java -cp "$BUILD/tools:$ASM" Patcher "$BASE" "$BUILD/classes" "$OUT" "${VERSION}+mc${MC}" ../dist/DIH-Visuals-1.21.11.zip "$BUILD/override" src/resources
 # 5. the base jar must show the known problem, the new jar must not have any
 if java -cp "$BUILD/tools:$ASM" MixinCheck "$BASE" >/dev/null; then echo "note: base jar has no mixin problem any more"; fi
 java -cp "$BUILD/tools:$ASM" MixinCheck "$OUT"

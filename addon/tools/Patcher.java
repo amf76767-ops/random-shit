@@ -27,7 +27,7 @@ import org.objectweb.asm.tree.VarInsnNode;
 /**
  * Builds the new DIHClient jar from the old one: hooks three existing methods and adds the compiled add-on classes.
  *
- * usage: Patcher base.jar addonClassesDir out.jar newVersion [bundledPack.zip]
+ * usage: Patcher base.jar addonClassesDir out.jar newVersion [bundledPack.zip [overrideClassesDir [resourcesDir]]]
  */
 public final class Patcher {
     private static final String HOOKS = "dev/dihclient/glue/AddonHooks";
@@ -38,6 +38,24 @@ public final class Patcher {
         Path out = Path.of(args[2]);
         String version = args[3];
 
+        java.util.Map<String, byte[]> over = new java.util.TreeMap<>();
+        if (args.length > 5) {
+            Path od = Path.of(args[5]);
+            try (Stream<Path> s = Files.walk(od)) {
+                for (Path p : (Iterable<Path>) s.filter(x -> x.toString().endsWith(".class"))::iterator) {
+                    over.put(od.relativize(p).toString().replace('\\', '/'), Files.readAllBytes(p));
+                }
+            }
+        }
+        java.util.Map<String, byte[]> resources = new java.util.TreeMap<>();
+        if (args.length > 6) {
+            Path rd = Path.of(args[6]);
+            try (Stream<Path> s = Files.walk(rd)) {
+                for (Path p : (Iterable<Path>) s.filter(Files::isRegularFile)::iterator) {
+                    resources.put(rd.relativize(p).toString().replace('\\', '/'), Files.readAllBytes(p));
+                }
+            }
+        }
         List<String> added = new ArrayList<>();
         try (Stream<Path> s = Files.walk(addon)) {
             s.filter(p -> p.toString().endsWith(".class")).forEach(p -> added.add(addon.relativize(p).toString().replace('\\', '/')));
@@ -54,6 +72,16 @@ public final class Patcher {
                 byte[] data;
                 try (InputStream in = zin.getInputStream(e)) {
                     data = in.readAllBytes();
+                }
+                if (over.containsKey(e.getName())) {
+                    data = over.remove(e.getName());
+                    System.out.println("replaced: " + e.getName());
+                    ZipEntry oe = new ZipEntry(e.getName());
+                    oe.setTime(e.getTime());
+                    zout.putNextEntry(oe);
+                    zout.write(data);
+                    zout.closeEntry();
+                    continue;
                 }
                 switch (e.getName()) {
                     case "dev/dihclient/DIHClient.class" -> {
@@ -73,7 +101,7 @@ public final class Patcher {
                                 throw new IllegalStateException(gone + " not found in dihclient.mixins.json");
                             }
                         }
-                        String withFallback = cfg.replace("\"KeyboardInputMixin\",", "\"KeyboardInputMixin\",\n    \"InputFallbackMixin\",\n    \"KeyBindingSoftMixin\",");
+                        String withFallback = cfg.replace("\"KeyboardInputMixin\",", "\"KeyboardInputMixin\",\n    \"InputFallbackMixin\",\n    \"KeyBindingSoftMixin\",\n    \"DummyHitMixin\",");
                         if (withFallback.equals(cfg)) {
                             throw new IllegalStateException("KeyboardInputMixin not found in dihclient.mixins.json");
                         }
@@ -97,6 +125,12 @@ public final class Patcher {
                         }
                         if (e.getName().equals("dev/dihclient/modules/client/Profiles.class")) {
                             data = renameModule(data, "Profiles", "Configs");
+                        }
+                        if (e.getName().equals("dev/dihclient/gui/MeteorGuiScreen.class") || e.getName().equals("dev/dihclient/gui/ClickGuiScreen.class")) {
+                            data = routeClickSound(data, e.getName());
+                        }
+                        if (e.getName().equals("dev/dihclient/util/Notifications.class")) {
+                            data = toggleSoundInNotifications(data);
                         }
                         if (e.getName().equals("dev/dihclient/modules/world/AutoBuild.class")) {
                             data = enforceBeforeTick(data);
@@ -123,6 +157,25 @@ public final class Patcher {
                 pe.setTime(zin.getEntry("fabric.mod.json").getTime());
                 zout.putNextEntry(pe);
                 zout.write(Files.readAllBytes(Path.of(args[4])));
+                zout.closeEntry();
+            }
+            for (var re : resources.entrySet()) {
+                if (zin.getEntry(re.getKey()) != null) {
+                    throw new IllegalStateException("resource would overwrite " + re.getKey());
+                }
+                System.out.println("resource: " + re.getKey());
+                ZipEntry ne = new ZipEntry(re.getKey());
+                ne.setTime(zin.getEntry("fabric.mod.json").getTime());
+                zout.putNextEntry(ne);
+                zout.write(re.getValue());
+                zout.closeEntry();
+            }
+            for (var oe : over.entrySet()) {
+                System.out.println("new class from override: " + oe.getKey());
+                ZipEntry ne = new ZipEntry(oe.getKey());
+                ne.setTime(zin.getEntry("fabric.mod.json").getTime());
+                zout.putNextEntry(ne);
+                zout.write(oe.getValue());
                 zout.closeEntry();
             }
             for (String name : added) {
@@ -271,6 +324,41 @@ public final class Patcher {
             throw new IllegalStateException("expected one \"" + from + "\" in constructor of " + cn.name + ", found " + n);
         }
         ClassWriter cw = new ClassWriter(0);
+        cn.accept(cw);
+        return cw.toByteArray();
+    }
+
+    /** The GUI click goes through GuiSounds, which plays the mod's own click sound. */
+    static byte[] routeClickSound(byte[] data, String name) {
+        ClassNode cn = read(data);
+        int n = 0;
+        for (MethodNode m : cn.methods) {
+            for (AbstractInsnNode in : m.instructions.toArray()) {
+                if (in instanceof MethodInsnNode mi && mi.getOpcode() == Opcodes.INVOKESTATIC && mi.owner.equals("net/minecraft/class_1109")
+                        && mi.name.equals("method_47978") && mi.desc.equals("(Lnet/minecraft/class_6880;F)Lnet/minecraft/class_1109;")) {
+                    m.instructions.set(mi, new MethodInsnNode(Opcodes.INVOKESTATIC, "dev/dihclient/glue/GuiSounds", "click",
+                            "(Lnet/minecraft/class_6880;F)Lnet/minecraft/class_1109;", false));
+                    n++;
+                }
+            }
+        }
+        if (n != 1) {
+            throw new IllegalStateException("expected one click sound in " + name + ", found " + n);
+        }
+        ClassWriter cw = new ClassWriter(0);
+        cn.accept(cw);
+        return cw.toByteArray();
+    }
+
+    /** Notifications.toggle(Module) is called whenever a module is switched on or off by the player. */
+    static byte[] toggleSoundInNotifications(byte[] data) {
+        ClassNode cn = read(data);
+        MethodNode m = method(cn, "toggle", "(Ldev/dihclient/module/Module;)V");
+        InsnList pre = new InsnList();
+        pre.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        pre.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "dev/dihclient/glue/GuiSounds", "toggle", "(Ldev/dihclient/module/Module;)V", false));
+        m.instructions.insert(pre);
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         cn.accept(cw);
         return cw.toByteArray();
     }

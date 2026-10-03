@@ -1,0 +1,43 @@
+# Vererbung (Yarn-Namen in Klammern)
+extends class_746 class_742      # ClientPlayerEntity -> AbstractClientPlayerEntity
+extends class_742 class_1657     # -> PlayerEntity
+extends class_745 class_742      # OtherClientPlayerEntity
+extends class_1657 class_1309    # -> LivingEntity
+extends class_1309 class_1297    # -> Entity
+extends class_1542 class_1297    # ItemEntity
+extends class_638 class_1937     # ClientWorld -> World
+extends class_3965 class_239     # BlockHitResult -> HitResult
+extends class_3966 class_239     # EntityHitResult
+extends class_2338 class_2382    # BlockPos -> Vec3i
+extends class_1747 class_1792    # BlockItem -> Item
+implements class_5250 class_2561    # MutableText
+extends class_442 class_437      # TitleScreen
+extends class_433 class_437      # GameMenuScreen
+interface class_2561
+interface class_1269
+enum class_2350
+enum class_1268
+enum class_239$class_240
+enum class_3959$class_3960
+enum class_3959$class_242
+enum class_1304
+implements class_1937 class_1922
+interface class_1922
+extends class_743 class_744      # KeyboardInput -> Input
+field class_744 field_54155 Lnet/minecraft/class_10185;
+field class_744 field_55868 Lnet/minecraft/class_241;
+field class_437 field_22787 Lnet/minecraft/class_310;
+field class_437 field_22789 I
+field class_437 field_22790 I
+returns class_638 method_18456 java.util.List<net.minecraft.class_742>
+method class_241 <init> (FF)V
+extends class_490 class_437       # InventoryScreen
+interface class_2596              # Packet
+implements class_2828 class_2596  # PlayerMoveC2SPacket
+extends class_2828$class_2831 class_2828
+extends class_2828$class_2829 class_2828
+extends class_2828$class_2830 class_2828
+extends class_2828$class_5911 class_2828
+extends class_1109 class_1101     # PositionedSoundInstance -> AbstractSoundInstance
+implements class_1101 class_1113  # -> SoundInstance
+interface class_1113

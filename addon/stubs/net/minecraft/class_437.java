@@ -1,2 +1,0 @@
-package net.minecraft;
-public class class_437 { protected class_437(class_2561 t) { } public int field_22789; public int field_22790; public class_310 field_22787; public boolean method_25421() { return true; } public void method_25394(class_332 g, int a, int b, float c) { } public boolean method_25402(class_11909 c, boolean d) { return false; } public boolean method_25404(class_11908 k) { return false; } public void method_25419() { } }

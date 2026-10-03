@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **5.9.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.1.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -82,3 +82,18 @@ Jeder Block-Klick des Bauens (`Worker`, `BuildRuntime`) läuft durch `LegalPlace
 entlang der echten Blickrichtung zuerst genau die geklickte Blockfläche trifft, höchstens 4,5 Blöcke entfernt. Nichts geht
 mehr durch oder hinter Blöcke, von der Rückseite einer Fläche oder außer Reichweite. Außerdem fest abgeschaltet:
 *Air Place*, *Legit Fallback*, *Legit Placement aus* und Reichweite über 4,5. Ungetestet im Spiel.
+
+## 6.x: Aufräumen und Reparaturen
+- **Entfernt:** AutoPot, MaceCombo, Step, ReverseStep, AutoReconnect, InvManager, SurvivalAlerts, MoneyHud, Xray, Chams,
+  DamageNumbers, Waypoints, DIHChat, Friends, Enemies, NewChunks, BaseTraces, Watchlist, PacketBuffer und das Pausen-Menü.
+  (Die Module fliegen aus Liste, Tick und Config; die Instanz bleibt für Stellen, die sie per Klasse nachschlagen.)
+- **Zusammengelegt:** PacketFly ist ein Modus von Flight (*Packet*); 3x3 Pickaxe ist keine eigene Seite mehr, das Namensfeld
+  steht in den Modulen mit *3x3 Pickaxe*-Schalter (`Cleanup`).
+- **Neu geschrieben** (`addon/src/override`, gleiche Klassennamen, ersetzen die alten): Jesus, NoSlow (+Cobwebs, Soul Sand),
+  Flight, AutoMLG (Platzierfenster 4,2 statt 2,7 Blöcke, schnelleres Abholen), AutoInvTotem (Silent-Modus ohne
+  Inventar), DummyPlayer (Schwerkraft, Schaden, Rückstoß), TargetHud (letzter Treffer bleibt sichtbar), AutoLog
+  (+Spieler in der Nähe), BetterTablist (neues Aussehen).
+- **Performance:** ein Schalter Light / Normal / Heavy. **Profiles** heißt jetzt **Configs**.
+- **GUI-Sounds:** eigene Klick- und Schalter-Sounds statt des Vanilla-Klicks (`tools/make_sounds.py`, `GuiSounds`).
+- **Build:** `tools/GenStubs.py` erzeugt aus dem Bytecode der alten JAR Platzhalter für alle benutzten Minecraft-Klassen.
+  Was ein neues Modul benutzt, muss darin vorkommen, sonst übersetzt es nicht. So bleibt jeder Aufruf geprüft.
