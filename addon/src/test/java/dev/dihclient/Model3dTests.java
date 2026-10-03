@@ -32,6 +32,7 @@ public final class Model3dTests {
         skinned(tmp);
         obj(tmp);
         sample();
+        voxels(tmp);
         broken(tmp);
         System.out.println(passed + " passed, " + failed + " failed");
         System.exit(failed == 0 ? 0 : 1);
@@ -137,6 +138,34 @@ public final class Model3dTests {
             }
         }
         check(moved, "walk animation moves vertices");
+    }
+
+    /** A white cube becomes a cube of white blocks; solid or hollow. */
+    static void voxels(Path tmp) throws Exception {
+        Files.writeString(tmp.resolve("cube.mtl"), "newmtl w\nKd 1 1 1\n");
+        StringBuilder o = new StringBuilder("mtllib cube.mtl\nusemtl w\n");
+        float[][] v = {{0, 0, 0}, {1, 0, 0}, {1, 1, 0}, {0, 1, 0}, {0, 0, 1}, {1, 0, 1}, {1, 1, 1}, {0, 1, 1}};
+        for (float[] p : v) {
+            o.append("v ").append(p[0]).append(' ').append(p[1]).append(' ').append(p[2]).append('\n');
+        }
+        int[][] f = {{1, 2, 3, 4}, {5, 8, 7, 6}, {1, 5, 6, 2}, {4, 3, 7, 8}, {1, 4, 8, 5}, {2, 6, 7, 3}};
+        for (int[] q : f) {
+            o.append("f ").append(q[0]).append(' ').append(q[1]).append(' ').append(q[2]).append(' ').append(q[3]).append('\n');
+        }
+        Files.writeString(tmp.resolve("cube.obj"), o.toString());
+        Model m = ModelLoader.load(tmp.resolve("cube.obj"));
+        dev.dihclient.model3d.Voxelizer.Grid hollow = dev.dihclient.model3d.Voxelizer.voxelize(m, 10, false, 64);
+        check(hollow.sx == 10 && hollow.sy == 10 && hollow.sz == 10, "cube grid is 10^3: " + hollow.sx + "," + hollow.sy + "," + hollow.sz);
+        check(hollow.count == 1000 - 512, "hollow cube has 488 surface blocks, got " + hollow.count);
+        dev.dihclient.model3d.Voxelizer.Grid solid = dev.dihclient.model3d.Voxelizer.voxelize(m, 10, true, 64);
+        check(solid.count == 1000, "solid cube has 1000 blocks, got " + solid.count);
+        var pal = dev.dihclient.model3d.BlockPalette.entries(dev.dihclient.model3d.BlockPalette.Set.CONCRETE);
+        check(dev.dihclient.model3d.BlockPalette.nearest(pal, 0xFFFFFF).id().equals("minecraft:white_concrete"), "white maps to white concrete");
+        check(dev.dihclient.model3d.BlockPalette.nearest(pal, 0x000000).id().equals("minecraft:black_concrete"), "black maps to black concrete");
+        check(dev.dihclient.model3d.BlockPalette.nearest(pal, 0x902020).id().equals("minecraft:red_concrete"), "red maps to red concrete: " + dev.dihclient.model3d.BlockPalette.nearest(pal, 0x902020).id());
+        Model tung = ModelLoader.load(Path.of("src/resources/assets/dihclient/models/tung_tung_tung_sahur.obj"));
+        dev.dihclient.model3d.Voxelizer.Grid tg = dev.dihclient.model3d.Voxelizer.voxelize(tung, 40, false, 128);
+        check(tg.sy == 40 && tg.count > 500 && tg.count < 20000, "the log man at 40 blocks: " + tg.count + " blocks, " + tg.sx + "x" + tg.sy + "x" + tg.sz);
     }
 
     static void broken(Path tmp) throws Exception {
