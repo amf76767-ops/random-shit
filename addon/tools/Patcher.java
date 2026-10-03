@@ -16,6 +16,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
+import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
@@ -72,7 +73,11 @@ public final class Patcher {
                         data = patched.getBytes(StandardCharsets.UTF_8);
                         mod = true;
                     }
-                    default -> { }
+                    default -> {
+                        if (e.getName().startsWith("dev/dihclient/mixin/") && e.getName().endsWith(".class")) {
+                            data = fixMixinAnnotations(data);
+                        }
+                    }
                 }
                 ZipEntry ne = new ZipEntry(e.getName());
                 ne.setTime(e.getTime());
@@ -127,6 +132,53 @@ public final class Patcher {
             }
         }
         return write(cn);
+    }
+
+    /** Mixin annotations that Mixin only reads when they are RuntimeVisible. */
+    private static final java.util.Set<String> RUNTIME_MIXIN_ANNOTATIONS = java.util.Set.of(
+            "Lorg/spongepowered/asm/mixin/gen/Accessor;", "Lorg/spongepowered/asm/mixin/gen/Invoker;",
+            "Lorg/spongepowered/asm/mixin/injection/Inject;", "Lorg/spongepowered/asm/mixin/injection/Redirect;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyVariable;", "Lorg/spongepowered/asm/mixin/injection/ModifyArg;",
+            "Lorg/spongepowered/asm/mixin/injection/ModifyArgs;", "Lorg/spongepowered/asm/mixin/injection/ModifyConstant;",
+            "Lorg/spongepowered/asm/mixin/Overwrite;", "Lorg/spongepowered/asm/mixin/Shadow;", "Lorg/spongepowered/asm/mixin/Unique;",
+            "Lorg/spongepowered/asm/mixin/Final;", "Lorg/spongepowered/asm/mixin/Mutable;");
+
+    /**
+     * 5.6 shipped ProfilerAccessor and SpawnerPieMixin with their @Accessor / @ModifyVariable annotations marked
+     * RuntimeInvisible. Mixin does not see those: it takes the accessor interface for a normal interface mixin and
+     * aborts the whole game start ("@Mixin target type mismatch: class_310 is not an interface").
+     * Moves such annotations to the visible list, which is what the compiler produces for these annotations.
+     */
+    static byte[] fixMixinAnnotations(byte[] data) {
+        ClassNode cn = read(data);
+        boolean changed = false;
+        for (MethodNode m : cn.methods) {
+            if (m.invisibleAnnotations == null) {
+                continue;
+            }
+            java.util.Iterator<AnnotationNode> it = m.invisibleAnnotations.iterator();
+            while (it.hasNext()) {
+                AnnotationNode an = it.next();
+                if (RUNTIME_MIXIN_ANNOTATIONS.contains(an.desc)) {
+                    it.remove();
+                    if (m.visibleAnnotations == null) {
+                        m.visibleAnnotations = new ArrayList<>();
+                    }
+                    m.visibleAnnotations.add(an);
+                    changed = true;
+                    System.out.println("fixed " + cn.name + "." + m.name + ": " + an.desc + " is now visible");
+                }
+            }
+            if (m.invisibleAnnotations.isEmpty()) {
+                m.invisibleAnnotations = null;
+            }
+        }
+        if (!changed) {
+            return data;
+        }
+        ClassWriter cw = new ClassWriter(0);
+        cn.accept(cw);
+        return cw.toByteArray();
     }
 
     private static void requireFresh(MethodNode m) {
