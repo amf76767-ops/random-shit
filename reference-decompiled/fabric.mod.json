@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "dihclient",
+  "version": "5.6.0+mc1.21.11",
+  "name": "DIHClient v3",
+  "icon": "assets/dihclient/icon.png",
+  "description": "DIHClient for 1.21.11 - rewritten from scratch: typed module/setting system, JSON profiles, new ClickGUI & HUD editor, working through-wall ESP, AutoBuild with schematic browser.",
+  "authors": ["DIHClient"],
+  "license": "All-Rights-Reserved",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["dev.dihclient.DIHClient"]
+  },
+  "mixins": ["dihclient.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
