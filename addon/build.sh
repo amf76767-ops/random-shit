@@ -31,6 +31,7 @@ javac -proc:none -nowarn -Xlint:none -d "$BUILD/classes" -cp "$BASE:$BUILD/stubs
 javac -nowarn -d "$BUILD/test" -cp "$BUILD/classes:$GSON" $(find src/test -name '*.java')
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.UpdateTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.SupervisorTests
+java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.SoftKeysTests
 # 4. patch + pack
 javac -nowarn -d "$BUILD/tools" -cp "$ASM" tools/Patcher.java tools/MixinCheck.java
 OUT="../dist/dihclient-v${VERSION}+mc${MC}.jar"
