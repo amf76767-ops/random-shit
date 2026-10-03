@@ -1,5 +1,6 @@
 package dev.dihclient.mixin;
 
+import dev.dihclient.DIHClient;
 import dev.dihclient.util.KeyUtil;
 import net.minecraft.class_10185;
 import net.minecraft.class_241;
@@ -21,6 +22,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin({class_743.class})
 public abstract class InputFallbackMixin extends class_744 {
+    private static int dih$debugTicks;
+
     @Inject(
         method = {"method_3129"},
         at = {@At("TAIL")}
@@ -29,6 +32,13 @@ public abstract class InputFallbackMixin extends class_744 {
         class_315 o = class_310.method_1551().field_1690;
         if (o == null) {
             return;
+        }
+        if (o.field_1894.method_1434() && ++dih$debugTicks % 40 == 0) {
+            // eine Zeile alle 2 Sekunden, solange "vorwärts" gedrückt ist (echt oder per Modul): zeigt, wo die Kette abreißt
+            class_310 mc = class_310.method_1551();
+            DIHClient.LOG.info("[DIH-Debug] vorwaerts: tastatur={} software={} eingabe={} spieler={} bildschirm={}",
+                KeyUtil.isPhysicallyDown(o.field_1894), soft(o.field_1894), this.field_54155,
+                mc.field_1724 == null ? "?" : String.format("%.3f", mc.field_1724.method_18798().field_1352), mc.field_1755 != null);
         }
         if (!(soft(o.field_1894) || soft(o.field_1881) || soft(o.field_1913) || soft(o.field_1849) || soft(o.field_1903) || soft(o.field_1832))) {
             return;
