@@ -41,6 +41,7 @@ java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.SoftKeysTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.LegalPlaceTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.Model3dTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.NavTests
+java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.MergeTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.EmoteTests
 python3 ../resourcepack/build.py >/dev/null
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.PackTests

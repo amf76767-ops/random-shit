@@ -55,8 +55,6 @@ public final class AddonHooks {
             add.invoke(modules, new CustomModel());
             add.invoke(modules, new FakeTime());
             add.invoke(modules, new Scenes());
-            add.invoke(modules, new ModelBuild());
-            add.invoke(modules, new Demolish());
             Emotes emotes = new Emotes();
             add.invoke(modules, emotes);
             emotes.setEnabledSilently(true); // idle until a key is pressed
@@ -75,6 +73,7 @@ public final class AddonHooks {
                 LegalPlace.prepare(build);
             }
         });
+        step("fold modules", () -> Folds.apply(modules));
     }
 
     /** Called at the start of every client tick. */

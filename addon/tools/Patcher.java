@@ -126,6 +126,12 @@ public final class Patcher {
                         if (e.getName().equals("dev/dihclient/autobuild/BuildRuntime.class")) {
                             data = redirectWalk(data);
                         }
+                        if (e.getName().equals("dev/dihclient/modules/automation/FlipFinder.class")) {
+                            data = renameModule(data, "FlipFinder", "AutoFlipper");
+                        }
+                        if (e.getName().equals("dev/dihclient/config/ConfigManager.class")) {
+                            data = hookConfig(data);
+                        }
                         if (e.getName().equals("dev/dihclient/modules/client/Profiles.class")) {
                             data = renameModule(data, "Profiles", "Configs");
                         }
@@ -389,6 +395,20 @@ public final class Patcher {
         routed += n;
         System.out.println("legal placement gate: " + n + " click(s) in " + name);
         ClassWriter cw = new ClassWriter(0);
+        cn.accept(cw);
+        return cw.toByteArray();
+    }
+
+    /** Before the config is applied, settings of folded modules are moved to where they live now (see Merge.migrate). */
+    static byte[] hookConfig(byte[] data) {
+        ClassNode cn = read(data);
+        MethodNode apply = method(cn, "apply", "(Lcom/google/gson/JsonObject;)V");
+        InsnList call = new InsnList();
+        call.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.ALOAD, 1));
+        call.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "dev/dihclient/glue/Merge", "migrate", "(Lcom/google/gson/JsonObject;)V", false));
+        apply.instructions.insert(call);
+        System.out.println("config migration hooked into ConfigManager.apply");
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         cn.accept(cw);
         return cw.toByteArray();
     }

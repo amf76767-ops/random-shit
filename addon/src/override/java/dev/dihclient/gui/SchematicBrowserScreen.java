@@ -7,6 +7,7 @@ import dev.dihclient.autobuild.SchematicLoader;
 import dev.dihclient.hud.HudManager;
 import dev.dihclient.modules.world.AutoBuild;
 import dev.dihclient.render.Gfx;
+import dev.dihclient.setting.ActionSetting;
 import dev.dihclient.setting.BoolSetting;
 import dev.dihclient.setting.DoubleSetting;
 import dev.dihclient.setting.EnumSetting;
@@ -56,11 +57,11 @@ public class SchematicBrowserScreen extends class_437 {
    private int[][] layerColors;
    private final List<int[]> buttons = new ArrayList<>();
    private int optScroll;
-   private final List<Setting<?>> options = new ArrayList<>();
+   private final List<Setting<?>> curated = new ArrayList<>();
    private final List<Setting<?>> quick = new ArrayList<>();
    private static final String[] OPTION_NAMES = new String[]{
-      "Mode", "Order", "Walk", "Smart Path", "Pillar Up", "Supports", "Remove Supports", "Escape Water", "Human Rotations", "Predict",
-      "Fix Wrong Blocks", "Clear Area", "Adjust States", "Restock From Chests", "Creative Stacks", "AutoBuy (/ah)", "Sneak Place", "Reach",
+      "Source", "Mode", "Order", "Walk", "Smart Path", "Pillar Up", "Supports", "Remove Supports", "Escape Water", "Human Rotations", "Predict",
+      "Fix Wrong Blocks", "Clear Area", "Adjust States", "Restock From Chests", "Hotbar Refill", "Creative Stacks", "AutoBuy (/ah)", "Sneak Place", "Reach",
       "Rotate Speed", "Randomness", "Blocks/Tick", "Delay", "Max Fall", "Max Attempts", "From Layer", "To Layer", "Pause Near Players",
       "Pause On Damage", "Finish Sound"
    };
@@ -85,7 +86,7 @@ public class SchematicBrowserScreen extends class_437 {
       for (String name : OPTION_NAMES) {
          Setting<?> found = this.find(name);
          if (found != null) {
-            this.options.add(found);
+            this.curated.add(found);
          }
       }
 
@@ -95,6 +96,24 @@ public class SchematicBrowserScreen extends class_437 {
             this.quick.add(found);
          }
       }
+   }
+
+   /** For a schematic the short list; for MapArt / Model / Demolish everything that is shown for it. */
+   private List<Setting<?>> currentOptions() {
+      Setting<?> source = this.find("Source");
+      if (source == null || source.get().toString().equals("SCHEMATIC")) {
+         return this.curated;
+      }
+
+      List<Setting<?>> out = new ArrayList<>();
+      out.add(source);
+      for (Setting<?> setting : this.module.settings()) {
+         if (setting != source && setting.isVisible()) {
+            out.add(setting);
+         }
+      }
+
+      return out;
    }
 
    private Setting<?> find(String name) {
@@ -526,7 +545,8 @@ public class SchematicBrowserScreen extends class_437 {
          this.tab = SchematicBrowserScreen.Tab.OPTIONS;
          return true;
       } else if (id >= 100 && id < 200) {
-         if (id - 100 < this.options.size() && this.options.get(id - 100) instanceof BoolSetting bool) {
+         List<Setting<?>> opts = this.currentOptions();
+         if (id - 100 < opts.size() && opts.get(id - 100) instanceof BoolSetting bool) {
             bool.toggle();
          }
 
@@ -534,8 +554,9 @@ public class SchematicBrowserScreen extends class_437 {
       } else if (id >= 200 && id < 400) {
          int index = (id - 200) / 2;
          int dir = (id - 200) % 2 == 0 ? -1 : 1;
-         if (index < this.options.size()) {
-            Setting<?> setting = this.options.get(index);
+         List<Setting<?>> opts = this.currentOptions();
+         if (index < opts.size()) {
+            Setting<?> setting = opts.get(index);
             if (setting instanceof IntSetting number) {
                int step = Math.max(1, (number.max() - number.min()) / 24);
                number.set(number.get() + dir * step);
@@ -546,8 +567,16 @@ public class SchematicBrowserScreen extends class_437 {
 
          return true;
       } else if (id >= 400 && id < 500) {
-         if (id - 400 < this.options.size() && this.options.get(id - 400) instanceof EnumSetting<?> choice) {
+         List<Setting<?>> opts = this.currentOptions();
+         if (id - 400 < opts.size() && opts.get(id - 400) instanceof EnumSetting<?> choice) {
             choice.cycle(true);
+         }
+
+         return true;
+      } else if (id >= 500 && id < 600) {
+         List<Setting<?>> opts = this.currentOptions();
+         if (id - 500 < opts.size() && opts.get(id - 500) instanceof ActionSetting action) {
+            action.run();
          }
 
          return true;
@@ -557,18 +586,21 @@ public class SchematicBrowserScreen extends class_437 {
    }
 
    private void renderOptions(class_332 g, int x, int y, int w, int h, int mouseX, int mouseY) {
+      List<Setting<?>> opts = this.currentOptions();
       int rows = Math.max(1, h / 18);
-      this.optScroll = Math.max(0, Math.min(Math.max(0, this.options.size() - rows), this.optScroll));
-      for (int i = 0; i < rows && this.optScroll + i < this.options.size(); i++) {
+      this.optScroll = Math.max(0, Math.min(Math.max(0, opts.size() - rows), this.optScroll));
+      for (int i = 0; i < rows && this.optScroll + i < opts.size(); i++) {
          int index = this.optScroll + i;
-         Setting<?> setting = this.options.get(index);
+         Setting<?> setting = opts.get(index);
          int ry = y + i * 18;
          if (i % 2 == 0) {
             g.method_25294(x + 3, ry, x + w - 3, ry + 17, 335544320);
          }
 
          Gfx.text(g, Gfx.trim(setting.name(), w - 130), x + 8, ry + 5, -1446670);
-         if (setting instanceof BoolSetting bool) {
+         if (setting instanceof ActionSetting) {
+            this.button(g, 500 + index, x + w - 58, ry + 2, 50, 14, "RUN", true, mouseX, mouseY);
+         } else if (setting instanceof BoolSetting bool) {
             this.button(g, 100 + index, x + w - 58, ry + 2, 50, 14, bool.get() ? "ON" : "OFF", bool.get(), mouseX, mouseY);
          } else if (setting instanceof EnumSetting<?>) {
             this.button(g, 400 + index, x + w - 118, ry + 2, 110, 14, Gfx.trim(setting.displayValue(), 100), false, mouseX, mouseY);
@@ -579,7 +611,7 @@ public class SchematicBrowserScreen extends class_437 {
          }
       }
 
-      Gfx.text(g, this.options.size() + " options · scroll for more", x + 8, y + rows * 18 + 2, -7564380);
+      Gfx.text(g, opts.size() + " options · scroll for more", x + 8, y + rows * 18 + 2, -7564380);
    }
 
    private void changeLayer(int var1) {

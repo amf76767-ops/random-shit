@@ -82,6 +82,12 @@ public class AutomationSupervisor extends Module {
         wasFlying = flying;
     }
 
+    /** True while the supervisor has this module switched off because of danger and means to start it again. */
+    static boolean isPaused(Module module) {
+        AutomationSupervisor s = instance;
+        return s != null && s.engine.pausedIds().contains(module.id());
+    }
+
     private boolean automationRunning() {
         for (String csv : new String[]{this.watched.get(), this.guarded.get()}) {
             for (Module m : this.resolve(csv)) {

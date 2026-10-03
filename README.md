@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.6.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.7.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -165,4 +165,19 @@ bei allen Spielern in der Nähe oder als Statuen. Nur du siehst es (Client-seiti
   (Schalter, Zahlen mit - / +, Auswahl wie Mode/Order/Sneak Place), die auch im Modul geändert werden. Unter den Knöpfen eine zweite Reihe
   mit Schnellschaltern: WALK, SMART PATH, PILLAR, HUMAN, RESTOCK, FIX WRONG, CLEAR AREA. Entwurf des Aussehens: `gui-mockups/browser-optionen.png`
   (kein echter Spiel-Screenshot).
+
+### 6.7.0: Module aufgeräumt
+Zusammengelegt wird ohne Eingriff in den Code der alten Module (`glue/Merge`, `Folds`, `Hubs`, `MergeBus`): das alte Modul verlässt die Liste (GUI, Config, Tasten),
+bleibt aber am Leben; seine Einstellungen wandern in das neue Modul (bei gleichem Namen mit Vorsatz, zum Beispiel "Tunnel Reach"). Der `MergeBus` (unsichtbar, immer an)
+tickt und zeichnet die eingebauten Module weiter. Ob so ein Teil läuft, folgt dem neuen Modul (`Link`). Alte Config-Werte werden vor dem Laden umgezogen (`ConfigMigration`,
+Hook in `ConfigManager.apply`), ohne neue Werte zu überschreiben.
+- **Miner** = AutoMine + Tunnel (Modus Ores / Tunnel).
+- **Goto** = Goto + ElytraBot (Modus Walk / Elytra), dazu der Schalter *Safe Route* (SafeRoute).
+- **Scaffold** = Scaffold + SmartBridge (Modus Classic / Smart).
+- **AutoArmor** hat den Schalter *Mend* (AutoMend).
+- **AutoBuild** hat die Auswahl *Source*: Schematic / MapArt / Model / Demolish, dazu den Schalter *Hotbar Refill* (AutoRestock). Der Schematic-Browser zeigt im Reiter
+  OPTIONS bei MapArt / Model / Demolish die passenden Einstellungen und Knöpfe.
+- **Entfernt:** AutoTrade, StashSorter (die Aufgabe `scan/sort/deposit` der TaskQueue benutzt die Engine weiter, aber ohne eigenes Modul).
+- **FlipFinder heißt jetzt AutoFlipper** (der alte Name findet das Modul weiter, die Einstellungen ziehen um).
+- Nicht im Spiel getestet. Die Namen und Reihenfolgen in der Config ändern sich; bei Problemen alte `config.json` zurücksetzen.
 
