@@ -1,0 +1,16 @@
+newmtl wood
+Kd 1.0 1.0 1.0
+map_Kd tung_tung_tung_sahur.png
+
+newmtl woodDark
+Kd 0.62 0.40 0.20
+
+newmtl bat
+Kd 0.80 0.55 0.28
+
+newmtl white
+Kd 0.97 0.97 0.95
+
+newmtl black
+Kd 0.04 0.03 0.03
+

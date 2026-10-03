@@ -56,11 +56,13 @@ public class CustomModel extends Module {
 
     private static final class_2960 TEXTURE = class_2960.method_60655("dihclient", "model/custom");
     private static final String EXAMPLE = "example_robot.glb";
+    private static final String DEFAULT = "tung_tung_tung_sahur";
+    private static final String[] DEFAULT_FILES = {DEFAULT + ".obj", DEFAULT + ".mtl", DEFAULT + ".png"};
     private static final int MAX_STATUES = 16;
 
     private static CustomModel instance;
 
-    public final StringSetting file = this.text("Model", "File in .minecraft/dihclient/models (.glb .gltf .obj). Empty = first file.", "", 200)
+    public final StringSetting file = this.text("Model", "File in .minecraft/dihclient/models (.glb .gltf .obj). Empty = Tung Tung Tung Sahur.", DEFAULT + ".obj", 200)
             .onChange(this::reload);
     public final EnumSetting<Target> target = this.mode("Replace",
             "Self: only your player · Everyone: all players near you · Nobody: only the statues.", Target.SELF);
@@ -123,6 +125,9 @@ public class CustomModel extends Module {
                 copy("/assets/dihclient/models/" + EXAMPLE, dir.resolve(EXAMPLE));
                 copy("/assets/dihclient/models/README.txt", dir.resolve("README.txt"));
             }
+            for (String f : DEFAULT_FILES) { // the default model is always there, also in folders made by older versions
+                copy("/assets/dihclient/models/" + f, dir.resolve(f));
+            }
         } catch (IOException ignored) {
             // the folder is only a convenience; loading reports what is missing
         }
@@ -152,6 +157,11 @@ public class CustomModel extends Module {
         String want = this.file.get().trim();
         for (Path p : all) {
             if (p.getFileName().toString().equalsIgnoreCase(want)) {
+                return p;
+            }
+        }
+        for (Path p : all) {
+            if (p.getFileName().toString().equalsIgnoreCase(DEFAULT + ".obj")) {
                 return p;
             }
         }

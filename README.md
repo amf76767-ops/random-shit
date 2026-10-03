@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.3.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.3.1**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -121,3 +121,5 @@ bei allen Spielern in der Nähe oder als Statuen. Nur du siehst es (Client-seiti
   aus `addon/src/override`. Beispielmodell: `tools/make_example_model.py`.
 - **Nicht im Spiel getestet.** Das Zeichnen im echten Minecraft (Licht, Tiefe, Verstecken des Spielers) konnte hier nicht laufen.
 
+### 6.3.1
+- **CustomModel** startet mit **Tung Tung Tung Sahur** (`.obj` aus `models/make_tungtung.py`) als Standardmodell. Die drei Dateien werden bei Bedarf in `dihclient/models` kopiert.
