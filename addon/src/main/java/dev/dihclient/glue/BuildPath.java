@@ -1,9 +1,11 @@
 package dev.dihclient.glue;
 
 import dev.dihclient.autobuild.BuildPilot;
+import dev.dihclient.autobuild.RoutePlans;
 import dev.dihclient.module.Category;
 import dev.dihclient.module.Module;
 import dev.dihclient.nav.Nav;
+import dev.dihclient.nav.RoutePlanner;
 import dev.dihclient.render.Render3D;
 import java.util.List;
 import net.minecraft.class_238;
@@ -14,8 +16,34 @@ public class BuildPath extends Module {
         super("BuildPath", Category.RENDER, "Shows the route AutoBuild plans to the next stand spot.");
     }
 
+    private static final int[] LAYER_COLORS = {0xFF4DA6FF, 0xFFB36BFF, 0xFFFF6BB5, 0xFFFFD24D, 0xFF4DFFD2};
+
+    /** The planned route of the whole build: a spot for every stop, joined in the order they are visited, coloured by layer. */
+    private void drawPlan(Render3D r) {
+        RoutePlanner.Result plan = RoutePlans.any();
+        if (plan == null || plan.stops.isEmpty()) {
+            return;
+        }
+        int n = Math.min(plan.stops.size(), 600);
+        RoutePlanner.Stop prev = null;
+        for (int i = 0; i < n; i++) {
+            RoutePlanner.Stop stop = plan.stops.get(i);
+            int color = (LAYER_COLORS[Math.floorMod(stop.layer(), LAYER_COLORS.length)] & 0x00FFFFFF) | 0x99000000;
+            if (prev != null) {
+                r.line(prev.x() + 0.5, prev.y() + 0.05, prev.z() + 0.5, stop.x() + 0.5, stop.y() + 0.05, stop.z() + 0.5, color, true);
+            }
+            r.boxOutline(new class_238(stop.x() + 0.3, stop.y(), stop.z() + 0.3, stop.x() + 0.7, stop.y() + 0.04, stop.z() + 0.7), color, true);
+            prev = stop;
+        }
+    }
+
     @Override
     public void onRender3D(Render3D r) {
+        try {
+            this.drawPlan(r);
+        } catch (Throwable ignored) {
+            // the drawing must never stop the game
+        }
         List<Nav.Cell> path = BuildPilot.routeForPreview();
         if (path == null || path.size() < 2) {
             return;

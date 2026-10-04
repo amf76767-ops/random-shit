@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.15.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.16.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -238,3 +238,9 @@ Aus einem Meteor-Addon übernommen (`addon/src/main/java/dev/dihclient/port/pack
 ### 6.15.0: Zoom
 Aus Anubis 0.9.8 (GPL-3.0). Nicht im Spiel getestet.
 - **Zoom** (Render): Taste halten (Standard **C**, im GUI änderbar) zoomt hinein, das Mausrad ändert den Zoom, die Maus dreht langsamer je näher du bist. Einstellungen: Zoom, Smoothness, Scroll, Lower Sensitivity, Cinematic Camera. Das Modul hat keinen An/Aus-Schalter, die Taste wirkt nur, wenn kein Bildschirm offen ist.
+
+### 6.16.0: AutoBuild plant die ganze Route und hat weniger Optionen
+Nicht im Spiel getestet.
+- **Plan First** (neu, standardmäßig an): Sobald ein Build startet, wird er kurz angehalten und der ganze Weg über alle Ebenen berechnet: die wenigsten Standplätze, von denen die meisten Blöcke erreichbar sind (Reichweite und Sichtlinie), in der kürzesten Reihenfolge. Fertige Ebenen zählen dabei als Boden für die nächsten. Danach folgt der Build diesem Plan; was der Plan nicht abdeckt (übersprungene Blöcke), löst wie vorher der eigene Algorithmus. Eine Meldung zeigt: Stops, Laufweg, geschätzte Zeit und wie viele Blöcke nur mit Pillar oder Gerüst erreichbar sind.
+- **Plan Route** (Knopf): berechnet die Route des geladenen Builds sofort und zeichnet sie in der Welt (ein Punkt je Standplatz, Linien dazwischen, Farbe je Ebene).
+- **Weniger Optionen im Modulmenü:** AutoBuild zeigt dort nur noch die Hauptoptionen (Source, Mode, Order, From/To Layer, Reach, Walk, Smart Path, Plan First, Hotbar Refill, Render, Progress HUD und die Hauptknöpfe). Alles andere steht im **OPTIONS-Reiter des Schematic-Browsers** (Knopf "More Options" im Menü öffnet ihn direkt). Die gespeicherten Werte bleiben.

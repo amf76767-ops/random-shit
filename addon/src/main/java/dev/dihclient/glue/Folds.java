@@ -1,6 +1,7 @@
 package dev.dihclient.glue;
 
 import dev.dihclient.DIHClient;
+import dev.dihclient.gui.SchematicBrowserScreen;
 import dev.dihclient.merge.ConfigMigration;
 import dev.dihclient.module.Module;
 import dev.dihclient.module.ModuleManager;
@@ -168,6 +169,22 @@ public final class Folds {
         Merge.hide(modules, mapArt);
         Merge.hide(modules, model);
         Merge.hide(modules, demolish);
+
+        // plan the whole route before the build, and keep the module menu short (the rest lives in the browser)
+        BoolSetting planFirst = new BoolSetting("Plan First",
+                "Before a build starts, works out the whole route (all layers, the fewest stand spots, the shortest way between them) and then follows it.", true);
+        Merge.addSetting(build, planFirst, false);
+        BuildPlannerModule planner = new BuildPlannerModule(build, planFirst);
+        add(modules, planner);
+        planner.setEnabledSilently(true);
+        Merge.addSetting(build, new ActionSetting("Plan Route",
+                "Works out the route of the loaded build now and draws it in the world (blue, purple, pink ... per layer). Also shows how long it will take.", planner::planNow), false);
+        Merge.addSetting(build, new ActionSetting("More Options", "Opens the schematic browser on its OPTIONS tab: all other AutoBuild options are there.",
+                () -> {
+                    net.minecraft.class_310 mc = net.minecraft.class_310.method_1551();
+                    mc.execute(() -> SchematicBrowserScreen.openOptions(mc.field_1755, build));
+                }), false);
+        AdvancedOptions.apply(build, AdvancedOptions.AUTOBUILD_MAIN);
     }
 
     private static void blockEsp(ModuleManager modules) throws ReflectiveOperationException {

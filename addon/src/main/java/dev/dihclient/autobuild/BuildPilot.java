@@ -237,12 +237,18 @@ public final class BuildPilot {
                 for (int[] b : open) {
                     openKeys.add(Nav.key(b[0], b[1], b[2]));
                 }
-                StandPlanner.Choice c = StandPlanner.best(region, open, TERRAIN, Math.max(2.5, s.reach - 0.4), EYE, 0.12,
-                        cell -> n.avoid.contains(Nav.key(cell.x, cell.y, cell.z)) || openKeys.contains(Nav.key(cell.x, cell.y, cell.z))
-                                || openKeys.contains(Nav.key(cell.x, cell.y + 1, cell.z)));
-                if (c != null) {
-                    goal = c.cell();
+                // the planned route first (see BuildPlannerModule), the own choice for what it does not cover
+                goal = RoutePlans.nextStop((BuildPlan) Priv.PLAN.get(rt), Priv.LAYER.getInt(rt), openKeys, region, n.avoid);
+                if (goal != null) {
                     n.covers = true;
+                } else {
+                    StandPlanner.Choice c = StandPlanner.best(region, open, TERRAIN, Math.max(2.5, s.reach - 0.4), EYE, 0.12,
+                            cell -> n.avoid.contains(Nav.key(cell.x, cell.y, cell.z)) || openKeys.contains(Nav.key(cell.x, cell.y, cell.z))
+                                    || openKeys.contains(Nav.key(cell.x, cell.y + 1, cell.z)));
+                    if (c != null) {
+                        goal = c.cell();
+                        n.covers = true;
+                    }
                 }
             }
         }

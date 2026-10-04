@@ -34,6 +34,7 @@ import net.minecraft.class_2338;
 import net.minecraft.class_2415;
 import net.minecraft.class_2470;
 import net.minecraft.class_2561;
+import net.minecraft.class_310;
 import net.minecraft.class_332;
 import net.minecraft.class_437;
 
@@ -67,7 +68,7 @@ public class SchematicBrowserScreen extends class_437 {
    };
    private static final String[][] QUICK_NAMES = new String[][]{
       {"Walk", "WALK"}, {"Smart Path", "SMART PATH"}, {"Pillar Up", "PILLAR"}, {"Human Rotations", "HUMAN"}, {"Restock From Chests", "RESTOCK"},
-      {"Fix Wrong Blocks", "FIX WRONG"}, {"Clear Area", "CLEAR AREA"}
+      {"Fix Wrong Blocks", "FIX WRONG"}, {"Clear Area", "CLEAR AREA"}, {"Plan First", "PLAN FIRST"}
    };
 
    public SchematicBrowserScreen(class_437 var1, AutoBuild var2) {
@@ -98,15 +99,17 @@ public class SchematicBrowserScreen extends class_437 {
       }
    }
 
-   /** For a schematic the short list; for MapArt / Model / Demolish everything that is shown for it. */
+   /**
+    * Every option of AutoBuild that applies to the chosen source. The module menu only shows the main ones; the rest is
+    * hidden there (see AdvancedOptions) and appears here, because this screen is the current one.
+    */
    private List<Setting<?>> currentOptions() {
       Setting<?> source = this.find("Source");
-      if (source == null || source.get().toString().equals("SCHEMATIC")) {
-         return this.curated;
+      List<Setting<?>> out = new ArrayList<>();
+      if (source != null) {
+         out.add(source);
       }
 
-      List<Setting<?>> out = new ArrayList<>();
-      out.add(source);
       for (Setting<?> setting : this.module.settings()) {
          if (setting != source && setting.isVisible()) {
             out.add(setting);
@@ -114,6 +117,13 @@ public class SchematicBrowserScreen extends class_437 {
       }
 
       return out;
+   }
+
+   /** Opens the browser straight on the OPTIONS tab (the module menu points here for the options it does not show). */
+   public static void openOptions(class_437 parent, AutoBuild module) {
+      SchematicBrowserScreen screen = new SchematicBrowserScreen(parent, module);
+      screen.tab = SchematicBrowserScreen.Tab.OPTIONS;
+      class_310.method_1551().method_1507(screen);
    }
 
    private Setting<?> find(String name) {
@@ -604,10 +614,12 @@ public class SchematicBrowserScreen extends class_437 {
             this.button(g, 100 + index, x + w - 58, ry + 2, 50, 14, bool.get() ? "ON" : "OFF", bool.get(), mouseX, mouseY);
          } else if (setting instanceof EnumSetting<?>) {
             this.button(g, 400 + index, x + w - 118, ry + 2, 110, 14, Gfx.trim(setting.displayValue(), 100), false, mouseX, mouseY);
-         } else {
+         } else if (setting instanceof IntSetting || setting instanceof DoubleSetting) {
             this.button(g, 200 + index * 2, x + w - 98, ry + 2, 16, 14, "-", false, mouseX, mouseY);
             Gfx.textCentered(g, setting.displayValue(), x + w - 56, ry + 5, -1);
             this.button(g, 201 + index * 2, x + w - 26, ry + 2, 16, 14, "+", false, mouseX, mouseY);
+         } else {
+            Gfx.text(g, Gfx.trim(setting.displayValue(), 100), x + w - 108, ry + 5, -7564380); // other kinds: edit them in the module menu
          }
       }
 

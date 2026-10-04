@@ -120,4 +120,18 @@ public final class StandPlanner {
         }
         return true;
     }
+
+    /** The open blocks that can really be placed from the cell: within reach and with a clear line from the eyes. */
+    public static List<int[]> coveredBy(Nav.Cell cell, List<int[]> open, Nav.Terrain world, double reach, double eye) {
+        double ex = cell.x + 0.5, ey = cell.y + eye, ez = cell.z + 0.5;
+        double r2 = reach * reach;
+        List<int[]> out = new ArrayList<>();
+        for (int[] b : open) {
+            double dx = b[0] + 0.5 - ex, dy = b[1] + 0.5 - ey, dz = b[2] + 0.5 - ez;
+            if (dx * dx + dy * dy + dz * dz <= r2 && visible(world, ex, ey, ez, b)) {
+                out.add(b);
+            }
+        }
+        return out;
+    }
 }
