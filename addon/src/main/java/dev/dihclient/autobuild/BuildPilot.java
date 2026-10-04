@@ -57,7 +57,12 @@ public final class BuildPilot {
     }
 
     private static Trip trip;
-    private static boolean failedBefore;
+    private static int failures;
+    private static int pausedUntil;
+    /** After the normal search found no way, the next ones look much further (until this tick). */
+    private static int bigUntil;
+    private static int lastGaveUp = -1000;
+    private static int noPlanUntil;
 
     private BuildPilot() {
     }
@@ -72,12 +77,19 @@ public final class BuildPilot {
 
     private static void run(BuildRuntime rt, class_243 target, double reach, boolean layer) {
         boolean handled = false;
-        if (enabled && !failedBefore) {
+        int now = mc.field_1724 == null ? 0 : mc.field_1724.field_6012;
+        if (enabled && now >= pausedUntil) {
             try {
                 handled = drive(rt, target, reach, layer);
             } catch (Throwable t) {
-                failedBefore = true; // once is enough: the old walking takes over for the rest of the session
-                DIHClient.LOG.warn("[DIHClient] smart path failed, using the old walking", t);
+                // not for the rest of the session: the next try is in 10 seconds, and after 5 failures in a row the old walking stays
+                failures++;
+                pausedUntil = failures >= 5 ? Integer.MAX_VALUE : now + 200;
+                trip = null;
+                DIHClient.LOG.warn("[DIHClient] smart path failed (" + failures + "), the old walking takes over for a while", t);
+            }
+            if (handled) {
+                failures = 0;
             }
         }
         if (!handled) {
@@ -90,7 +102,7 @@ public final class BuildPilot {
     private static final class Priv {
         static final Field PLAN = f("plan"), DONE = f("done"), ATTEMPTS = f("attempts"), LAYER = f("layer"), START = f("layerStart"),
                 END = f("layerEnd"), DEFERRED = f("lastDeferred"), SETTINGS = f("lastSettings"), WALKING = f("walking"), STATUS = f("status"),
-                MISSING = f("missing"), TOWER = f("towerBase"), SNEAKING = f("sneaking");
+                MISSING = f("missing"), TOWER = f("towerBase"), SNEAKING = f("sneaking"), STUCK = f("stuckTicks");
         static final Method WALK = m("walkTo", class_243.class, double.class), RELEASE = m("releaseKeys"),
                 SNEAK = m("sneakKey", boolean.class), TOWER_START = m("startTower", BuildRuntime.Settings.class);
 
@@ -119,6 +131,21 @@ public final class BuildPilot {
 
     private static void oldWalk(BuildRuntime rt, class_243 target, double reach) {
         try {
+            // the old walking can climb a wall with support blocks, so it gets a short try; when it only jumps against the wall
+            // (no blocks to climb with, or still stuck after two seconds) it is stopped instead
+            BuildRuntime.Settings cfg = (BuildRuntime.Settings) Priv.SETTINGS.get(rt);
+            boolean canClimb = cfg != null && cfg.supports && Priv.STUCK.getInt(rt) <= 40;
+            if (!canClimb && wallAhead(target)) {
+                // the old walking would run into it and jump against it for ever: stand still and say why
+                Priv.RELEASE.invoke(rt);
+                Priv.STATUS.set(rt, "Blocked by a wall: no way around found");
+                int tick = mc.field_1724.field_6012;
+                if (tick - lastGaveUp > 200) {
+                    lastGaveUp = tick;
+                    DIHClient.LOG.info("[DIHClient] AutoBuild: a wall two blocks high is in the way and no route around it was found");
+                }
+                return;
+            }
             if (legacyWalk == null) {
                 legacyWalk = BuildRuntime.class.getDeclaredMethod("walkTo", class_243.class, double.class);
                 legacyWalk.setAccessible(true);
@@ -127,6 +154,28 @@ public final class BuildPilot {
         } catch (ReflectiveOperationException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    /** True when the next block on the way to the target is a wall the player cannot jump over (feet and head cell both blocked). */
+    private static boolean wallAhead(class_243 target) {
+        class_746 p = mc.field_1724;
+        if (p == null || mc.field_1687 == null) {
+            return false;
+        }
+        double dx = target.field_1352 - p.method_23317(), dz = target.field_1350 - p.method_23321();
+        double len = Math.hypot(dx, dz);
+        if (len < 0.8) {
+            return false;
+        }
+        TERRAIN.reset();
+        int y = (int) Math.floor(p.method_23318() + 0.01);
+        for (double d : new double[]{0.9, 1.5}) {
+            int x = (int) Math.floor(p.method_23317() + dx / len * d), z = (int) Math.floor(p.method_23321() + dz / len * d);
+            if (!TERRAIN.passable(x, y, z) && !TERRAIN.passable(x, y + 1, z) && !TERRAIN.hazard(x, y, z)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** The cells of the route that is being walked (for the path preview), or null. */
@@ -153,10 +202,14 @@ public final class BuildPilot {
             return false; // swimming: the old code knows how to get out of the water
         }
         int tick = p.field_6012;
+        if (tick < noPlanUntil && trip == null) {
+            return false; // nothing was found a moment ago; searching again every tick would only cost frames
+        }
         Trip t = trip;
         if (t == null || t.layerMode != layerMode || tick - t.plannedAt > REPLAN_AFTER || !onPath(t, p) || blockedAhead(t)) {
             t = plan(rt, s, target, reach, layerMode, tick, t);
             if (t == null) {
+                noPlanUntil = tick + 15;
                 return false;
             }
             trip = t;
@@ -212,6 +265,10 @@ public final class BuildPilot {
         }
         Nav.Options o = new Nav.Options();
         o.maxFall = Math.max(1, Math.min(4, s.maxFall > 0 ? s.maxFall : 1));
+        if (tick < bigUntil) { // the normal search found no way before: look much further around walls
+            o.radius = 64;
+            o.maxNodes = 45000;
+        }
         Nav.Region region = Nav.explore(TERRAIN, sx, sy, sz, o);
 
         Trip n = new Trip();
@@ -355,7 +412,11 @@ public final class BuildPilot {
                 Priv.RELEASE.invoke(rt);
                 if (t.replans >= 6) {
                     t.replans = 0;
-                    return false; // the old walking may do better here
+                    if (tick >= bigUntil) {
+                        bigUntil = tick + 1200; // first look further around; that costs a moment, so only for a minute
+                        return true;
+                    }
+                    return false; // even the wide search had nothing: the old walking (which will not run into a wall) takes over
                 }
                 return true;
             }

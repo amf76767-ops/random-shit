@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.16.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.16.1**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -244,3 +244,10 @@ Nicht im Spiel getestet.
 - **Plan First** (neu, standardmäßig an): Sobald ein Build startet, wird er kurz angehalten und der ganze Weg über alle Ebenen berechnet: die wenigsten Standplätze, von denen die meisten Blöcke erreichbar sind (Reichweite und Sichtlinie), in der kürzesten Reihenfolge. Fertige Ebenen zählen dabei als Boden für die nächsten. Danach folgt der Build diesem Plan; was der Plan nicht abdeckt (übersprungene Blöcke), löst wie vorher der eigene Algorithmus. Eine Meldung zeigt: Stops, Laufweg, geschätzte Zeit und wie viele Blöcke nur mit Pillar oder Gerüst erreichbar sind.
 - **Plan Route** (Knopf): berechnet die Route des geladenen Builds sofort und zeichnet sie in der Welt (ein Punkt je Standplatz, Linien dazwischen, Farbe je Ebene).
 - **Weniger Optionen im Modulmenü:** AutoBuild zeigt dort nur noch die Hauptoptionen (Source, Mode, Order, From/To Layer, Reach, Walk, Smart Path, Plan First, Hotbar Refill, Render, Progress HUD und die Hauptknöpfe). Alles andere steht im **OPTIONS-Reiter des Schematic-Browsers** (Knopf "More Options" im Menü öffnet ihn direkt). Die gespeicherten Werte bleiben.
+
+### 6.16.1: AutoBuild springt nicht mehr dauernd gegen Wände
+Nicht im Spiel getestet.
+- Der "Smart Path" gab nach **einem** Fehler für die ganze Sitzung auf und überließ das Laufen der alten Methode (die gegen Wände springt). Jetzt gibt es einen neuen Versuch nach 10 Sekunden (nach 5 Fehlern hintereinander bleibt die alte Methode).
+- Findet die Suche keinen Weg, sucht sie danach eine Minute lang viel weiter (Radius 64, 45 000 Knoten statt 28 und 9 000), bevor die alte Methode übernimmt.
+- Die alte Methode darf eine Wand mit Stützblöcken überklettern. Springt sie nur dagegen (keine Blöcke zum Klettern oder nach 2 Sekunden immer noch fest), bleibt der Spieler stehen und meldet "Blocked by a wall: no way around found" (auch in `latest.log`), statt endlos zu springen.
+- Findet die Suche gar kein Ziel, sucht sie nicht mehr in jedem Tick neu, sondern wartet 15 Ticks.
