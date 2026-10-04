@@ -103,6 +103,7 @@ public final class Folds {
             add(modules, hub); // same name as Blink
         });
         step("Block ESP + Storage ESP + Block Notifier", () -> blockEsp(modules));
+        step("Amethyst Bypass in Sus ChunkFinder", () -> amethyst(modules));
         step("Auto Log + Auto Relog", () -> autoLog(modules));
         step("AutoFlipper", () -> {
             FlipFinder flip = modules.get(FlipFinder.class);
@@ -195,6 +196,23 @@ public final class Folds {
         Merge.addSetting(build, new ActionSetting("Join Team", "Builds with the team whose code is in Team Code, at the same place and the same schematic.", team::join), false);
         Merge.addSetting(build, new ActionSetting("Leave Team", "Leaves the team (the build goes on alone).", team::leave), false);
         AdvancedOptions.apply(build, AdvancedOptions.AUTOBUILD_MAIN);
+    }
+
+    /**
+     * Amethyst Bypass is no module of its own any more: it is the "Amethyst" part of Sus ChunkFinder (the switch keeps its name).
+     * Its settings (Method, Min Cells, Tracer) show there while Amethyst is on, and its finds count as amethyst points.
+     */
+    private static void amethyst(ModuleManager modules) throws ReflectiveOperationException {
+        dev.dihclient.modules.basefinding.SusChunkFinder sus = modules.get(dev.dihclient.modules.basefinding.SusChunkFinder.class);
+        dev.dihclient.port.donutd.AmethystBypassModule bypass = modules.get(dev.dihclient.port.donutd.AmethystBypassModule.class);
+        if (sus == null || bypass == null) {
+            return;
+        }
+        Map<String, String> renamed = Merge.absorb(sus, bypass, "Amethyst", sus.amethyst::get);
+        Merge.hide(modules, bypass);
+        Merge.rule(new ConfigMigration.Rule(bypass.id(), sus.id(), renamed, null, null, null, false, false));
+        Merge.link(sus, sus.amethyst::get, bypass, false);
+        dev.dihclient.modules.basefinding.SusChunkFinder.amethystSource = () -> bypass.isEnabled() ? bypass.perChunk() : null;
     }
 
     private static void blockEsp(ModuleManager modules) throws ReflectiveOperationException {

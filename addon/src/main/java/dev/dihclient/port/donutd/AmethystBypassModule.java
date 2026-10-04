@@ -85,7 +85,7 @@ public final class AmethystBypassModule extends Module {
     private boolean broken;
 
     public AmethystBypassModule() {
-        super("Amethyst Bypass", Category.DONUT, "Shows amethyst geodes hidden by anti-xray.");
+        super("Amethyst Bypass", Category.DONUT, "Shows amethyst geodes hidden by anti-xray. Part of Sus ChunkFinder (its Amethyst switch).");
         this.method.onChange(this::restart);
     }
 
@@ -355,6 +355,29 @@ public final class AmethystBypassModule extends Module {
 
     private static boolean isGeode(class_2680 state) {
         return state.method_27852(class_2246.field_27159) || state.method_27852(class_2246.field_27160);
+    }
+
+    /**
+     * The finds per chunk for Sus ChunkFinder: chunk key -> {points, finds, average y}. Bypass gives one mark per geode chunk
+     * (1 point); Light and ANBS+ Scan give a mark per hidden bud / glow cell (1/4 point each, at most 4 points per chunk).
+     */
+    public java.util.Map<Long, float[]> perChunk() {
+        long[] current = this.hits;
+        java.util.Map<Long, float[]> out = new java.util.HashMap<>();
+        boolean bypass = this.method.is(Method.BYPASS);
+        for (long packed : current) {
+            int x = class_2338.method_10061(packed);
+            int y = class_2338.method_10071(packed);
+            int z = class_2338.method_10083(packed);
+            float[] e = out.computeIfAbsent(class_1923.method_8331(x >> 4, z >> 4), k -> new float[3]);
+            e[1]++;
+            e[2] += y;
+        }
+        for (float[] e : out.values()) {
+            e[2] /= e[1];
+            e[0] = bypass ? e[1] : Math.min(4.0F, e[1] / 4.0F);
+        }
+        return out;
     }
 
     @Override

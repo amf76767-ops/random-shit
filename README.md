@@ -335,3 +335,9 @@ Nicht im Spiel getestet (die Shader sind mit glslangValidator gegen GLSL 330 gep
 - **VisualPack – Sternenhimmel ohne Mond:** Nachts zeichnet der Himmel-Shader jetzt viele weiche Sterne in zwei Größen, leicht bläulich und warm gefärbt, dazu einen schwachen violetten Streifen wie die Milchstraße. Zum Horizont hin werden sie ausgeblendet, tagsüber sind sie weg. Der Mond ist durchsichtig (neuer Schalter **No Moon**). Die Sterne hängen am Schalter **Sky Gradient**.
 - **Neues Modul Shader** (Render): eigener Glanz auf Werkzeugen, Waffen, Rüstung und allem Verzauberten. **Style**: Aurora, Rainbow, Fire, Ice, Gold, Toxic, Galaxy, Crimson; **Strength** = Helligkeit. **Tools** / **Armor**: Diese glänzen auch ohne Verzauberung. Der Stil wird als kleines Resourcepack erzeugt, das über allen anderen liegt. Ein Wechsel lädt die Ressourcen einmal neu.
 - **Hats folgen dem Körper:** Beim Fliegen mit der Elytra, beim Schwimmen und Kriechen kippt Minecraft das Spielermodell nach vorne. Der Hut kippt jetzt genauso mit und bleibt auf dem Kopf, statt über der kleinen Hitbox zu schweben.
+
+### 8.5.0: Amethyst Bypass steckt jetzt im Sus ChunkFinder
+Nicht im Spiel getestet.
+- Das Modul **Amethyst Bypass** ist aus der Liste entfernt. Sein Erkennen ersetzt den Amethyst-Teil von **Sus ChunkFinder**. Der Schalter heißt weiter **Amethyst** (nicht umbenannt).
+- Ist Amethyst an, zählt Sus ChunkFinder keine sichtbaren Amethyst-Cluster mehr (Anti-Xray versteckt sie), sondern nimmt die Funde des Bypass: **Bypass** = 1 Punkt pro Chunk mit Geode, **Light** / **ANBS+ Scan** = 1/4 Punkt pro verstecktem Knospen-/Glühpunkt (höchstens 4 Punkte pro Chunk). Chunks, die nur Amethyst haben, werden auch markiert.
+- Die Einstellungen des alten Moduls (**Method**, **Min Cells**, **Tracer**) stehen jetzt im Sus ChunkFinder unter Amethyst und werden aus alten Configs übernommen. Die Markierungen der Geoden werden weiter gezeichnet, solange Sus ChunkFinder und Amethyst an sind.
