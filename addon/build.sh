@@ -71,4 +71,6 @@ java -cp "$BUILD/tools:$ASM" Patcher "$BASE" "$BUILD/classes" "$OUT" "${VERSION}
 # 5. the base jar must show the known problem, the new jar must not have any
 if java -cp "$BUILD/tools:$ASM" MixinCheck "$BASE" >/dev/null; then echo "note: base jar has no mixin problem any more"; fi
 java -cp "$BUILD/tools:$ASM" MixinCheck "$OUT"
+# every mixin of the add-on must find its target in the real game (a failing mixin would stop the game from starting)
+[ -n "$MC_INT" ] && java -cp "$ASM" tools/MixinTargets.java "$BUILD/classes" "$BUILD/override" "$BASE" "$MC_INT"
 echo "built $OUT"
