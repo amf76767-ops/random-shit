@@ -406,12 +406,14 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
             if (b == 2) {
                 this.choose(m);
                 this.binding = true;
-            } else if (b == 1 && m.isToggleable()) {
-                m.toggle();
-                DIHClient.config().markDirty();
-            } else {
+            } else if (b == 1 || !m.isToggleable()) {
+                // right click: the settings of the module
                 this.choose(m);
                 this.sound();
+            } else {
+                // left click: switch it on / off, like in the other GUIs
+                m.toggle();
+                DIHClient.config().markDirty();
             }
         });
         if (over) {
@@ -696,7 +698,7 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
 
     private void drawBottom(class_332 g) {
         int y = this.sh - 20;
-        Gfx.text(g, "Click: select · Right click: switch · Middle click: bind · Type to search", 14.0F, y + 5.0F, this.c(DIMMER), 0.75F);
+        Gfx.text(g, "Left click: switch · Right click: settings · Middle click: bind · Type to search", 14.0F, y + 5.0F, this.c(DIMMER), 0.75F);
         String label = "✎ HUD Editor";
         int w = Gfx.width(label) + 16;
         int x = this.sw - 12 - w;

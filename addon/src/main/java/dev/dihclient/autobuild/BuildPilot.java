@@ -64,6 +64,22 @@ public final class BuildPilot {
     private static int lastGaveUp = -1000;
     private static int noPlanUntil;
 
+    // ---- stalls: too long at one spot -> park the blocks around it for a while, work elsewhere, come back later
+    private static final int STALL_SPOT_TICKS = 140;
+    private static final int STALL_DONE_TICKS = 900;
+    private static final double PARK_RADIUS = 6.0;
+    /** Index of a plan block -> tick until which the pilot leaves it alone. */
+    private static final Map<Integer, Integer> PARKED = new java.util.HashMap<>();
+    private static Object parkedPlan;
+    private static int parkRounds;
+    private static int lastCall = -1000;
+    private static int lastDone = -1;
+    private static int anchorTick;
+    private static int doneTick;
+    private static double anchorX;
+    private static double anchorY;
+    private static double anchorZ;
+
     private BuildPilot() {
     }
 
@@ -78,6 +94,13 @@ public final class BuildPilot {
     private static void run(BuildRuntime rt, class_243 target, double reach, boolean layer) {
         boolean handled = false;
         int now = mc.field_1724 == null ? 0 : mc.field_1724.field_6012;
+        if (layer && enabled) {
+            try {
+                stallCheck(rt, target, now);
+            } catch (Throwable t) {
+                DIHClient.LOG.warn("[DIHClient] AutoBuild stall check failed", t);
+            }
+        }
         if (enabled && now >= pausedUntil) {
             try {
                 handled = drive(rt, target, reach, layer);
@@ -93,8 +116,108 @@ public final class BuildPilot {
             }
         }
         if (!handled) {
-            oldWalk(rt, target, reach);
+            oldWalk(rt, layer ? unparkedTarget(rt, target) : target, reach);
         }
+    }
+
+    /** While blocks are parked, even the old walking aims at the nearest block that is not. */
+    private static class_243 unparkedTarget(BuildRuntime rt, class_243 target) {
+        if (PARKED.isEmpty() || mc.field_1724 == null) {
+            return target;
+        }
+        try {
+            class_243 best = target;
+            double bestD = Double.MAX_VALUE;
+            for (int[] b : openBlocks(rt)) {
+                class_243 c = new class_243(b[0] + 0.5, b[1] + 0.5, b[2] + 0.5);
+                double d = mc.field_1724.method_5707(c);
+                if (d < bestD) {
+                    bestD = d;
+                    best = c;
+                }
+            }
+            return best;
+        } catch (ReflectiveOperationException e) {
+            return target;
+        }
+    }
+
+    /**
+     * Called every tick the build wants to walk. Staying around one spot for several seconds without getting a block done (jumping at a
+     * wall, a block that cannot be placed from anywhere reachable) parks the open blocks around that spot; the pilot then works on the
+     * rest of the layer and comes back to the parked ones later.
+     */
+    private static void stallCheck(BuildRuntime rt, class_243 target, int now) throws ReflectiveOperationException {
+        class_746 p = mc.field_1724;
+        if (p == null) {
+            return;
+        }
+        int done = Priv.DONECOUNT.getInt(rt);
+        boolean fresh = now - lastCall > 60;
+        lastCall = now;
+        if (fresh || done != lastDone) {
+            if (done != lastDone) {
+                parkRounds = 0;
+            }
+            lastDone = done;
+            doneTick = now;
+            anchorTick = now;
+            anchorX = p.method_23317();
+            anchorY = p.method_23318();
+            anchorZ = p.method_23321();
+            return;
+        }
+        if (Math.hypot(p.method_23317() - anchorX, p.method_23321() - anchorZ) > 3.5 || Math.abs(p.method_23318() - anchorY) > 3.0) {
+            anchorTick = now;
+            anchorX = p.method_23317();
+            anchorY = p.method_23318();
+            anchorZ = p.method_23321();
+        }
+        if (now - anchorTick > STALL_SPOT_TICKS || now - doneTick > STALL_DONE_TICKS) {
+            anchorTick = now;
+            doneTick = now;
+            park(rt, target, now);
+        }
+    }
+
+    private static void park(BuildRuntime rt, class_243 target, int now) throws ReflectiveOperationException {
+        List<int[]> open = openBlocks(rt);
+        if (open.isEmpty()) {
+            return;
+        }
+        class_243 center = target;
+        Trip t = trip;
+        if (t != null && t.path != null && !t.path.isEmpty()) {
+            Nav.Cell goal = t.path.get(t.path.size() - 1);
+            center = new class_243(goal.x + 0.5, goal.y + EYE, goal.z + 0.5);
+        }
+        int[] nearest = null;
+        double nearestD = Double.MAX_VALUE;
+        int until = now + Math.min(6000, 1200 * (1 + parkRounds));
+        int parked = 0;
+        for (int[] b : open) {
+            double d = center.method_1022(new class_243(b[0] + 0.5, b[1] + 0.5, b[2] + 0.5));
+            if (d < nearestD) {
+                nearestD = d;
+                nearest = b;
+            }
+            if (d <= PARK_RADIUS) {
+                PARKED.put(b[3], until);
+                parked++;
+            }
+        }
+        if (parked == 0 && nearest != null) {
+            PARKED.put(nearest[3], until);
+            parked = 1;
+        }
+        if (t != null) {
+            t.avoid.add(t.goalKey);
+        }
+        trip = null;
+        noPlanUntil = 0;
+        Priv.RELEASE.invoke(rt);
+        Priv.STATUS.set(rt, "Too long at one spot: moving on, back to " + parked + " blocks later");
+        DIHClient.LOG.info("[DIHClient] AutoBuild: parked " + parked + " blocks that could not be done from here, working elsewhere first");
     }
 
     // ---- reflection into the private parts of BuildRuntime
@@ -102,7 +225,7 @@ public final class BuildPilot {
     private static final class Priv {
         static final Field PLAN = f("plan"), DONE = f("done"), ATTEMPTS = f("attempts"), LAYER = f("layer"), START = f("layerStart"),
                 END = f("layerEnd"), DEFERRED = f("lastDeferred"), SETTINGS = f("lastSettings"), WALKING = f("walking"), STATUS = f("status"),
-                MISSING = f("missing"), TOWER = f("towerBase"), SNEAKING = f("sneaking"), STUCK = f("stuckTicks");
+                MISSING = f("missing"), DONECOUNT = f("doneCount"), TOWER = f("towerBase"), SNEAKING = f("sneaking"), STUCK = f("stuckTicks");
         static final Method WALK = m("walkTo", class_243.class, double.class), RELEASE = m("releaseKeys"),
                 SNEAK = m("sneakKey", boolean.class), TOWER_START = m("startTower", BuildRuntime.Settings.class);
 
@@ -290,6 +413,17 @@ public final class BuildPilot {
         if (layerMode) {
             List<int[]> open = openBlocks(rt);
             if (!open.isEmpty()) {
+                if (!PARKED.isEmpty()) {
+                    // BuildRuntime's own target may be a parked block: aim at the nearest block that is not
+                    double best = Double.MAX_VALUE;
+                    for (int[] b : open) {
+                        double d = p.method_5707(new class_243(b[0] + 0.5, b[1] + 0.5, b[2] + 0.5));
+                        if (d < best) {
+                            best = d;
+                            target = new class_243(b[0] + 0.5, b[1] + 0.5, b[2] + 0.5);
+                        }
+                    }
+                }
                 Set<Long> openKeys = new HashSet<>();
                 for (int[] b : open) {
                     openKeys.add(Nav.key(b[0], b[1], b[2]));
@@ -357,15 +491,33 @@ public final class BuildPilot {
         if (plan == null || layer < 0 || start == null || layer >= start.length || start[layer] < 0) {
             return out;
         }
+        if (plan != parkedPlan) {
+            parkedPlan = plan;
+            PARKED.clear();
+            parkRounds = 0;
+        }
+        int tick = mc.field_1724 == null ? 0 : mc.field_1724.field_6012;
+        PARKED.values().removeIf(until -> until <= tick);
+        boolean skippedParked = false;
         for (int i = start[layer]; i < end[layer] && out.size() < 8000; i++) {
             if (done[i] || attempts[i] >= 1000 || deferred.contains(i)) {
+                continue;
+            }
+            if (PARKED.containsKey(i)) {
+                skippedParked = true;
                 continue;
             }
             BuildPlan.Planned b = plan.blocks.get(i);
             if (!missing.isEmpty() && missing.containsKey(BuildPlan.itemOf(b.state()))) {
                 continue;
             }
-            out.add(new int[]{b.pos().method_10263(), b.pos().method_10264(), b.pos().method_10260()});
+            out.add(new int[]{b.pos().method_10263(), b.pos().method_10264(), b.pos().method_10260(), i});
+        }
+        if (out.isEmpty() && skippedParked) {
+            // nothing else is left: try the parked ones again, for longer each time
+            PARKED.clear();
+            parkRounds++;
+            return openBlocks(rt);
         }
         return out;
     }

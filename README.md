@@ -277,3 +277,8 @@ Nicht im Spiel getestet.
   - **Rechts:** Titel des gewählten Moduls, Trennlinie, darunter die Einstellungen als Zeilen (graues Symbol, weißer Name, rundes Feld rechts, zum Beispiel `Inter`). Enum = Klick wechselt (Rechtsklick zurück), Zahl = Feld mit Füllung, ziehen, Farbe = Feld mit Farbwähler, Text = Feld zum Tippen, Liste = öffnet den Ziel-Auswahlbildschirm. Ganz oben stehen **Keybind** und **Toast**.
   - **Oben:** Kategorien als Reiter und das Suchfeld (Tippen sucht auch ohne Klick). Unten rechts **HUD Editor**.
   - Config-Leiste (Rechts-Shift-Panel unten) und Sounds gehen weiter. **Blur** und **GUI Scale** in den ClickGUI-Einstellungen gelten auch hier. Das Setting **Layout** (Modern/Meteor) gilt für Glass nicht; die anderen Themes bleiben wie sie waren.
+
+### 6.19.1: Glass-GUI Klicks getauscht, AutoBuild wechselt den Platz
+Nicht im Spiel getestet.
+- **Glass-GUI:** Linksklick auf eine Karte schaltet das Modul ein/aus, Rechtsklick öffnet die Einstellungen (wie in den anderen GUIs). Mittelklick belegt weiter die Taste, der Schalter und das Zahnrad bleiben.
+- **AutoBuild:** Bleibt der Bau länger an einer Stelle hängen (über 7 Sekunden im Umkreis von 3,5 Blöcken ohne neuen fertigen Block, oder 45 Sekunden ohne Fortschritt), werden die offenen Blöcke im Umkreis von 6 Blöcken für eine Weile zurückgestellt. Er baut zuerst den Rest der Ebene und kommt später (nach 1 Minute, bei jedem weiteren Mal länger) zu den zurückgestellten Blöcken zurück. Bleibt nichts anderes übrig, versucht er sie sofort wieder. Die Meldung im Status lautet "Too long at one spot: moving on", und im `latest.log` steht, wie viele Blöcke es waren. Auch die alte Laufmethode zielt in dieser Zeit auf den nächsten nicht zurückgestellten Block.
