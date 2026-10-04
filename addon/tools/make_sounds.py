@@ -28,7 +28,36 @@ def fade(x, ms=3):
     k = int(SR * ms / 1000)
     x = x.copy(); x[-k:] *= np.linspace(1, 0, k); return x
 
+def bell(freqs, amps, decays, dur, attack=0.0006, start=0.0):
+    n = int(SR * dur)
+    t = np.arange(n) / SR
+    x = np.zeros(n)
+    for f, a, d in zip(freqs, amps, decays):
+        x += a * np.sin(2 * np.pi * f * t) * np.exp(-t * d)
+    x *= np.minimum(1.0, t / attack)
+    if start > 0:
+        x = np.concatenate([np.zeros(int(SR * start)), x])
+    return x
+
+def glass_note(f, dur=0.34, start=0.0):
+    # glass is not a clean tone: the upper partials are not whole multiples of the base
+    return bell([f, f * 2.76, f * 5.40, f * 8.93], [1.0, 0.38, 0.14, 0.05], [11, 22, 38, 60], dur, start=start)
+
+def mix(*parts):
+    n = max(len(p) for p in parts)
+    out = np.zeros(n)
+    for p in parts:
+        out[:len(p)] += p
+    return out
+
+rng = np.random.default_rng(7)
+tick_noise = rng.standard_normal(int(SR * 0.004)) * np.exp(-np.arange(int(SR * 0.004)) / (SR * 0.0008))
+
 sounds = {
+    # glass set (GUI sound set "Glass"): a soft tap, a rising pair, a falling pair
+    "glass_click": norm(fade(mix(bell([3300, 5200, 7600], [1.0, 0.5, 0.22], [95, 130, 170], 0.1), np.concatenate([tick_noise * 0.25, np.zeros(10)])), 6), 0.5),
+    "glass_on": norm(fade(mix(glass_note(1318.5, 0.42), glass_note(1975.5, 0.42, start=0.065)), 25), 0.55),
+    "glass_off": norm(fade(mix(glass_note(1046.5, 0.3), glass_note(698.5, 0.3, start=0.055)), 20), 0.45),
     # kurzes, weiches Tick
     "click": norm(fade(tone(1900, 0.05, (1.0, 0.25), glide=1500))),
     # zwei steigende Töne

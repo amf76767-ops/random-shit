@@ -1,4 +1,19 @@
 {
+  "ui.glass_click": {
+    "sounds": [
+      "dihclient:ui/glass_click"
+    ]
+  },
+  "ui.glass_on": {
+    "sounds": [
+      "dihclient:ui/glass_on"
+    ]
+  },
+  "ui.glass_off": {
+    "sounds": [
+      "dihclient:ui/glass_off"
+    ]
+  },
   "ui.click": {
     "sounds": [
       "dihclient:ui/click"

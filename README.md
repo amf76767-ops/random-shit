@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.17.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.18.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -260,3 +260,8 @@ Nicht im Spiel getestet.
   - Auf den anderen Accounts (Alts) den Code unter *Team Code* eintragen und *Join Team* drücken. Sie bauen dasselbe Schematic an derselben Stelle.
   - Die Arbeit wird in Streifen geteilt (einer pro Mitglied, entlang der längeren Seite, alle Ebenen). Ist ein Mitglied mit seinem Streifen fertig, baut es den Rest des ganzen Schematics mit. Kommt jemand dazu oder geht, werden die Streifen neu aufgeteilt.
   - Die Spiele finden sich über einen Ordner im Benutzerverzeichnis (`~/.dihclient/teams`). **Es geht nur auf demselben Computer** und es wird nichts über das Netzwerk gesendet. Beitreten geht nur auf demselben Server und in derselben Dimension, und die Schematic-Datei muss dieselbe sein (Prüfsumme).
+
+### 6.18.0: Glass-Theme und neue GUI-Sounds
+Nicht im Spiel getestet.
+- **Theme "Glass"** (ClickGUI → Theme, beide Layouts): durchsichtige dunkle Flächen über dem weichgezeichneten Spiel, weißer Text, runde Ecken, weiche Blau-Violett-Akzente, sehr leichter Schleier. Mit **Blur** an sieht es am besten aus (Blur steht in den ClickGUI-Einstellungen).
+- **Sound Set** (neu, ClickGUI): **Glass** (Standard) mit einem kurzen Glas-Tipp beim Klicken, einem steigenden Zweiklang beim Einschalten und einem fallenden beim Ausschalten, oder **Soft** (die alten Sounds). Die Klänge entstehen im Code (`addon/tools/make_sounds.py`): Glas hat Obertöne, die keine ganzzahligen Vielfachen sind, daher der "gläserne" Klang. "Click Sound" und "Click Pitch" gelten für beide Sets.
