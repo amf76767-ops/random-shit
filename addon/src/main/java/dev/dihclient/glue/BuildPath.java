@@ -35,6 +35,25 @@ public class BuildPath extends Module {
             r.boxOutline(new class_238(stop.x() + 0.3, stop.y(), stop.z() + 0.3, stop.x() + 0.7, stop.y() + 0.04, stop.z() + 0.7), color, true);
             prev = stop;
         }
+        // supports the plan puts under floating parts (yellow) and blocks it cannot reach or support (red), visible through walls
+        int shown = 0;
+        for (int[] b : plan.supports) {
+            if (shown++ > 1500) {
+                break;
+            }
+            class_238 box = new class_238(b[0] + 0.15, b[1] + 0.15, b[2] + 0.15, b[0] + 0.85, b[1] + 0.85, b[2] + 0.85);
+            r.boxFilled(box, 0x33FFD24D, true);
+            r.boxOutline(box, 0xCCFFD24D, true);
+        }
+        shown = 0;
+        for (int[] b : plan.problems) {
+            if (shown++ > 1500) {
+                break;
+            }
+            class_238 box = new class_238(b[0] + 0.05, b[1] + 0.05, b[2] + 0.05, b[0] + 0.95, b[1] + 0.95, b[2] + 0.95);
+            r.boxFilled(box, 0x44FF3B3B, true);
+            r.boxOutline(box, 0xEEFF3B3B, true);
+        }
     }
 
     @Override

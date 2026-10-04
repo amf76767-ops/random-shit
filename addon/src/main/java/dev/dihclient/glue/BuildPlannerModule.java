@@ -175,7 +175,8 @@ public class BuildPlannerModule extends Module {
         int sec = r.estimateSeconds();
         String time = sec >= 90 ? (sec / 60) + " min" : sec + " s";
         String text = "Route ready: " + r.stops.size() + " stops, about " + Math.round(r.walk) + " blocks of walking, ~" + time
-                + (r.unreachable > 0 ? ", " + r.unreachable + " blocks need pillars or scaffolds" : "");
+                + (r.supportCount > 0 ? ", " + r.supportCount + " supports (yellow)" : "")
+                + (r.problems.size() > 0 ? ", " + r.problems.size() + " problem blocks (red): out of reach or floating without ground" : "");
         Notifications.info("AutoBuild", text);
         DIHClient.LOG.info("[DIHClient] AutoBuild {}", text);
     }

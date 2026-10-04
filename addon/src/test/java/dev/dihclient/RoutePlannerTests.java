@@ -114,6 +114,29 @@ public final class RoutePlannerTests {
         RoutePlanner.Result t = run(sky, tower, 4.5);
         check(t.unreachable == 1 && t.stops.isEmpty(), "a block 40 high is unreachable from the ground");
 
+        check(t.problems.size() == 1, "the block 40 high is marked as a problem");
+
+        // a floating block 4 above the ground gets a column of supports down to the ground
+        Flat field = new Flat();
+        List<List<int[]>> floating = new ArrayList<>();
+        List<int[]> fl = new ArrayList<>();
+        fl.add(new int[]{3, 4, 3, 1});
+        fl.add(new int[]{4, 4, 3, 1});
+        floating.add(fl);
+        RoutePlanner.Result fp = run(field, floating, 4.5);
+        check(fp.supportCount == 3, "three supports under the floating pair: " + fp.supportCount);
+        check(fp.floating == 2, "two floating blocks: " + fp.floating);
+        check(fp.problems.isEmpty(), "no problem when supports can reach the ground");
+        int fc = 0;
+        for (RoutePlanner.Stop st : fp.stops) {
+            fc += st.blocks().length;
+        }
+        check(fc == 5 && fp.unreachable == 0, "the blocks and their supports are all covered: " + fc);
+
+        // blocks that touch the ground need no support
+        RoutePlanner.Result grounded = run(new Flat(), box(5, 5, 4, 4, 1), 4.5);
+        check(grounded.supportCount == 0 && grounded.problems.isEmpty(), "blocks on the ground need no supports");
+
         // a start that is not standable fails clearly
         Flat bad = new Flat();
         RoutePlanner.Job job = new RoutePlanner.Job(bad, 0, 5, 0, box(5, 5, 4, 4, 1), List.of(0), 4.5, 1.62, 3);

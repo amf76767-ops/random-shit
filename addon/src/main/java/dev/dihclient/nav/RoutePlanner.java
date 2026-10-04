@@ -31,6 +31,21 @@ public final class RoutePlanner {
         public double walk;
         public boolean finished;
         public String failure;
+        /** Blocks no spot reaches, and floating blocks with no ground to put a support on: {x, y, z}. At most {@link #MAX_MARKS}. */
+        public final List<int[]> problems = new ArrayList<>();
+        /** Support blocks the plan puts under floating parts (placed first, from the same stops): {x, y, z}. */
+        public final List<int[]> supports = new ArrayList<>();
+        public int supportCount;
+        public int floating;
+        public static final int MAX_MARKS = 3000;
+
+        private final Set<Long> problemKeys = new HashSet<>();
+
+        void problem(int[] b) {
+            if (this.problems.size() < MAX_MARKS && this.problemKeys.add(Nav.key(b[0], b[1], b[2]))) {
+                this.problems.add(new int[]{b[0], b[1], b[2]});
+            }
+        }
 
         /** Seconds, a rough guess: walking at about four blocks a second and some placing time. */
         public int estimateSeconds() {
@@ -49,6 +64,8 @@ public final class RoutePlanner {
         private final double eye;
         private final Nav.Options options = new Nav.Options();
         private final Set<Long> solid = new HashSet<>();
+        /** Every block of the finished layers (solid or not): something a new block can be placed against. */
+        private final Set<Long> placedAll = new HashSet<>();
         private final Nav.Terrain world;
         private final Result result = new Result();
         private int li;
@@ -112,6 +129,7 @@ public final class RoutePlanner {
                     for (int[] b : this.open) {
                         this.openKeys.add(Nav.key(b[0], b[1], b[2]));
                     }
+                    this.planSupports();
                     this.moved = false;
                 }
                 if (this.open.isEmpty()) {
@@ -123,11 +141,123 @@ public final class RoutePlanner {
             return true;
         }
 
+        /** Something a block can be placed against. */
+        private boolean anchor(int x, int y, int z) {
+            long k = Nav.key(x, y, z);
+            return this.placedAll.contains(k) || this.world.support(x, y, z) || !this.world.passable(x, y, z);
+        }
+
+        private static final int[][] SIDES = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
+        private static final int MAX_SUPPORT_DEPTH = 6;
+
+        /**
+         * Blocks of this layer that touch nothing (not the world, not an earlier layer, not a block of this layer that touches
+         * something) cannot be placed. For every such floating group a column of supports is planned under its lowest block down to
+         * the ground; the supports become open blocks of this layer, so the stops are chosen to reach them as well. A group with no
+         * ground within {@value #MAX_SUPPORT_DEPTH} blocks is a problem (it needs scaffolding).
+         */
+        private void planSupports() {
+            Set<Long> anchored = new HashSet<>();
+            List<int[]> todo = new ArrayList<>();
+            java.util.Map<Long, int[]> byKey = new java.util.HashMap<>();
+            for (int[] b : this.open) {
+                byKey.put(Nav.key(b[0], b[1], b[2]), b);
+            }
+            for (int[] b : this.open) {
+                for (int[] d : SIDES) {
+                    if (this.anchor(b[0] + d[0], b[1] + d[1], b[2] + d[2])) {
+                        anchored.add(Nav.key(b[0], b[1], b[2]));
+                        todo.add(b);
+                        break;
+                    }
+                }
+            }
+            while (!todo.isEmpty()) {
+                int[] b = todo.remove(todo.size() - 1);
+                for (int[] d : SIDES) {
+                    long k = Nav.key(b[0] + d[0], b[1] + d[1], b[2] + d[2]);
+                    int[] n = byKey.get(k);
+                    if (n != null && anchored.add(k)) {
+                        todo.add(n);
+                    }
+                }
+            }
+            if (anchored.size() == this.open.size()) {
+                return;
+            }
+            Set<Long> seen = new HashSet<>(anchored);
+            List<int[]> added = new ArrayList<>();
+            for (int[] start : new ArrayList<>(this.open)) {
+                long sk = Nav.key(start[0], start[1], start[2]);
+                if (!seen.add(sk)) {
+                    continue;
+                }
+                // one floating group: find its lowest block
+                List<int[]> group = new ArrayList<>();
+                List<int[]> queue = new ArrayList<>();
+                queue.add(start);
+                int[] low = start;
+                while (!queue.isEmpty()) {
+                    int[] b = queue.remove(queue.size() - 1);
+                    group.add(b);
+                    if (b[1] < low[1]) {
+                        low = b;
+                    }
+                    for (int[] d : SIDES) {
+                        long k = Nav.key(b[0] + d[0], b[1] + d[1], b[2] + d[2]);
+                        int[] n = byKey.get(k);
+                        if (n != null && seen.add(k)) {
+                            queue.add(n);
+                        }
+                    }
+                }
+                this.result.floating += group.size();
+                List<int[]> column = new ArrayList<>();
+                int y = low[1] - 1;
+                boolean grounded = false;
+                for (int i = 0; i < MAX_SUPPORT_DEPTH; i++, y--) {
+                    if (this.anchor(low[0], y, low[2])) {
+                        grounded = true;
+                        break;
+                    }
+                    column.add(new int[]{low[0], y, low[2], 1, 2});
+                    if (this.anchor(low[0], y - 1, low[2]) || this.anchor(low[0] + 1, y, low[2]) || this.anchor(low[0] - 1, y, low[2])
+                            || this.anchor(low[0], y, low[2] + 1) || this.anchor(low[0], y, low[2] - 1)) {
+                        grounded = true;
+                        break;
+                    }
+                }
+                if (!grounded) {
+                    for (int[] b : group) {
+                        this.result.problem(b);
+                    }
+                    continue;
+                }
+                added.addAll(column);
+            }
+            for (int[] b : added) {
+                long k = Nav.key(b[0], b[1], b[2]);
+                if (this.openKeys.add(k)) {
+                    this.open.add(b);
+                    this.total++;
+                    this.result.supportCount++;
+                    if (this.result.supports.size() < Result.MAX_MARKS) {
+                        this.result.supports.add(new int[]{b[0], b[1], b[2]});
+                    }
+                }
+            }
+        }
+
         private void finishLayer() {
             for (int[] b : this.layers.get(this.li)) {
                 if (b.length > 3 && b[3] == 1) {
                     this.solid.add(Nav.key(b[0], b[1], b[2]));
                 }
+                this.placedAll.add(Nav.key(b[0], b[1], b[2]));
+            }
+            for (int[] b : this.result.supports) {
+                this.solid.add(Nav.key(b[0], b[1], b[2]));
+                this.placedAll.add(Nav.key(b[0], b[1], b[2]));
             }
             this.li++;
             this.open = null;
@@ -148,6 +278,9 @@ public final class RoutePlanner {
             Nav.Cell next = this.moved ? null : this.towardsNearest(region);
             if (next == null || (next.x == this.cx && next.y == this.cy && next.z == this.cz)) {
                 this.result.unreachable += this.open.size();
+                for (int[] b : this.open) {
+                    this.result.problem(b);
+                }
                 this.placed += this.open.size();
                 this.open.clear();
                 return;

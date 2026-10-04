@@ -254,11 +254,24 @@ public final class BuildPilot {
 
     private static void oldWalk(BuildRuntime rt, class_243 target, double reach) {
         try {
-            // the old walking can climb a wall with support blocks, so it gets a short try; when it only jumps against the wall
-            // (no blocks to climb with, or still stuck after two seconds) it is stopped instead
+            // in front of a wall two blocks high it never jumps: jumping cannot get over it. With "Pillar" on, the old walking may
+            // pillar up next to the wall (it walks into the wall and then builds a tower); otherwise, or when that does not start
+            // within two seconds, it stands still and says why
             BuildRuntime.Settings cfg = (BuildRuntime.Settings) Priv.SETTINGS.get(rt);
-            boolean canClimb = cfg != null && cfg.supports && Priv.STUCK.getInt(rt) <= 40;
-            if (!canClimb && wallAhead(target)) {
+            boolean wall = wallAhead(target);
+            boolean canPillar = cfg != null && cfg.pillar && Priv.STUCK.getInt(rt) <= 40;
+            if (wall && canPillar) {
+                if (legacyWalk == null) {
+                    legacyWalk = BuildRuntime.class.getDeclaredMethod("walkTo", class_243.class, double.class);
+                    legacyWalk.setAccessible(true);
+                }
+                legacyWalk.invoke(rt, target, reach);
+                if (Priv.TOWER.get(rt) == null) {
+                    mc.field_1690.field_1903.method_23481(false);
+                }
+                return;
+            }
+            if (wall) {
                 // the old walking would run into it and jump against it for ever: stand still and say why
                 Priv.RELEASE.invoke(rt);
                 Priv.STATUS.set(rt, "Blocked by a wall: no way around found");
@@ -575,9 +588,19 @@ public final class BuildPilot {
         }
         boolean up = next.y > p.method_23318() + 0.4;
         boolean ahead = Math.hypot(dx, dz) < 1.6;
+        // a wall two blocks high is never jumped at; the path should not lead into one, so the spot is given up right away
+        boolean wall = wallAhead(new class_243(next.x + 0.5, next.y, next.z + 0.5));
+        if (wall && t.stuck >= 1) {
+            t.avoid.add(t.goalKey);
+            t.replans++;
+            trip = null;
+            Priv.RELEASE.invoke(rt);
+            return true;
+        }
+        boolean stepUp = up && ahead && next.y - Math.floor(p.method_23318() + 0.01) <= 1.0;
         mc.field_1690.field_1894.method_23481(true);
         mc.field_1690.field_1913.method_23481(false);
-        mc.field_1690.field_1903.method_23481(p.method_24828() && ((up && ahead) || t.stuck >= 2));
+        mc.field_1690.field_1903.method_23481(p.method_24828() && !wall && (stepUp || t.stuck >= 2));
         Priv.WALKING.setBoolean(rt, true);
         Priv.STATUS.set(rt, t.covers ? "Walking to the next stand spot" : "Walking towards the build");
         return true;

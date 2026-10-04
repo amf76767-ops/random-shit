@@ -312,3 +312,9 @@ Nicht im Spiel getestet, ich konnte die FPS hier nicht messen. Ich vermute die g
 - Glatte Ecken haben pro Bild ein Budget (ca. 3000 kleine Flächen); ist es verbraucht, werden die restlichen Ecken einfach gezeichnet. Kaum sichtbare Randpunkte werden weggelassen.
 - Text wird nur einmal aufbereitet und dann wiederverwendet (vorher jedes Bild neu).
 - Neues Setting **ClickGUI → Smooth Corners**. Aus = die Ecken der alten Version; **Smooth Font** aus = die Pixelschrift. Mit beiden Schaltern lässt sich herausfinden, was bei dir bremst.
+
+### 8.2.0: AutoBuild springt nicht mehr gegen Wände, Stützen und Problemstellen im Plan
+Nicht im Spiel getestet (der Route-Planer ist mit Tests geprüft).
+- **Kein Springen vor 2 Block hohen Wänden:** Der neue Weg springt nur noch bei echten 1-Block-Stufen. Steht eine Wand (Füße und Kopf blockiert) vor ihm, springt er nicht, gibt diesen Standplatz sofort auf und sucht einen anderen. Die alte Laufmethode springt dort auch nicht mehr: Mit **Pillar** an darf sie neben der Wand einen Turm bauen, sonst bleibt sie stehen und meldet "Blocked by a wall".
+- **Stützen im Plan:** Beim Planen der Route (Plan First / Plan Route) erkennt er Blöcke, die in der Luft schweben (sie berühren weder die Welt noch eine fertige Ebene noch einen anderen Block, der etwas berührt). Für jede schwebende Gruppe plant er eine Stützsäule unter dem tiefsten Block bis zum Boden ein (höchstens 6 Blöcke). Die Standplätze werden so gewählt, dass auch die Stützen erreichbar sind.
+- **Probleme in der Vorschau:** Nach dem Planen zeigt die Vorschau geplante Stützen **gelb** und Problemblöcke **rot** (durch Wände sichtbar). Problemblöcke sind Blöcke, die von keinem Standplatz erreichbar sind, und schwebende Teile ohne Boden für eine Stütze. Die Meldung nach dem Planen nennt beide Zahlen.
