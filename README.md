@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.9.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.9.1**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -192,3 +192,9 @@ Aus Anubis 0.9.8 (GPL-3.0, eigener Client) nach DIH übernommen. Alles ist nur g
 - **Player Bypass** (Basefinding) ersetzt das alte Modul gleichen Namens (Licht-Daten statt Aktivitäts-Alarm; alte Einstellungen werden verworfen). **Prime Chunk Finder** neu.
 - **Anti Vanish**, **Staff List**, **No Inv Leak** (Misc). Staff List nutzt eine fest eingebaute Namensliste und macht keine Netzwerkaufrufe. No Inv Leak: "Stream Only" geht nur unter Windows 10 (2004+), sonst ersetzt es nur Items im Spiel.
 - Technik: `dev.dihclient.port.PacketBus` (empfangene Pakete), neue Mixins in `mixin/port/`, Bau gegen das echte Minecraft (`tools/README-mc-int.txt`), Notizen in `addon/PORTING.md`.
+
+### 6.9.1: Accounts-Menü
+- Der **Accounts**-Knopf im Titelbildschirm tat seit 1.21.9 nichts (der Klick war an der falschen Klasse eingehängt). Jetzt geht er wieder auf und öffnet ein Menü wie bei Meteor: Liste der gespeicherten Logins, **Add account** zeigt die Login-Arten.
+- Login-Arten: **Microsoft** (Code auf microsoft.com/link), **Cracked** (nur ein Name, mit Zufallsname; nur für Offline-Mode-Server und Einzelspieler), **Session token**, **Refresh token**. **Original** springt zurück auf den Account, mit dem das Spiel gestartet wurde. Doppelklick auf einen Eintrag loggt ein.
+- Der Wechsel funktionierte in 1.21.11 nie (der Session-Konstruktor hat 5 statt 6 Parameter). Jetzt werden neben der Session auch die Chat-Signaturschlüssel, der Report-Kontext und die Social-Interactions neu gebaut, sonst kickt ein Online-Server mit "Invalid signature for profile public key". Nicht im Spiel getestet.
+- TheAltening ist nicht dabei: es braucht einen eigenen Auth-Server für das Spiel und lässt sich ohne Test nicht sicher einbauen.
