@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.13.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.14.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -224,3 +224,13 @@ Nicht im Spiel getestet.
 - **Storage ESP** und **Block Notifier** sind Schalter ("Storage", "Notify") in **Block ESP**.
 - **Entfernt:** AutoWalk, Disco Mode, Drunk Mode und BowAimbot. BowAimbot sollte den Pfeil steuerbar machen; das geht nicht, weil ein abgeschossener Pfeil allein vom Server berechnet wird.
 - Gespeicherte Einstellungen und Tasten der zusammengelegten Module werden übernommen.
+
+### 6.14.0: Packet Log + Spawner Reader
+Aus einem Meteor-Addon übernommen (`addon/src/main/java/dev/dihclient/port/packets/`), neu geschrieben für die DIH-Modul-API.
+- **Packet Log** (Misc): liest gesendete und empfangene Pakete und gibt sie in Chat und `latest.log` aus. Nur lesen, nie ändern.
+  Filter *All / Whitelist / Blacklist*; die Paketliste ist ein Text mit Paket-IDs, Teile reichen (`move` trifft alle Move-Pakete).
+  Chatzeilen werden gesammelt und pro Tick nur wenige ausgegeben. Feldnamen erscheinen mit den Intermediary-Namen des laufenden Spiels.
+- **Spawner Reader** (Basefinding): meldet Spawner unter *Max Y* aus Chunk-, Block- und Section-Paketen, je einmal, und
+  zeichnet Chunk-Rahmen oder Strahl. Block-Entity-Pakete haben keinen eigenen Schalter mehr (der Chunk-Scan deckt sie ab).
+- Test: `PacketLogTests` (Listen-Logik). **Nicht gebaut und nicht im Spiel getestet**: in diesem Archiv fehlen `base/dihclient-v5.6.jar`
+  und `/tmp/mc-int.jar`, ohne die `build.sh` nicht läuft.

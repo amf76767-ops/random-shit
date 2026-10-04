@@ -81,7 +81,8 @@ public final class AddonHooks {
                     new dev.dihclient.port.donutc.AntiTrap(),
                     new dev.dihclient.port.donutc.AirStuck(),
                     new dev.dihclient.port.donutd.AmethystBypassModule(),
-                    new dev.dihclient.port.donutd.SpawnerNametagsModule()}) {
+                    new dev.dihclient.port.donutd.SpawnerNametagsModule(),
+                    new dev.dihclient.port.packets.PacketLog(), new dev.dihclient.port.packets.SpawnerReader()}) {
                 add.invoke(modules, m);
             }
         });
