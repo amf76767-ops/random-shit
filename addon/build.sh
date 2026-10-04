@@ -58,7 +58,7 @@ java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.NavTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.MergeTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.EmoteTests
 FASTUTIL=$CACHE/fastutil-8.5.15.jar:$SLF4J
-for t in StaffListTests ToolsTests VanishTests CrystalAuraTests ChunksTests; do
+for t in StaffListTests ToolsTests VanishTests CrystalAuraTests ChunksTests NoInvLeakTests; do
   java -cp "$BUILD/test:$BUILD/classes:$GSON:$FASTUTIL" dev.dihclient.$t
 done
 python3 ../resourcepack/build.py >/dev/null

@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.8.1**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.9.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -183,3 +183,12 @@ Hook in `ConfigManager.apply`), ohne neue Werte zu überschreiben.
 
 ### 6.8.1
 - Die GUI-Themen Larp und DIH aus 6.8.0 sind wieder draußen (der Auftrag waren nur Entwürfe). Die Bilder liegen weiter in `gui-mockups/` (`thema-*.png`, `themen-uebersicht.png`).
+
+### 6.9.0: Module aus dem Anubis-Client
+Aus Anubis 0.9.8 (GPL-3.0, eigener Client) nach DIH übernommen. Alles ist nur gebaut und mit Tests der reinen Logik geprüft, **nicht im Spiel getestet**.
+- **Crystal Aura** und **Crystal Optimizer** (Combat). Crystal Aura pausiert, solange Crystal Macro an ist, und schont DIH-Freunde.
+- **Spear Swap** (Lunge-Speer, die Modul-Taste ist die Lunge-Taste), **FastXP**, **Hover Totem** (Combat).
+- **Spawner Protect** (Misc): baut Spawner in die Enderkiste ab, wenn die Spieler-Abbau-Schwelle erreicht ist. Webhook raus, Meldungen laufen über die DIH-Benachrichtigungen.
+- **Player Bypass** (Basefinding) ersetzt das alte Modul gleichen Namens (Licht-Daten statt Aktivitäts-Alarm; alte Einstellungen werden verworfen). **Prime Chunk Finder** neu.
+- **Anti Vanish**, **Staff List**, **No Inv Leak** (Misc). Staff List nutzt eine fest eingebaute Namensliste und macht keine Netzwerkaufrufe. No Inv Leak: "Stream Only" geht nur unter Windows 10 (2004+), sonst ersetzt es nur Items im Spiel.
+- Technik: `dev.dihclient.port.PacketBus` (empfangene Pakete), neue Mixins in `mixin/port/`, Bau gegen das echte Minecraft (`tools/README-mc-int.txt`), Notizen in `addon/PORTING.md`.
