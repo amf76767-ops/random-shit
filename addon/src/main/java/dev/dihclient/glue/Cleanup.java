@@ -21,7 +21,7 @@ public final class Cleanup {
             "AutoPot", "MaceCombo", "Step", "ReverseStep", "AutoReconnect", "InvManager", "SurvivalAlerts", "MoneyHud",
             "Xray", "Chams", "DamageNumbers", "Waypoints", "DihChat", "Friends", "Enemies", "NewChunks", "BaseTraces",
             "Watchlist", "PacketBuffer", "PacketFly", "HammerTool", "Fullbright", "SafeWalk", "BoatNoClip", "AutoTrade",
-            "PlayerActivity"); // the old "Player Bypass"; the ported Anubis module has that name now
+            "PlayerActivity", "Profiles"); // Profiles: now the config dock in the GUI. PlayerActivity: the old "Player Bypass"; the ported Anubis module has that name now
 
     /** Removed by display name (several modules share a class, like the hotbar macros). Glowstone Macro was only Anchor Macro again. */
     static final Set<String> REMOVED_NAMES = Set.of("Glowstone Macro");

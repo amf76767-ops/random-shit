@@ -83,6 +83,7 @@ public final class AddonHooks {
             }
         });
         step("fold modules", () -> Folds.apply(modules));
+        step("config dock", dev.dihclient.port.configs.Configs::install);
     }
 
     /** Called at the start of every client tick. */
