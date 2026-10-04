@@ -305,3 +305,10 @@ Nicht im Spiel getestet (die Logik des Lag Finders ist mit Tests geprüft).
 - **Spear Swap:** Hat jetzt keinen Schalter mehr und reagiert nur auf seine Taste (vorher musste das Modul zusätzlich eingeschaltet sein, sonst passierte nichts). Ein Speer ohne Lunge wird auch benutzt, außer **Lunge Only** ist an. Kann die Taste nichts tun, sagt eine Meldung warum (kein Speer in der Hotbar, zu wenig Hunger zum Sprinten, im Wasser, Speer noch nicht bereit, ...).
 - **BetterTablist** ist im Style Glass durchsichtig wie der Rest.
 - **Namen entfernt:** Der Name des Ursprungs-Clients steht nirgends mehr (Texte, Quellcode-Kommentare, README, Arbeitsnotizen). Die Lizenzangabe (GPL-3.0) bleibt in den Kopfzeilen. **Discord Presence** zeigte bisher den Namen des fremden Clients als Spielname an: Die Standard-ID und das Standard-Bild sind jetzt leer, das Modul braucht eine eigene Discord-Anwendungs-ID (discord.com/developers) und zeigt sonst nichts.
+
+### 8.1.1: Weniger Last durch die glatte Darstellung
+Nicht im Spiel getestet, ich konnte die FPS hier nicht messen. Ich vermute die glatten Ecken von 8.0.0 als Ursache, denn jede runde Ecke besteht aus vielen kleinen Flächen.
+- Schatten nutzen wieder die einfachen, gestuften Ecken (sie sind durchsichtig, da sieht man den Unterschied nicht).
+- Glatte Ecken haben pro Bild ein Budget (ca. 3000 kleine Flächen); ist es verbraucht, werden die restlichen Ecken einfach gezeichnet. Kaum sichtbare Randpunkte werden weggelassen.
+- Text wird nur einmal aufbereitet und dann wiederverwendet (vorher jedes Bild neu).
+- Neues Setting **ClickGUI → Smooth Corners**. Aus = die Ecken der alten Version; **Smooth Font** aus = die Pixelschrift. Mit beiden Schaltern lässt sich herausfinden, was bei dir bremst.

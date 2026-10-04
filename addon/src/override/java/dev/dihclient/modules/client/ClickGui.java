@@ -28,6 +28,7 @@ public class ClickGui extends Module {
     public final BoolSetting animations = this.bool("Animations", "Smooth transitions, switches and scrolling.", true).onChange(this::applyAnim);
     public final BoolSetting blur = this.bool("Blur", "Blurs the game behind the GUI (the Glass theme looks best with it on).", true);
     public final BoolSetting smoothFont = this.bool("Smooth Font", "Draws the text of the GUI and HUD in a smooth font (Inter) instead of the pixel font of the game.", true);
+    public final BoolSetting smoothCorners = this.bool("Smooth Corners", "Draws rounded corners smooth. Turn it off if the game gets slower with the GUI or HUD on screen.", true);
     public final BoolSetting descriptions = this.bool("Descriptions", "Shows a module's description on its card.", true);
     public final BoolSetting clickSound = this.bool("Click Sound", "Plays a click when toggling.", true).legacy("gui.clickSound");
     public final EnumSetting<SoundSet> soundSet = this.mode(

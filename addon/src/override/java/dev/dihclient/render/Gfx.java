@@ -10,6 +10,7 @@ import java.util.Map;
 import net.minecraft.class_11719;
 import net.minecraft.class_2561;
 import net.minecraft.class_2583;
+import net.minecraft.class_5481;
 import net.minecraft.class_2960;
 import net.minecraft.class_310;
 import net.minecraft.class_327;
@@ -35,7 +36,6 @@ public final class Gfx {
 
     private static final class_2583 STYLE_REGULAR = class_2583.field_24360.method_27704(new class_11719.class_11721(class_2960.method_60655("dihclient", "ui")));
     private static final class_2583 STYLE_BOLD = class_2583.field_24360.method_27704(new class_11719.class_11721(class_2960.method_60655("dihclient", "ui_bold")));
-    private static final Map<String, class_2561> COMPONENTS = new HashMap<>();
     private static ClickGui gui;
 
     private Gfx() {
@@ -83,7 +83,7 @@ public final class Gfx {
                     this.ring[i][c] = (outer - inner) / (float) (n * n);
                 }
                 int f = r;
-                while (f > 0 && this.fill[i][f - 1] >= 0.995F) {
+                while (f > 0 && this.fill[i][f - 1] >= 0.9F) {
                     f--;
                 }
                 this.first[i] = f;
@@ -99,6 +99,88 @@ public final class Gfx {
             c = CORNERS[r] = new Corner(r);
         }
         return c;
+    }
+
+    // ---- the cheap stepped corners of the 5.6 client: used for shadows, when "Smooth Corners" is off and when a frame has used up its budget
+    private static final int[][] INSETS = new int[65][];
+
+    private static int inset(int r, int row) {
+        double d = r - row - 0.5;
+        return (int) Math.round(r - Math.sqrt(Math.max(0.0, r * r - d * d)));
+    }
+
+    private static int[] insets(int r) {
+        int[] in = r < INSETS.length ? INSETS[r] : null;
+        if (in == null) {
+            in = new int[r];
+            for (int i = 0; i < r; i++) {
+                in[i] = inset(r, i);
+            }
+            if (r < INSETS.length) {
+                INSETS[r] = in;
+            }
+        }
+        return in;
+    }
+
+    private static int stepRows(class_332 g, int x, int y, int w, int h, int r, int color, boolean bottom) {
+        int[] in = insets(r);
+        int rows = 0;
+        while (rows < r && in[rows] > 0) {
+            rows++;
+        }
+        int i = 0;
+        while (i < rows) {
+            int inset = in[i];
+            int j = i + 1;
+            while (j < rows && in[j] == inset) {
+                j++;
+            }
+            g.method_25294(x + inset, y + i, x + w - inset, y + j, color);
+            if (bottom) {
+                g.method_25294(x + inset, y + h - j, x + w - inset, y + h - i, color);
+            }
+            i = j;
+        }
+        return rows;
+    }
+
+    private static void stepOutline(class_332 g, int x, int y, int w, int h, int r, int color) {
+        int[] in = insets(r);
+        int i = 0;
+        while (i < r) {
+            int inset = in[i];
+            int run = Math.max(1, inset - (i + 1 < r ? in[i + 1] : 0));
+            int j = i + 1;
+            while (j < r && in[j] == inset && Math.max(1, inset - (j + 1 < r ? in[j + 1] : 0)) == run) {
+                j++;
+            }
+            g.method_25294(x + inset, y + i, x + inset + run, y + j, color);
+            g.method_25294(x + w - inset - run, y + i, x + w - inset, y + j, color);
+            g.method_25294(x + inset, y + h - j, x + inset + run, y + h - i, color);
+            g.method_25294(x + w - inset - run, y + h - j, x + w - inset, y + h - i, color);
+            i = j;
+        }
+    }
+
+    /** Smooth corners cost many small fills; each pass (one GuiGraphics) may spend this many, then the cheap corners are used. */
+    private static final int AA_BUDGET = 3000;
+    private static class_332 pass;
+    private static int budget;
+
+    private static boolean smoothCorners(class_332 g, int cost) {
+        if (!corners()) {
+            return false;
+        }
+        if (g != pass) {
+            pass = g;
+            budget = AA_BUDGET;
+        }
+        if (budget < cost) {
+            return false;
+        }
+        budget -= cost;
+        return true;
     }
 
     private static void dot(class_332 g, int x, int y, int color, float cover) {
@@ -120,7 +202,7 @@ public final class Gfx {
             }
             for (int c = 0; c < f; c++) {
                 float cover = k.fill[i][c];
-                if (cover > 0.01F) {
+                if (cover > 0.12F) {
                     dot(g, x + c, y + i, color, cover);
                     dot(g, x + w - 1 - c, y + i, color, cover);
                     if (bottom) {
@@ -140,9 +222,12 @@ public final class Gfx {
             r = Math.max(0, Math.min(r, Math.min(Math.min(w, h) / 2, 64)));
             if (r == 0) {
                 g.method_25294(x, y, x + w, y + h, color);
-            } else {
+            } else if (color >>> 24 >= 40 && smoothCorners(g, r * 8)) {
                 fillRows(g, x, y, w, h, r, color, true);
                 g.method_25294(x, y + r, x + w, y + h - r, color);
+            } else {
+                int rows = stepRows(g, x, y, w, h, r, color, true);
+                g.method_25294(x, y + rows, x + w, y + h - rows, color);
             }
         }
     }
@@ -151,9 +236,12 @@ public final class Gfx {
         r = Math.max(0, Math.min(r, Math.min(Math.min(w, h) / 2, 64)));
         if (r == 0) {
             g.method_25294(x, y, x + w, y + h, color);
-        } else {
+        } else if (color >>> 24 >= 40 && smoothCorners(g, r * 4)) {
             fillRows(g, x, y, w, h, r, color, false);
             g.method_25294(x, y + r, x + w, y + h, color);
+        } else {
+            int rows = stepRows(g, x, y, w, h, r, color, false);
+            g.method_25294(x, y + rows, x + w, y + h, color);
         }
     }
 
@@ -170,11 +258,15 @@ public final class Gfx {
             if (r == 0) {
                 return;
             }
+            if (color >>> 24 < 40 || !smoothCorners(g, r * 6)) {
+                stepOutline(g, x, y, w, h, r, color);
+                return;
+            }
             Corner k = corner(r);
             for (int i = 0; i < r; i++) {
                 for (int c = 0; c < r; c++) {
                     float cover = k.ring[i][c];
-                    if (cover > 0.01F) {
+                    if (cover > 0.12F) {
                         dot(g, x + c, y + i, color, cover);
                         dot(g, x + w - 1 - c, y + i, color, cover);
                         dot(g, x + c, y + h - 1 - i, color, cover);
@@ -197,7 +289,10 @@ public final class Gfx {
         for (int i = size; i > 0; i--) {
             int a = (int) (strength * 60.0F * (1.0F - (float) i / (size + 1)) / size * 2.0F);
             if (a > 0) {
-                rect(g, x - i, y - i + 1, w + i * 2, h + i * 2, r + i, a << 24);
+                // a soft translucent layer needs no smooth edge
+                int rr = Math.max(0, Math.min(r + i, Math.min(w + i * 2, h + i * 2) / 2));
+                int rows = rr == 0 ? 0 : stepRows(g, x - i, y - i + 1, w + i * 2, h + i * 2, rr, a << 24, true);
+                g.method_25294(x - i, y - i + 1 + rows, x + w + i, y - i + 1 + h + i * 2 - rows, a << 24);
             }
         }
     }
@@ -267,24 +362,38 @@ public final class Gfx {
         return g == null || g.smoothFont.get();
     }
 
-    /** The text as a component in the smooth font. A leading "\u00a7l" means the bold cut. */
-    private static class_2561 component(String s) {
-        class_2561 c = COMPONENTS.get(s);
-        if (c == null) {
-            boolean bold = s.startsWith("\u00a7l");
-            c = class_2561.method_43470(bold ? s.substring(2) : s).method_10862(bold ? STYLE_BOLD : STYLE_REGULAR);
-            if (COMPONENTS.size() > 4096) {
-                COMPONENTS.clear();
-            }
-            COMPONENTS.put(s, c);
+    private static boolean corners() {
+        ClickGui g = gui;
+        if (g == null) {
+            g = gui = ModuleManager.of(ClickGui.class);
         }
-        return c;
+        return g == null || g.smoothCorners.get();
+    }
+
+    /** A string ready to draw in the smooth font (a leading "\u00a7l" means the bold cut), with its width. */
+    private record Line(class_5481 text, int width) {
+    }
+
+    private static final Map<String, Line> LINES = new HashMap<>();
+
+    private static Line line(String s) {
+        Line l = LINES.get(s);
+        if (l == null) {
+            boolean bold = s.startsWith("\u00a7l");
+            class_5481 seq = class_2561.method_43470(bold ? s.substring(2) : s).method_10862(bold ? STYLE_BOLD : STYLE_REGULAR).method_30937();
+            l = new Line(seq, font().method_30880(seq));
+            if (LINES.size() > 4096) {
+                LINES.clear();
+            }
+            LINES.put(s, l);
+        }
+        return l;
     }
 
     private static void draw(class_332 g, String s, int x, int y, int color) {
         boolean shadow = textShadow && !Skin.frost();
         if (smooth()) {
-            g.method_51439(font(), component(s), x, y, color, shadow);
+            g.method_51430(font(), line(s).text, x, y, color, shadow);
         } else {
             g.method_51433(font(), s, x, y, color, shadow);
         }
@@ -294,7 +403,7 @@ public final class Gfx {
     public static void drawComponent(class_332 g, class_327 font, class_2561 text, int x, int y, int color, boolean shadow) {
         if (smooth() && text.method_10855().isEmpty()) {
             String plain = text.getString();
-            g.method_51439(font, component(text.method_10866().method_10984() ? "\u00a7l" + plain : plain), x, y, color, shadow);
+            g.method_51430(font, line(text.method_10866().method_10984() ? "\u00a7l" + plain : plain).text, x, y, color, shadow);
         } else {
             g.method_51439(font, text, x, y, color, shadow);
         }
@@ -331,7 +440,7 @@ public final class Gfx {
     }
 
     public static int width(String s) {
-        return smooth() ? font().method_27525(component(s)) : font().method_1727(s);
+        return smooth() ? line(s).width : font().method_1727(s);
     }
 
     public static String trim(String s, int max) {
