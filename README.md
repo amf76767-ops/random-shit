@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.10.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.11.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -204,3 +204,11 @@ Nicht im Spiel getestet.
 - **Config-Dock** statt Modul "Profiles": im DIH-GUI (Rechts-Shift) sitzt unten in der Mitte der Reiter "Configs". Er klappt nach oben auf: beliebig viele Configs mit Namen (speichern, laden, überschreiben, umbenennen, löschen), Doppelklick lädt. Die alten Slots 1 bis 3 erscheinen als "Slot n". "Share code", "Import code" und "Import all" sind jetzt hier. Pro Config lassen sich Server eintragen (**+ This server** oder **+ Address…**); beim Beitritt lädt der Client dann die Config automatisch. Ein Server gehört zu einer Config, bei mehreren Treffern gewinnt der genauere Servername (play.example.net vor example.net). Die Liste steht in `dihclient/configs.json`.
 - **Spotify HUD** (Client): Titel, Künstler, Cover, Fortschritt und synchronisierte Songtexte. Nur Windows (Medien-Sitzung von Windows, Ersatz: Fenstertitel von Spotify). Netzwerk: nur `lrclib.net` für die Texte (Titel, Künstler, Album, Dauer); Schalter "Lyrics Online". Cache in `config/dihclient/lyrics-cache`. Auf Linux und Mac tut das Modul nichts.
 - **Discord Presence** (Client): zeigt "Playing Minecraft" in deinem Discord-Status, nur über den lokalen Discord-Kanal. Server-Adresse standardmäßig **aus**. Es nutzt die Anwendungs-ID des Anubis-Clients (Name im Status: "Anubis Client"); für einen eigenen Namen und ein eigenes Logo unter discord.com/developers eine Anwendung anlegen und ID plus Bildname in den Einstellungen eintragen.
+
+### 6.11.0: Donut-Module und alles auf Englisch
+Nicht im Spiel getestet. Aus Anubis 0.9.8 (GPL-3.0, eigener Client) nach DIH übernommen; DIH hat keine Donut-Kategorie, die Module liegen in der passenden DIH-Kategorie.
+- **Movement:** Donut NoFall, Trident Boost, Air Stuck.
+- **Player / Misc:** Donut Speed Mine, Anti Trap, Auto Relog, Riptide, Trident Util, Fake Stats (Name und Werte leer = unverändert; Anubis-Werbetext als Standard ist raus), Player Detection (Alarme laufen über Discord Alarm).
+- **Render / Basefinding:** Spawner Nametags, Amethyst Bypass (Methoden Bypass / Light / ANBS+ Scan).
+- Auf Servern mit Anti-Cheat (z. B. Grim) sind **Donut NoFall, Trident Util, Trident Boost, Air Stuck und Donut Speed Mine** vermutlich erkennbar. Riptide und Auto Relog sind unauffälliger. Fake Stats und Amethyst Bypass senden nichts.
+- **Alles auf Englisch:** die letzten deutschen Meldungen (VisualPack, Debug-Zeilen, Pack-Beschreibung) sind übersetzt, die deutsche Sprachdatei `de_de.json` wird nicht mehr mitgeliefert. Diese README bleibt deutsch.

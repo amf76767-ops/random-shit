@@ -69,7 +69,19 @@ public final class AddonHooks {
                     new dev.dihclient.port.chunks.PlayerBypass(), new dev.dihclient.port.chunks.PrimeChunkFinder(),
                     new dev.dihclient.port.vanish.AntiVanish(), new dev.dihclient.port.staff.StaffList(), new dev.dihclient.port.noinvleak.NoInvLeakModule(),
                     new dev.dihclient.port.discord.DiscordPresence(),
-                    new dev.dihclient.port.spotify.SpotifyHudModule()}) {
+                    new dev.dihclient.port.spotify.SpotifyHudModule(),
+                    new dev.dihclient.port.donuta.DonutNoFall(),
+                    new dev.dihclient.port.donuta.DonutSpeedMine(),
+                    new dev.dihclient.port.donuta.AutoRelog(),
+                    new dev.dihclient.port.trident.RiptideModule(),
+                    new dev.dihclient.port.trident.TridentUtilModule(),
+                    new dev.dihclient.port.trident.TridentBoostModule(),
+                    new dev.dihclient.port.donutc.FakeStats(),
+                    new dev.dihclient.port.donutc.PlayerDetection(),
+                    new dev.dihclient.port.donutc.AntiTrap(),
+                    new dev.dihclient.port.donutc.AirStuck(),
+                    new dev.dihclient.port.donutd.AmethystBypassModule(),
+                    new dev.dihclient.port.donutd.SpawnerNametagsModule()}) {
                 add.invoke(modules, m);
             }
         });
