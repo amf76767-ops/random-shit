@@ -269,3 +269,11 @@ Nicht im Spiel getestet.
 ### 6.18.1: Absturz beim Start behoben (6.17.0 und 6.18.0)
 - **6.17.0 und 6.18.0 stürzen beim Start ab** (`VerifyError: Expecting a stackmap frame at branch target`): Der Patch für "Dirt zu Gras ist nicht falsch" hat einen Sprung in `BuildRuntime.statusOf` eingebaut, dem die Java-Prüfung ein "Stack-Map-Frame" abverlangt, und das fehlte. 6.18.1 bringt das Frame mit.
 - **Damit das nicht wieder unbemerkt passiert:** `build.sh` prüft jetzt jede Klasse der fertigen Jar so, wie es die JVM beim Spielstart tut (`tools/VerifyClasses.java`; die alte 6.18.0 fällt dabei genau mit diesem Fehler durch), und der Patcher bricht ab, wenn ein von ihm eingefügter Sprung kein Frame hat.
+
+### 6.19.0: Neue Glass-GUI (nach dem Screenshot)
+Nicht im Spiel getestet.
+- **ClickGUI → Theme → Glass** öffnet jetzt ein eigenes Layout statt der alten Fenster: kein Fenster, nur durchsichtige Karten über dem weichgezeichneten Spiel, weißer Text.
+  - **Links:** eine Karte pro Modul (Name, weißer Schalter, Zahnrad). Klick = Modul wählen, Schalter = ein/aus, Rechtsklick = ein/aus, Mittelklick = Taste belegen.
+  - **Rechts:** Titel des gewählten Moduls, Trennlinie, darunter die Einstellungen als Zeilen (graues Symbol, weißer Name, rundes Feld rechts, zum Beispiel `Inter`). Enum = Klick wechselt (Rechtsklick zurück), Zahl = Feld mit Füllung, ziehen, Farbe = Feld mit Farbwähler, Text = Feld zum Tippen, Liste = öffnet den Ziel-Auswahlbildschirm. Ganz oben stehen **Keybind** und **Toast**.
+  - **Oben:** Kategorien als Reiter und das Suchfeld (Tippen sucht auch ohne Klick). Unten rechts **HUD Editor**.
+  - Config-Leiste (Rechts-Shift-Panel unten) und Sounds gehen weiter. **Blur** und **GUI Scale** in den ClickGUI-Einstellungen gelten auch hier. Das Setting **Layout** (Modern/Meteor) gilt für Glass nicht; die anderen Themes bleiben wie sie waren.

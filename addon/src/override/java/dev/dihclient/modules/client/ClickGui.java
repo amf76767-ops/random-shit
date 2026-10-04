@@ -19,9 +19,9 @@ public class ClickGui extends Module {
     public final EnumSetting<Look> look = this.mode(
             "Theme",
             "Classic: the original look. Neon Circuit: dark with cyan / lime glow. Frost Glass: light, frosted and rounded. Pixel Forge: chunky stone blocks"
-                    + " with bevelled edges. Glass: see-through dark panels over the blurred game with white text. Applies to both layouts, Modern and Meteor"
+                    + " with bevelled edges. Glass: no window, only see-through cards over the blurred game with white text (its own layout, the Layout setting is not used). The other themes apply to both layouts, Modern and Meteor"
                     + " (Accent below is only used by Classic).",
-            Look.CLASSIC);
+            Look.CLASSIC).onChange(MeteorGuiScreen::onLayoutChanged);
     public final ColorSetting accent = this.color("Accent", "Primary accent colour of GUI and HUD.", -1754827).legacy("accent");
     public final ColorSetting accent2 = this.color("Accent 2", "Second colour for gradients.", -30147);
     public final EnumSetting<Theme.ColorMode> colorMode = this.mode(
