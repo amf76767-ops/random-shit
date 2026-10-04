@@ -14,14 +14,10 @@ import dev.dihclient.util.BugReport;
 
 public class ClickGui extends Module {
     public final EnumSetting<Layout> layout = this.mode(
-            "Layout", "Modern: single window with sidebar. Meteor: one draggable, collapsible panel per category (like Meteor Client).", Layout.MODERN)
-            .onChange(MeteorGuiScreen::onLayoutChanged);
-    public final EnumSetting<Look> look = this.mode(
-            "Theme",
-            "Classic: the original look. Neon Circuit: dark with cyan / lime glow. Frost Glass: light, frosted and rounded. Pixel Forge: chunky stone blocks"
-                    + " with bevelled edges. Glass: no window, only see-through cards over the blurred game with white text (its own layout, the Layout setting is not used). The other themes apply to both layouts, Modern and Meteor"
-                    + " (Accent below is only used by Classic).",
-            Look.CLASSIC).onChange(MeteorGuiScreen::onLayoutChanged);
+            "Style",
+            "Modern: one window with a sidebar. Meteor: one draggable, collapsible panel per category (like Meteor Client). Glass: no window, only"
+                    + " see-through cards over the blurred game with white text.",
+            Layout.MODERN).onChange(MeteorGuiScreen::onLayoutChanged);
     public final ColorSetting accent = this.color("Accent", "Primary accent colour of GUI and HUD.", -1754827).legacy("accent");
     public final ColorSetting accent2 = this.color("Accent 2", "Second colour for gradients.", -30147);
     public final EnumSetting<Theme.ColorMode> colorMode = this.mode(
@@ -41,7 +37,7 @@ public class ClickGui extends Module {
             .visibleWhen(this.clickSound::get);
 
     public ClickGui() {
-        super("ClickGUI", Category.CLIENT, "Look & feel and colour theme of the whole client. Open the GUI with Right Shift (rebind under Controls).");
+        super("ClickGUI", Category.CLIENT, "Style (Modern, Meteor, Glass) and colours of the whole client. Open the GUI with Right Shift (rebind under Controls).");
         this.action("Reset Window", "Centers the ClickGUI window again and resets the Meteor panels.", () -> {
             GuiState.resetLayout();
             MeteorGuiScreen.resetLayout();
@@ -61,16 +57,10 @@ public class ClickGui extends Module {
         return false;
     }
 
+    /** The three styles of the GUI (the name stays Layout because the old classes of the client use it). */
     public enum Layout {
         MODERN,
-        METEOR;
-    }
-
-    public enum Look {
-        CLASSIC,
-        NEON,
-        FROST,
-        PIXEL,
+        METEOR,
         GLASS;
     }
 

@@ -82,9 +82,38 @@ public final class Merge {
     public static void migrate(JsonObject root) {
         try {
             ConfigMigration.apply(root, RULES);
+            styleMigration(root);
         } catch (Throwable t) {
             DIHClient.LOG.warn("[DIHClient] config migration failed", t);
         }
+    }
+
+    /** The ClickGUI had a Layout and a Theme setting; now there is one Style (Modern, Meteor, Glass). A saved Glass theme becomes the Glass style. */
+    private static void styleMigration(JsonObject root) {
+        if (root == null || !root.has("modules") || !root.get("modules").isJsonObject()) {
+            return;
+        }
+        JsonObject modules = root.getAsJsonObject("modules");
+        if (!modules.has("clickgui") || !modules.get("clickgui").isJsonObject()) {
+            return;
+        }
+        JsonObject gui = modules.getAsJsonObject("clickgui");
+        if (!gui.has("settings") || !gui.get("settings").isJsonObject()) {
+            return;
+        }
+        JsonObject settings = gui.getAsJsonObject("settings");
+        if (settings.has("style")) {
+            return;
+        }
+        String theme = settings.has("theme") && settings.get("theme").isJsonPrimitive() ? settings.get("theme").getAsString() : "";
+        String layout = settings.has("layout") && settings.get("layout").isJsonPrimitive() ? settings.get("layout").getAsString() : "";
+        if (theme.equalsIgnoreCase("GLASS")) {
+            settings.addProperty("style", "GLASS");
+        } else if (layout.equalsIgnoreCase("METEOR") || layout.equalsIgnoreCase("MODERN")) {
+            settings.addProperty("style", layout.toUpperCase(java.util.Locale.ROOT));
+        }
+        settings.remove("theme");
+        settings.remove("layout");
     }
 
     /**

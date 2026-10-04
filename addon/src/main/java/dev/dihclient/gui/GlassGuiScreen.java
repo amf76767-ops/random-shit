@@ -118,7 +118,7 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
     /** True when the GUI should be the glass one. */
     public static boolean wanted() {
         ClickGui gui = gui();
-        return gui != null && gui.look.get() == ClickGui.Look.GLASS;
+        return gui != null && gui.layout.get() == ClickGui.Layout.GLASS;
     }
 
     private static ClickGui gui() {

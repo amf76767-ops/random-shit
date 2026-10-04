@@ -5,8 +5,9 @@ import dev.dihclient.modules.client.ClickGui;
 import dev.dihclient.util.ColorUtil;
 
 /**
- * Maps the colours of the normal look to the colours of the chosen theme (Classic is left as it is). Same as in 5.6 plus the
- * Glass theme: see-through dark panels over the blurred game, white text, soft rounded corners.
+ * Maps the colours of the normal look to the glass colours while a screen draws inside {@link #begin()} / {@link #end()} and the
+ * ClickGUI style is Glass (the Modern and Meteor styles keep the normal colours). The other themes of the 5.6 client (Neon, Frost,
+ * Pixel) are gone; the methods the old classes call for them stay and answer "no".
  */
 public final class Skin {
     private static boolean active;
@@ -31,86 +32,33 @@ public final class Skin {
         return g;
     }
 
-    public static ClickGui.Look look() {
+    private static boolean glassStyle() {
         ClickGui g = gui();
-        return g == null ? ClickGui.Look.CLASSIC : g.look.get();
+        return g != null && g.layout.get() == ClickGui.Layout.GLASS;
     }
 
     public static boolean active() {
-        return active && look() != ClickGui.Look.CLASSIC;
+        return active && glassStyle();
     }
 
     public static boolean neon() {
-        return active() && look() == ClickGui.Look.NEON;
+        return false;
     }
 
     public static boolean frost() {
-        return active() && look() == ClickGui.Look.FROST;
+        return false;
     }
 
     public static boolean pixel() {
-        return active() && look() == ClickGui.Look.PIXEL;
+        return false;
     }
 
     public static boolean glass() {
-        return active() && look() == ClickGui.Look.GLASS;
+        return active();
     }
 
     public static int c(int color) {
-        ClickGui.Look look = look();
-        if (look == ClickGui.Look.CLASSIC) {
-            return color;
-        }
-        if (look == ClickGui.Look.GLASS) {
-            return glassColor(color);
-        }
-        boolean neon = look == ClickGui.Look.NEON;
-        boolean frost = look == ClickGui.Look.FROST;
-        switch (color) {
-            case -535555048:
-                return c(-15328992);
-            case -300937196:
-            case -267382764:
-                return c(-233959403);
-            case -233959403:
-                return neon ? -200865268 : (frost ? -253432069 : -12960443);
-            case -16052975:
-                return neon ? -16052205 : (frost ? -855638017 : -13750217);
-            case -15592422:
-                return neon ? -16184048 : (frost ? -1493172225 : -13421252);
-            case -15328992:
-                return neon ? -15656930 : (frost ? -1191182337 : -12105134);
-            case -14868182:
-                return neon ? -15063764 : (frost ? -2892306 : -11184033);
-            case -14341579:
-                return neon ? -14931407 : (frost ? -419430401 : -10723223);
-            case -13881027:
-                return neon ? -15063764 : (frost ? -3615512 : -14737114);
-            case -10788238:
-                return neon ? -10983058 : (frost ? -8548434 : -6644056);
-            case -7564380:
-                return neon ? -7693152 : (frost ? -11903878 : -3157286);
-            case -1446670:
-                return neon ? -1904914 : (frost ? -15260099 : -855310);
-            case 921621:
-                return c(-233959403) & 16777215;
-            case 352321535:
-                return neon ? 402718689 : (frost ? 872415231 : 587202559);
-            case 419430399:
-                return c(352321535);
-            case 587202559:
-                return neon ? -2147418143 : (frost ? -855638017 : -15921648);
-            case 872415231:
-                return c(587202559);
-            case 1090519039:
-                return neon ? -16711711 : (frost ? 1716219856 : -6644056);
-            case 1442840575:
-                return c(1090519039);
-            case 1711276032:
-                return neon ? 1711276032 : (frost ? 1084865753 : 1073741824);
-            default:
-                return color;
-        }
+        return glassStyle() ? glassColor(color) : color;
     }
 
     /** The glass look: dark see-through panels, light see-through "frost" on top of them, white text. */
@@ -163,67 +111,25 @@ public final class Skin {
     }
 
     public static int onCard() {
-        return look() == ClickGui.Look.FROST ? -15720390 : -1;
+        return -1;
     }
 
     public static int accent(double phase) {
         float t = (float) (Math.sin(phase * 6.0 + System.currentTimeMillis() / 1600.0) * 0.5 + 0.5);
-        switch (look()) {
-            case NEON:
-                return ColorUtil.blend(-16711711, -4784325, t);
-            case FROST:
-                return ColorUtil.blend(-12743681, -14628428, t);
-            case PIXEL:
-                return ColorUtil.blend(-11141238, -13654950, t);
-            case GLASS: // soft blue to soft violet; white text stays readable on it
-                return ColorUtil.blend(0xFF7FB8FF, 0xFFC9A8FF, t);
-            default:
-                return 0;
-        }
+        // soft blue to soft violet; white text stays readable on it
+        return ColorUtil.blend(0xFF7FB8FF, 0xFFC9A8FF, t);
     }
 
     public static int dimTop(float f) {
-        switch (look()) {
-            case NEON:
-                return (int) (f * 150.0F) << 24 | 198151;
-            case FROST:
-                return (int) (f * 70.0F) << 24 | 14477562;
-            case PIXEL:
-                return (int) (f * 120.0F) << 24 | 1053720;
-            case GLASS: // the blur does most of the work; only a light veil
-                return (int) (f * 40.0F) << 24 | 0x0A0A14;
-            default:
-                return (int) (f * 112.0F) << 24;
-        }
+        // the blur does most of the work; only a light veil
+        return glassStyle() ? (int) (f * 40.0F) << 24 | 0x0A0A14 : (int) (f * 112.0F) << 24;
     }
 
     public static int dimBottom(float f) {
-        switch (look()) {
-            case NEON:
-                return (int) (f * 185.0F) << 24 | 265228;
-            case FROST:
-                return (int) (f * 130.0F) << 24 | 11978992;
-            case PIXEL:
-                return (int) (f * 170.0F) << 24 | 1839626;
-            case GLASS:
-                return (int) (f * 95.0F) << 24 | 0x050510;
-            default:
-                return (int) (f * 160.0F) << 24;
-        }
+        return glassStyle() ? (int) (f * 95.0F) << 24 | 0x050510 : (int) (f * 160.0F) << 24;
     }
 
     public static int radius(int r) {
-        switch (look()) {
-            case NEON:
-                return Math.min(r, 3);
-            case FROST:
-                return r * 2;
-            case PIXEL:
-                return 0;
-            case GLASS:
-                return r * 2;
-            default:
-                return r;
-        }
+        return glassStyle() ? r * 2 : r;
     }
 }

@@ -282,3 +282,8 @@ Nicht im Spiel getestet.
 Nicht im Spiel getestet.
 - **Glass-GUI:** Linksklick auf eine Karte schaltet das Modul ein/aus, Rechtsklick öffnet die Einstellungen (wie in den anderen GUIs). Mittelklick belegt weiter die Taste, der Schalter und das Zahnrad bleiben.
 - **AutoBuild:** Bleibt der Bau länger an einer Stelle hängen (über 7 Sekunden im Umkreis von 3,5 Blöcken ohne neuen fertigen Block, oder 45 Sekunden ohne Fortschritt), werden die offenen Blöcke im Umkreis von 6 Blöcken für eine Weile zurückgestellt. Er baut zuerst den Rest der Ebene und kommt später (nach 1 Minute, bei jedem weiteren Mal länger) zu den zurückgestellten Blöcken zurück. Bleibt nichts anderes übrig, versucht er sie sofort wieder. Die Meldung im Status lautet "Too long at one spot: moving on", und im `latest.log` steht, wie viele Blöcke es waren. Auch die alte Laufmethode zielt in dieser Zeit auf den nächsten nicht zurückgestellten Block.
+
+### 6.20.0: Nur noch drei GUI-Stile
+Nicht im Spiel getestet.
+- Die Themes **Classic, Neon Circuit, Frost Glass und Pixel Forge** sind entfernt, ebenso das Setting **Theme**. Es bleibt ein Setting **ClickGUI → Style** mit drei Werten: **Modern** (ein Fenster mit Seitenleiste), **Meteor** (ein Panel pro Kategorie) und **Glass** (die neue durchsichtige GUI). Modern und Meteor haben die normalen Farben mit dem einstellbaren **Accent**.
+- Alte Configs werden übernommen: Das alte Layout (Modern/Meteor) wird zum Style, und war als Theme Glass gewählt, wird der Style Glass.
