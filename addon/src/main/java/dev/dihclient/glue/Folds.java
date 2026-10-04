@@ -6,6 +6,13 @@ import dev.dihclient.module.Module;
 import dev.dihclient.module.ModuleManager;
 import dev.dihclient.modules.automation.FlipFinder;
 import dev.dihclient.modules.automation.StashSorter;
+import dev.dihclient.modules.basefinding.BlockNotifier;
+import dev.dihclient.modules.misc.AutoLog;
+import dev.dihclient.modules.movement.Blink;
+import dev.dihclient.modules.render.BlockEsp;
+import dev.dihclient.modules.render.StorageEsp;
+import dev.dihclient.port.donuta.AutoRelog;
+import dev.dihclient.port.donutc.AirStuck;
 import dev.dihclient.modules.movement.ElytraBot;
 import dev.dihclient.modules.player.AutoArmor;
 import dev.dihclient.modules.player.AutoMend;
@@ -85,6 +92,16 @@ public final class Folds {
         step("AutoArmor + Mend", () -> mend(modules));
         step("AutoBuild options", () -> build(modules));
         step("StashSorter", () -> Merge.hide(modules, modules.get(StashSorter.class)));
+        step("Blink + Air Stuck", () -> {
+            Blink blink = modules.get(Blink.class);
+            AirStuck freeze = modules.get(AirStuck.class);
+            Hubs.BlinkHub hub = new Hubs.BlinkHub(blink, freeze);
+            Merge.hide(modules, blink);
+            Merge.hide(modules, freeze);
+            add(modules, hub); // same name as Blink
+        });
+        step("Block ESP + Storage ESP + Block Notifier", () -> blockEsp(modules));
+        step("Auto Log + Auto Relog", () -> autoLog(modules));
         step("AutoFlipper", () -> {
             FlipFinder flip = modules.get(FlipFinder.class);
             Merge.alias(modules, "flipfinder", flip);
@@ -151,5 +168,34 @@ public final class Folds {
         Merge.hide(modules, mapArt);
         Merge.hide(modules, model);
         Merge.hide(modules, demolish);
+    }
+
+    private static void blockEsp(ModuleManager modules) throws ReflectiveOperationException {
+        BlockEsp esp = modules.get(BlockEsp.class);
+        StorageEsp storage = modules.get(StorageEsp.class);
+        BlockNotifier notifier = modules.get(BlockNotifier.class);
+        BoolSetting storageOn = new BoolSetting("Storage", "Also highlights chests, barrels, shulkers and other containers (the old Storage ESP).", false);
+        BoolSetting notifyOn = new BoolSetting("Notify", "Tells you once when selected blocks or entity types show up (the old Block Notifier).", false);
+        Merge.addSetting(esp, storageOn, false);
+        Map<String, String> s = Merge.absorb(esp, storage, "Storage", storageOn::get);
+        Merge.addSetting(esp, notifyOn, false);
+        Map<String, String> n = Merge.absorb(esp, notifier, "Notify", notifyOn::get);
+        Merge.rule(new ConfigMigration.Rule(storage.id(), esp.id(), s, "storage", null, null, false, false));
+        Merge.rule(new ConfigMigration.Rule(notifier.id(), esp.id(), n, "notify", null, null, false, false));
+        Merge.link(esp, storageOn::get, storage, false);
+        Merge.link(esp, notifyOn::get, notifier, false);
+        Merge.hide(modules, storage);
+        Merge.hide(modules, notifier);
+    }
+
+    private static void autoLog(ModuleManager modules) throws ReflectiveOperationException {
+        AutoLog log = modules.get(AutoLog.class);
+        AutoRelog relog = modules.get(AutoRelog.class);
+        BoolSetting on = new BoolSetting("Relog", "Also leaves and rejoins once when you go below a Y level (the old Auto Relog), for servers that reset something at a certain depth.", false);
+        Merge.addSetting(log, on, false);
+        Map<String, String> m = Merge.absorb(log, relog, "Relog", on::get);
+        Merge.rule(new ConfigMigration.Rule(relog.id(), log.id(), m, "relog", null, null, false, false));
+        Merge.link(log, on::get, relog, false);
+        Merge.hide(modules, relog);
     }
 }

@@ -3,6 +3,7 @@ package dev.dihclient.glue;
 import dev.dihclient.merge.ConfigMigration;
 import dev.dihclient.module.Category;
 import dev.dihclient.module.Module;
+import dev.dihclient.modules.movement.Blink;
 import dev.dihclient.modules.movement.ElytraBot;
 import dev.dihclient.modules.world.AutoMine;
 import dev.dihclient.modules.world.Goto;
@@ -10,6 +11,7 @@ import dev.dihclient.modules.world.SafeRoute;
 import dev.dihclient.modules.world.Scaffold;
 import dev.dihclient.modules.world.SmartBridge;
 import dev.dihclient.modules.world.Tunnel;
+import dev.dihclient.port.donutc.AirStuck;
 import dev.dihclient.setting.BoolSetting;
 import dev.dihclient.setting.EnumSetting;
 import java.util.List;
@@ -96,6 +98,23 @@ public final class Hubs {
             Merge.rule(new ConfigMigration.Rule(smart.id(), this.id(), s, null, "mode", "SMART", true, false));
             Merge.link(this, () -> this.mode.get() == Mode.CLASSIC, classic, true);
             Merge.link(this, () -> this.mode.get() == Mode.SMART, smart, true);
+        }
+    }
+
+    /** Blink + Air Stuck. Keeps the name Blink, so the saved settings of Blink stay where they were. */
+    public static final class BlinkHub extends Hub {
+        public enum Type { BLINK, FREEZE }
+
+        public final EnumSetting<Type> type = this.mode("Type",
+                "Blink: holds your movement packets and releases them later · Freeze: you stay where you are for the server, even mid-air (the old Air Stuck).", Type.BLINK);
+
+        public BlinkHub(Blink blink, AirStuck freeze) throws ReflectiveOperationException {
+            super("Blink", blink.category(), "Holds your movement packets (Blink) or freezes you in place, even mid-air (Freeze).");
+            this.active = () -> this.type.get() == Type.BLINK ? blink : freeze;
+            Merge.absorb(this, blink, "Blink", () -> this.type.get() == Type.BLINK);
+            Merge.rule(new ConfigMigration.Rule(freeze.id(), this.id(), Map.of(), null, "type", "FREEZE", true, false));
+            Merge.link(this, () -> this.type.get() == Type.BLINK, blink, true);
+            Merge.link(this, () -> this.type.get() == Type.FREEZE, freeze, true);
         }
     }
 }

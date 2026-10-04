@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.12.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.13.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -215,3 +215,12 @@ Nicht im Spiel getestet. Aus Anubis 0.9.8 (GPL-3.0, eigener Client) nach DIH üb
 
 ### 6.12.0: Eigene Kategorie "Donut"
 Die Donut-Module haben jetzt ein eigenes Fenster im GUI (neben Basefinding): Air Stuck, Amethyst Bypass, Anti Trap, Anti Vanish, Auto Relog, Donut NoFall, Donut Speed Mine, Fake Stats, Player Detection, Riptide, Spawner Nametags, Spawner Protect, Staff List, Trident Boost, Trident Util. Modul-IDs, gespeicherte Einstellungen und Tasten bleiben gleich (die Kategorie wird nicht gespeichert). Das Fenster bekommt beim ersten Öffnen einen freien Platz rechts neben den anderen. Nicht im Spiel getestet.
+
+### 6.13.0: Module aufgeräumt (zweite Runde)
+Nicht im Spiel getestet.
+- **Auto Relog** ist jetzt ein Schalter "Relog" in **Auto Log** (mit eigener Y-Höhe und Verzögerung).
+- **Hover Totem** ist weg: **Auto Inv Totem** kann das schon (Totem im offenen Inventar per Hover und Taste, plus Hotbar-Slot).
+- **Air Stuck** ist ein Typ von **Blink**: Einstellung "Type" = Blink oder Freeze. Der Name und die gespeicherten Einstellungen von Blink bleiben.
+- **Storage ESP** und **Block Notifier** sind Schalter ("Storage", "Notify") in **Block ESP**.
+- **Entfernt:** AutoWalk, Disco Mode, Drunk Mode und BowAimbot. BowAimbot sollte den Pfeil steuerbar machen; das geht nicht, weil ein abgeschossener Pfeil allein vom Server berechnet wird.
+- Gespeicherte Einstellungen und Tasten der zusammengelegten Module werden übernommen.
