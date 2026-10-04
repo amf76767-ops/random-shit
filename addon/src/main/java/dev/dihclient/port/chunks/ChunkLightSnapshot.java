@@ -22,6 +22,15 @@ public final class ChunkLightSnapshot {
         Arrays.fill(this.sky, LightSectionStatus.UNKNOWN);
     }
 
+    /** Light sections from this index up never count for the base signal (their top is at or above the ceiling). */
+    public int signalSections() {
+        int i = 1;
+        while (i < this.sectionCount + 1 && (this.bottomSectionY + i - 1) * 16 + 15 < BASE_DETECT_CEILING_Y) {
+            i++;
+        }
+        return i;
+    }
+
     public boolean hasBaseSignal() {
         for (int i = 1; i < this.sectionCount + 1; i++) {
             int top = (this.bottomSectionY + i - 1) * 16 + 15;

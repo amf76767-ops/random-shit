@@ -61,6 +61,8 @@ public final class AddonHooks {
             BuildPath path = new BuildPath();
             add.invoke(modules, path);
             path.setEnabledSilently(true); // harmless: draws only while AutoBuild walks
+            // the block finders keep their results up to date from single block changes instead of scanning everything again and again
+            dev.dihclient.port.chunks.BlockUpdates.add(dev.dihclient.scan.BlockScanner::blockChanged);
             dev.dihclient.port.zoom.Zoom zoom = new dev.dihclient.port.zoom.Zoom();
             add.invoke(modules, zoom);
             zoom.setEnabledSilently(true); // the key is read in onTick, the module has no switch

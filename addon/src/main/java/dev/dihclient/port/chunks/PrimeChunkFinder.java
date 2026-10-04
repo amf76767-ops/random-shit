@@ -105,6 +105,7 @@ public final class PrimeChunkFinder extends Module {
     private final PacketBus.Netty nettyListener = this::onPacket;
     private final BlockUpdates.Listener blockListener = this::onBlockUpdate;
     private class_638 lastWorld;
+    private int refreshTicks;
     private long lastToast;
     private int suppressedToasts;
 
@@ -195,7 +196,9 @@ public final class PrimeChunkFinder extends Module {
             this.passedChunks.add(mc.field_1724.method_31476().method_8324());
         }
         this.forgetOldLamps();
-        this.refreshShown(mc.field_1687);
+        if (++this.refreshTicks % 10 == 0) {
+            this.refreshShown(mc.field_1687);
+        }
     }
 
     private void refreshShown(class_638 level) {
@@ -294,8 +297,10 @@ public final class PrimeChunkFinder extends Module {
         }
         int centerX = mc.field_1724.method_31477() >> 4;
         int centerZ = mc.field_1724.method_31479() >> 4;
-        for (int chunkX = centerX - SNAPSHOT_RADIUS; chunkX <= centerX + SNAPSHOT_RADIUS; chunkX++) {
-            for (int chunkZ = centerZ - SNAPSHOT_RADIUS; chunkZ <= centerZ + SNAPSHOT_RADIUS; chunkZ++) {
+        // only as far as chunks can be loaded at all (the view distance), not a fixed 65 x 65 chunks
+        int radius = Math.min(SNAPSHOT_RADIUS, mc.field_1690.method_38521() + 1);
+        for (int chunkX = centerX - radius; chunkX <= centerX + radius; chunkX++) {
+            for (int chunkZ = centerZ - radius; chunkZ <= centerZ + radius; chunkZ++) {
                 Map<Integer, byte[]> sections = this.snapshotChunk(chunkX, chunkZ);
                 if (sections != null) {
                     this.chunkLight.put(ProtectedChunkStore.key(chunkX, chunkZ), sections);
@@ -662,8 +667,9 @@ public final class PrimeChunkFinder extends Module {
         return mc.field_1687.method_32891();
     }
 
+    /** Only the sections below Y 0 are kept and compared: the module looks for light changes there and nowhere else. */
     private int topSection() {
-        return mc.field_1687.method_31597();
+        return Math.min(mc.field_1687.method_31597(), -1);
     }
 
     private void trimChunkCache() {

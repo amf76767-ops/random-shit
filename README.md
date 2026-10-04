@@ -323,3 +323,9 @@ Nicht im Spiel getestet (der Route-Planer ist mit Tests geprüft).
 Nicht im Spiel getestet.
 - **Ursache:** Ein Hopper zeigt in den Block, an den er gesetzt wird. Ein Hopper, der in eine Kiste oder einen anderen Hopper zeigen soll, muss also an diese Kiste oder diesen Hopper geklickt werden. Mit **Sneak Place = Off** (Standard) hat die Platzier-Suche anklickbare Blöcke (Kisten, Hopper, Öfen, Türen ...) nie benutzt, weil der Klick sie öffnen würde. Solche Hopper hatten deshalb keinen gültigen Klick und wurden übersprungen. Silent Rotate ändert daran nichts.
 - **Fix:** Sneak Place **Off** verhält sich jetzt wie **When Needed**: Nur für Klicks auf anklickbare Blöcke wird kurz geschlichen, alles andere bleibt wie vorher.
+
+### 8.3.0: Chunk-Finder schneller
+Nicht im Spiel getestet, ich konnte hier nicht messen.
+- **Alle Block-Finder** (Block ESP, Xray, Spawner Finder, Sus/Tuff Chunk Finder, Block Notifier, Base Traces): Der alte Scanner hat alle geladenen Chunks immer wieder komplett durchsucht und nie aufgehört. Jetzt wird jeder Chunk einmal gescannt. Danach ändert eine Blockänderung nur genau diese eine Stelle in den Ergebnissen. Ein neu geladener Chunk wird gescannt, und einmal pro Minute gibt es zur Sicherheit einen langsamen Durchgang. Die Liste aller Funde wird zwischengespeichert, bis sich etwas ändert.
+- **Prime Chunk Finder:** Merkt und vergleicht nur noch die Abschnitte unter Y 0 (dort sucht er; vorher alle 24 Abschnitte jedes Chunks). Unveränderte Abschnitte werden mit einem schnellen Gesamtvergleich übersprungen statt Byte für Byte. Beim Einschalten liest er nur Chunks in Sichtweite (vorher fest 65 × 65 Chunks). Die angezeigten Chunks werden zweimal pro Sekunde statt in jedem Tick neu bestimmt.
+- **Player Bypass:** Der Licht-Tracker (läuft immer mit) liest nur noch die tiefen Abschnitte, auf die es ankommt (unter Y 62). Die Markierungen werden viermal pro Sekunde statt in jedem Bild neu berechnet.

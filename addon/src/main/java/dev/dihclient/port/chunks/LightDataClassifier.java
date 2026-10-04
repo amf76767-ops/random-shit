@@ -43,12 +43,20 @@ public final class LightDataClassifier {
      * @param out       status per light section, only the touched entries change
      */
     public static void applyTrack(BitSet mask, BitSet emptyMask, List<byte[]> updates, LightSectionStatus[] out) {
+        applyTrack(mask, emptyMask, updates, out, out.length);
+    }
+
+    /**
+     * Same, but only the light sections below {@code classifyBelow} are read (the others only count for the order of the data):
+     * the base signal only looks at the low sections, and reading 2048 bytes of every high section of every packet is wasted work.
+     */
+    public static void applyTrack(BitSet mask, BitSet emptyMask, List<byte[]> updates, LightSectionStatus[] out, int classifyBelow) {
         int next = 0;
         for (int i = 0; i < out.length; i++) {
             if (mask.get(i)) {
                 byte[] payload = next < updates.size() ? updates.get(next) : null;
                 next++;
-                out[i] = classifyPayload(payload);
+                out[i] = i < classifyBelow ? classifyPayload(payload) : LightSectionStatus.NORMAL;
             } else if (emptyMask.get(i)) {
                 out[i] = LightSectionStatus.EMPTY_MASK;
             }

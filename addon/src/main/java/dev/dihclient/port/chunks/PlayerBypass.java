@@ -35,6 +35,9 @@ public final class PlayerBypass extends Module {
 
     private final ChunkAreas chunkAreas = new ChunkAreas();
     private final LongOpenHashSet flagged = new LongOpenHashSet();
+    /** The flagged chunks around the player, worked out 4 times a second instead of every frame. */
+    private long[] drawn = new long[0];
+    private long drawnAt;
 
     public PlayerBypass() {
         super("Player Bypass", Category.BASEFINDING, "Flags chunks with signs of underground player bases from light data.");
@@ -50,6 +53,7 @@ public final class PlayerBypass extends Module {
     protected void onDisable() {
         PlayerBypassLightTracker.setSpottedListener(null);
         this.flagged.clear();
+        this.drawn = new long[0];
     }
 
     @Override
@@ -81,6 +85,7 @@ public final class PlayerBypass extends Module {
         Long2ObjectMap<ChunkLightSnapshot> snapshots = PlayerBypassLightTracker.tracker().snapshots();
         if (snapshots.isEmpty()) {
             this.flagged.clear();
+            this.drawn = new long[0];
             return;
         }
         int color = this.chunkColor.get();
@@ -89,22 +94,29 @@ public final class PlayerBypass extends Module {
         int fillAlpha = Math.max(8, Math.min(255, this.opacity.get() / 3));
         int lineColor = withAlpha(color, Math.round(lineAlpha * colorAlpha));
         int fillColor = withAlpha(color, Math.round(fillAlpha * colorAlpha));
-        int centerX = mc.field_1724.method_31477() >> 4;
-        int centerZ = mc.field_1724.method_31479() >> 4;
-        this.flagged.clear();
-        for (int cx = centerX - RENDER_DISTANCE_CHUNKS; cx <= centerX + RENDER_DISTANCE_CHUNKS; cx++) {
-            for (int cz = centerZ - RENDER_DISTANCE_CHUNKS; cz <= centerZ + RENDER_DISTANCE_CHUNKS; cz++) {
-                long key = ProtectedChunkStore.key(cx, cz);
-                ChunkLightSnapshot snapshot = snapshots.get(key);
-                if (snapshot != null && PlayerBypassLightTracker.tracker().isFlagged(key, snapshot)) {
-                    double x = cx << 4;
-                    double z = cz << 4;
-                    class_238 slab = new class_238(x, MARKER_Y, z, x + 16.0, MARKER_Y + 1.0, z + 16.0);
-                    r.boxFilled(slab, fillColor, true);
-                    r.boxOutline(slab, lineColor, true);
-                    this.flagged.add(key);
+        long now = System.currentTimeMillis();
+        if (now - this.drawnAt > 250L) {
+            this.drawnAt = now;
+            int centerX = mc.field_1724.method_31477() >> 4;
+            int centerZ = mc.field_1724.method_31479() >> 4;
+            this.flagged.clear();
+            for (int cx = centerX - RENDER_DISTANCE_CHUNKS; cx <= centerX + RENDER_DISTANCE_CHUNKS; cx++) {
+                for (int cz = centerZ - RENDER_DISTANCE_CHUNKS; cz <= centerZ + RENDER_DISTANCE_CHUNKS; cz++) {
+                    long key = ProtectedChunkStore.key(cx, cz);
+                    ChunkLightSnapshot snapshot = snapshots.get(key);
+                    if (snapshot != null && PlayerBypassLightTracker.tracker().isFlagged(key, snapshot)) {
+                        this.flagged.add(key);
+                    }
                 }
             }
+            this.drawn = this.flagged.toLongArray();
+        }
+        for (long key : this.drawn) {
+            double x = ProtectedChunkStore.chunkX(key) << 4;
+            double z = ProtectedChunkStore.chunkZ(key) << 4;
+            class_238 slab = new class_238(x, MARKER_Y, z, x + 16.0, MARKER_Y + 1.0, z + 16.0);
+            r.boxFilled(slab, fillColor, true);
+            r.boxOutline(slab, lineColor, true);
         }
         if (this.tracers.get() && !this.flagged.isEmpty()) {
             this.chunkAreas.update(this.flagged);

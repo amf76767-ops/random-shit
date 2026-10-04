@@ -77,7 +77,7 @@ public final class ChunkFlagTracker {
             this.snapshots.put(key, snapshot);
         }
         try {
-            LightDataClassifier.applyTrack(skyMask, skyEmpty, skyNibbles, snapshot.sky);
+            LightDataClassifier.applyTrack(skyMask, skyEmpty, skyNibbles, snapshot.sky, snapshot.signalSections());
         } catch (Throwable t) {
             LOGGER.error("[DIHClient] Player Bypass light ingest failed for chunk {}, {}", chunkX, chunkZ, t);
             return;
@@ -103,7 +103,7 @@ public final class ChunkFlagTracker {
             snapshot = new ChunkLightSnapshot(sectionCount, bottomSectionY);
         }
         try {
-            LightDataClassifier.applyTrack(skyMask, skyEmpty, skyNibbles, snapshot.sky);
+            LightDataClassifier.applyTrack(skyMask, skyEmpty, skyNibbles, snapshot.sky, snapshot.signalSections());
         } catch (Throwable t) {
             LOGGER.error("[DIHClient] Player Bypass light hold failed for chunk {}, {}", chunkX, chunkZ, t);
             return;

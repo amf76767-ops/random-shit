@@ -132,6 +132,9 @@ public final class LightDiff {
     }
 
     public static void compareSection(byte[] previous, byte[] light, int chunkX, int chunkZ, int sectionY, Explainer explainer, Summary summary) {
+        if (previous == light || Arrays.equals(previous, light)) {
+            return; // the usual case: nothing changed (one fast vectorised compare instead of 2048 single steps)
+        }
         for (int i = 0; i < SECTION_BYTES; i++) {
             int was = previous[i] & 0xFF;
             int now = light[i] & 0xFF;
