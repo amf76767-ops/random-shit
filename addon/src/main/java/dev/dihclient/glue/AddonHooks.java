@@ -61,6 +61,9 @@ public final class AddonHooks {
             BuildPath path = new BuildPath();
             add.invoke(modules, path);
             path.setEnabledSilently(true); // harmless: draws only while AutoBuild walks
+            dev.dihclient.port.zoom.Zoom zoom = new dev.dihclient.port.zoom.Zoom();
+            add.invoke(modules, zoom);
+            zoom.setEnabledSilently(true); // the key is read in onTick, the module has no switch
             // modules ported from the Anubis client; Player Bypass takes the place of the old module of the same name
             for (dev.dihclient.module.Module m : new dev.dihclient.module.Module[]{
                     new dev.dihclient.port.crystal.CrystalAuraModule(), new dev.dihclient.port.crystal.CrystalOptimizerModule(),

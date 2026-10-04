@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.14.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.15.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -234,3 +234,7 @@ Aus einem Meteor-Addon übernommen (`addon/src/main/java/dev/dihclient/port/pack
   zeichnet Chunk-Rahmen oder Strahl. Block-Entity-Pakete haben keinen eigenen Schalter mehr (der Chunk-Scan deckt sie ab).
 - Test: `PacketLogTests` (Listen-Logik). **Nicht gebaut und nicht im Spiel getestet**: in diesem Archiv fehlen `base/dihclient-v5.6.jar`
   und `/tmp/mc-int.jar`, ohne die `build.sh` nicht läuft.
+
+### 6.15.0: Zoom
+Aus Anubis 0.9.8 (GPL-3.0). Nicht im Spiel getestet.
+- **Zoom** (Render): Taste halten (Standard **C**, im GUI änderbar) zoomt hinein, das Mausrad ändert den Zoom, die Maus dreht langsamer je näher du bist. Einstellungen: Zoom, Smoothness, Scroll, Lower Sensitivity, Cinematic Camera. Das Modul hat keinen An/Aus-Schalter, die Taste wirkt nur, wenn kein Bildschirm offen ist.
