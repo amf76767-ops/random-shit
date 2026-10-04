@@ -179,6 +179,7 @@ public class BuildPlannerModule extends Module {
                 + (r.problems.size() > 0 ? ", " + r.problems.size() + " problem blocks (red): out of reach or floating without ground" : "");
         Notifications.info("AutoBuild", text);
         DIHClient.LOG.info("[DIHClient] AutoBuild {}", text);
+        dev.dihclient.autobuild.BuildLog.add("route planned: " + text);
     }
 
     private void abort(boolean resume) {

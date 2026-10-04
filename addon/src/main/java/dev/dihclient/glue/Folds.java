@@ -179,6 +179,23 @@ public final class Folds {
         BuildPlannerModule planner = new BuildPlannerModule(build, planFirst);
         add(modules, planner);
         planner.setEnabledSilently(true);
+        Merge.addSetting(build, new ActionSetting("Build Log",
+                "Shows the last lines of what AutoBuild did (trips, stuck spots, walls, parked blocks) and copies them. The whole log is the file build-log.txt in the config folder.",
+                () -> {
+                    java.util.List<String> lines = dev.dihclient.autobuild.BuildLog.last(12);
+                    if (lines.isEmpty()) {
+                        dev.dihclient.util.Notifications.info("AutoBuild", "The build log is empty. File: " + dev.dihclient.autobuild.BuildLog.where());
+                        return;
+                    }
+                    for (String l : lines.subList(Math.max(0, lines.size() - 5), lines.size())) {
+                        dev.dihclient.util.Notifications.info("AutoBuild", l);
+                    }
+                    try {
+                        net.minecraft.class_310.method_1551().field_1774.method_1455(String.join("\n", dev.dihclient.autobuild.BuildLog.last(60)));
+                    } catch (Throwable ignored) {
+                        // no clipboard
+                    }
+                }), false);
         Merge.addSetting(build, new ActionSetting("Plan Route",
                 "Works out the route of the loaded build now and draws it in the world (blue, purple, pink ... per layer). Also shows how long it will take.", planner::planNow), false);
         Merge.addSetting(build, new ActionSetting("More Options", "Opens the schematic browser on its OPTIONS tab: all other AutoBuild options are there.",

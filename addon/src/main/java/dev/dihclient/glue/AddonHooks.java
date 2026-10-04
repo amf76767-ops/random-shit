@@ -89,7 +89,7 @@ public final class AddonHooks {
                     new dev.dihclient.port.donutd.AmethystBypassModule(),
                     new dev.dihclient.port.donutd.SpawnerNametagsModule(),
                     new dev.dihclient.port.packets.PacketLog(), new dev.dihclient.port.packets.SpawnerReader(),
-                    new dev.dihclient.port.lag.LagFinder()}) {
+                    new dev.dihclient.port.lag.LagFinder(), new dev.dihclient.port.profile.FrameProfiler()}) {
                 add.invoke(modules, m);
                 if (m instanceof dev.dihclient.port.tools.SpearSwap) {
                     m.setEnabledSilently(true); // no switch: it only reacts to its key

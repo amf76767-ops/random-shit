@@ -63,6 +63,7 @@ public final class BuildPilot {
     private static int bigUntil;
     private static int lastGaveUp = -1000;
     private static int noPlanUntil;
+    private static int lastSnapshot;
 
     // ---- stalls: too long at one spot -> park the blocks around it for a while, work elsewhere, come back later
     private static final int STALL_SPOT_TICKS = 140;
@@ -115,7 +116,21 @@ public final class BuildPilot {
                 failures = 0;
             }
         }
+        if (now - lastSnapshot >= 200 && mc.field_1724 != null) {
+            lastSnapshot = now;
+            try {
+                BuildLog.add(String.format("status \"%s\" at %.0f %.0f %.0f, layer %d, done %d, parked %d, smart path %s", Priv.STATUS.get(rt),
+                        mc.field_1724.method_23317(), mc.field_1724.method_23318(), mc.field_1724.method_23321(), Priv.LAYER.getInt(rt) + 1,
+                        Priv.DONECOUNT.getInt(rt), PARKED.size(), handled ? "walking" : "not used"));
+            } catch (ReflectiveOperationException ignored) {
+                // no snapshot
+            }
+        }
         if (!handled) {
+            if (layer) {
+                BuildLog.add(!enabled ? "smart path is switched off: old walking" : now < pausedUntil ? "smart path paused after errors: old walking"
+                        : "no way found for now: old walking (it stands still in front of walls)");
+            }
             oldWalk(rt, layer ? unparkedTarget(rt, target) : target, reach);
         }
     }
@@ -218,6 +233,8 @@ public final class BuildPilot {
         Priv.RELEASE.invoke(rt);
         Priv.STATUS.set(rt, "Too long at one spot: moving on, back to " + parked + " blocks later");
         DIHClient.LOG.info("[DIHClient] AutoBuild: parked " + parked + " blocks that could not be done from here, working elsewhere first");
+        BuildLog.add("too long at one spot: parked " + parked + " blocks around " + (int) center.field_1352 + " " + (int) center.field_1351 + " "
+                + (int) center.field_1350 + " for " + (until - now) / 20 + " s, round " + parkRounds);
     }
 
     // ---- reflection into the private parts of BuildRuntime
@@ -279,6 +296,7 @@ public final class BuildPilot {
                 if (tick - lastGaveUp > 200) {
                     lastGaveUp = tick;
                     DIHClient.LOG.info("[DIHClient] AutoBuild: a wall two blocks high is in the way and no route around it was found");
+                    BuildLog.add("wall two blocks high ahead of the target, no way around, standing still");
                 }
                 return;
             }
@@ -465,6 +483,8 @@ public final class BuildPilot {
         }
         n.goalKey = Nav.key(goal.x, goal.y, goal.z);
         n.path = region.path(goal);
+        BuildLog.add(String.format("new trip to %d %d %d (%s), %d steps, layer %s, avoided spots %d", goal.x, goal.y, goal.z,
+                n.covers ? "sees blocks to place" : "only as close as possible", n.path.size(), layerMode ? "mode" : "point", n.avoid.size()));
         n.index = n.path.size() > 1 ? 1 : 0;
         return n;
     }
@@ -571,6 +591,8 @@ public final class BuildPilot {
             t.sampleX = p.method_23317();
             t.sampleZ = p.method_23321();
             if (t.stuck >= 4) {
+                BuildLog.add(String.format("stuck at %.1f %.1f %.1f on the way to the spot, giving it up (replan %d)", p.method_23317(), p.method_23318(),
+                        p.method_23321(), t.replans + 1));
                 t.avoid.add(t.goalKey);
                 t.replans++;
                 trip = null;
@@ -591,6 +613,7 @@ public final class BuildPilot {
         // a wall two blocks high is never jumped at; the path should not lead into one, so the spot is given up right away
         boolean wall = wallAhead(new class_243(next.x + 0.5, next.y, next.z + 0.5));
         if (wall && t.stuck >= 1) {
+            BuildLog.add(String.format("wall two blocks high ahead at %d %d %d: not jumping, giving the spot up", next.x, next.y, next.z));
             t.avoid.add(t.goalKey);
             t.replans++;
             trip = null;
@@ -612,6 +635,7 @@ public final class BuildPilot {
         if (t.covers) {
             // the blocks should be placeable from here; if the build code still finds nothing, this spot does not work
             if (t.arrived > 12) {
+                BuildLog.add("arrived at the spot but nothing could be placed from there: avoiding it");
                 t.avoid.add(t.goalKey);
                 t.replans++;
                 trip = null;
