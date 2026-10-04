@@ -40,7 +40,7 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
     public final BoolSetting showTime = this.bool("Show Elapsed Time",
             "Show how long you have been on the server (or in the game).", true);
     public final StringSetting stateText = this.text("State Text",
-            "Second line of the status. Empty = 'DIHClient v" + DIHClient.VERSION + "'.", "", 128);
+            "Second line of the status. Empty = 'DIHClient' with the version.", "", 128);
     public final BoolSetting showMenu = this.bool("Show In Main Menu",
             "Keep a status ('In Main Menu') while no world is open. Off: the status is removed when you leave a world.", false);
 
@@ -78,13 +78,8 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
         }
     }
 
-    @Override
-    public String getInfo() {
-        return null;
-    }
-
     private void ensureLink() {
-        if (this.link != null && !this.link.finished()) {
+        if (this.link != null && this.link.alive()) {
             return;
         }
         DiscordLink fresh = new DiscordLink(this.link, this::isEnabled);
@@ -169,7 +164,7 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
             this.stateIn = in;
             this.stateOut = DiscordCard.clip(in);
         }
-        return this.stateOut != null ? this.stateOut : "DIHClient v" + DIHClient.VERSION;
+        return this.stateOut != null ? this.stateOut : "DIHClient " + version();
     }
 
     /** Game close: give the link a moment to remove the status. */
@@ -189,5 +184,20 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
         } catch (Throwable t) {
             DIHClient.LOG.warn("[DIHClient] Discord Presence: no shutdown hook ({})", t.toString());
         }
+    }
+
+    private static String version() {
+        try { // by reflection: the compile-time stand-in for Fabric does not know the mod container
+            Object loader = Class.forName("net.fabricmc.loader.api.FabricLoader").getMethod("getInstance").invoke(null);
+            java.util.Optional<?> container = (java.util.Optional<?>) Class.forName("net.fabricmc.loader.api.FabricLoader").getMethod("getModContainer", String.class).invoke(loader, "dihclient");
+            if (container.isPresent()) {
+                Object meta = Class.forName("net.fabricmc.loader.api.ModContainer").getMethod("getMetadata").invoke(container.get());
+                Object version = Class.forName("net.fabricmc.loader.api.metadata.ModMetadata").getMethod("getVersion").invoke(meta);
+                return String.valueOf(Class.forName("net.fabricmc.loader.api.Version").getMethod("getFriendlyString").invoke(version)).replaceAll("\\+.*", "");
+            }
+        } catch (Throwable ignored) {
+            // no version in the text
+        }
+        return "";
     }
 }

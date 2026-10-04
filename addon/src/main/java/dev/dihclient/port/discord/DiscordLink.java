@@ -54,8 +54,13 @@ final class DiscordLink implements Runnable {
         LockSupport.unpark(this.thread);
     }
 
-    boolean finished() {
-        return this.finished;
+    /** False once stop() was called or the thread ended; a new link must be started then. */
+    boolean alive() {
+        return this.running && !this.finished;
+    }
+
+    DiscordCard current() {
+        return this.card;
     }
 
     /** Waits (bounded) for the thread, so a closing game still gets the status cleared. */

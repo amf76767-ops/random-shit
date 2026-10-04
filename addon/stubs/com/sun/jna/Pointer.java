@@ -23,4 +23,24 @@ public class Pointer {
 
     public void setMemory(long offset, long length, byte value) {
     }
+
+    public Pointer getPointer(long offset) {
+        return null;
+    }
+
+    public char[] getCharArray(long offset, int length) {
+        return null;
+    }
+
+    public void write(long offset, byte[] buf, int index, int length) {
+    }
+
+    public void setShort(long offset, short value) {
+    }
+
+    public void setInt(long offset, int value) {
+    }
+
+    public void setLong(long offset, long value) {
+    }
 }

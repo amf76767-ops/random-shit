@@ -130,7 +130,7 @@ public final class DiscordIpc implements Closeable {
     }
 
     /** Same, with the places to look in given by the caller (tests use a temp folder). */
-    static DiscordIpc connect(String applicationId, boolean windows, Iterable<Path> folders) throws IOException {
+    public static DiscordIpc connect(String applicationId, boolean windows, Iterable<Path> folders) throws IOException {
         Pipe pipe = windows ? openWindowsPipe() : openUnixSocket(folders);
         if (pipe == null) {
             return null;
