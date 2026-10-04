@@ -28,6 +28,7 @@ import net.minecraft.class_1799;
 import net.minecraft.class_1802;
 import net.minecraft.class_1923;
 import net.minecraft.class_1937;
+import net.minecraft.class_638;
 import net.minecraft.class_2246;
 import net.minecraft.class_2338;
 import net.minecraft.class_2350;
@@ -127,8 +128,14 @@ public class NetheriteFinder extends Module implements ChunkEvents.Listener {
 
    @Override
    protected void onEnable() {
+      this.startWorker();
       this.clear();
       this.announced.clear();
+   }
+
+   @Override
+   protected void onDisable() {
+      this.stopWorker();
    }
 
    @Override
@@ -138,6 +145,8 @@ public class NetheriteFinder extends Module implements ChunkEvents.Listener {
    }
 
    private void clear() {
+      this.generation++;
+      this.finished.clear();
       this.confirmed.clear();
       this.truthful.clear();
       this.dug.clear();
@@ -348,11 +357,7 @@ public class NetheriteFinder extends Module implements ChunkEvents.Listener {
             this.chunks.keySet().removeIf(var0 -> !mc.field_1687.method_2935().method_12123(class_1923.method_8325(var0), class_1923.method_8332(var0)));
          }
 
-         for (int var9 = 0; var9 < this.speed.get() && !this.queue.isEmpty() && (var9 <= 0 || ScanBudget.hasTime()); var9++) {
-            long var11 = this.queue.poll();
-            this.queued.remove(var11);
-            this.scan(class_1923.method_8325(var11), class_1923.method_8332(var11));
-         }
+         this.pump();
 
          if (mc.field_1724.field_6012 % 4 == 0) {
             this.refreshSorted();
@@ -381,67 +386,176 @@ public class NetheriteFinder extends Module implements ChunkEvents.Listener {
       return var1;
    }
 
-   private void scan(int var1, int var2) {
-      class_2818 var3 = mc.field_1687.method_2935().method_2857(var1, var2, class_2806.field_12803, false);
-      long var4 = class_1923.method_8331(var1, var2);
-      if (var3 == null) {
-         this.chunks.remove(var4);
-      } else {
-         NetheriteFinder.ChunkData var6 = new NetheriteFinder.ChunkData();
-         HashSet<class_2338> var7 = new HashSet<>();
-         class_2826[] var8 = var3.method_12006();
-         int var9 = mc.field_1687.method_31607() >> 4;
-         int var10 = this.minY.get();
-         int var11 = this.maxY.get();
+   /** What the worker found in one chunk: only block positions, no judgement yet. */
+   private static final class Raw {
+      int x;
+      int z;
+      int generation;
+      Object level;
+      boolean gone;
+      boolean failed;
+      HashSet<class_2338> debris = new HashSet<>();
+      List<class_238> hints = new ArrayList<>();
+   }
 
-         for (int var12 = 0; var12 < var8.length; var12++) {
-            class_2826 var13 = var8[var12];
-            int var14 = var9 + var12 << 4;
-            if (var13 != null
-               && !var13.method_38292()
-               && var14 + 15 >= var10
-               && var14 <= var11
-               && var13.method_19523(var0 -> ((class_2680)var0).method_27852(class_2246.field_22109))) {
-               int var15 = var1 << 4;
-               int var16 = var2 << 4;
-               int var17 = 0;
-
-               for (int var18 = 0; var18 < 16; var18++) {
-                  int var19 = var14 + var18;
-                  if (var19 >= var10 && var19 <= var11) {
-                     for (int var20 = 0; var20 < 16; var20++) {
-                        for (int var21 = 0; var21 < 16; var21++) {
-                           if (var13.method_12254(var21, var18, var20).method_27852(class_2246.field_22109)) {
-                              var7.add(new class_2338(var15 + var21, var19, var16 + var20));
-                              var17++;
-                           }
+   /** Reads the blocks of a chunk (the heavy part). Runs on the worker thread, or on the game thread as a fallback. */
+   private Raw collect(Object level, int cx, int cz, int low, int high, boolean wantHints, int generation) {
+      Raw out = new Raw();
+      out.x = cx;
+      out.z = cz;
+      out.level = level;
+      out.generation = generation;
+      class_638 world = (class_638)level;
+      class_2818 chunk = world.method_2935().method_2857(cx, cz, class_2806.field_12803, false);
+      if (chunk == null) {
+         out.gone = true;
+         return out;
+      }
+      class_2826[] sections = chunk.method_12006();
+      int bottom = world.method_31607() >> 4;
+      for (int i = 0; i < sections.length; i++) {
+         class_2826 section = sections[i];
+         int baseY = bottom + i << 4;
+         if (section != null && !section.method_38292() && baseY + 15 >= low && baseY <= high
+            && section.method_19523(state -> ((class_2680)state).method_27852(class_2246.field_22109))) {
+            int bx = cx << 4;
+            int bz = cz << 4;
+            int found = 0;
+            for (int y = 0; y < 16; y++) {
+               int wy = baseY + y;
+               if (wy >= low && wy <= high) {
+                  for (int z = 0; z < 16; z++) {
+                     for (int x = 0; x < 16; x++) {
+                        if (section.method_12254(x, y, z).method_27852(class_2246.field_22109)) {
+                           out.debris.add(new class_2338(bx + x, wy, bz + z));
+                           found++;
                         }
                      }
                   }
                }
-
-               if (var17 == 0 && this.sectionHints.get()) {
-                  var6.hints.add(new class_238(var15, var14, var16, var15 + 16, var14 + 16, var16 + 16));
-               }
+            }
+            if (found == 0 && wantHints) {
+               out.hints.add(new class_238(bx, baseY, bz, bx + 16, baseY + 16, bz + 16));
             }
          }
+      }
+      return out;
+   }
 
-         var6.debris = var7.size();
-         var6.fake = this.antiXray.get() && var7.size() > this.fakeLimit.get();
+   /** Judges what was found (exposed, fake ores, deposits, alerts). Game thread only. */
+   private void finish(Raw raw) {
+      long var4 = class_1923.method_8331(raw.x, raw.z);
+      if (raw.gone) {
+         this.chunks.remove(var4);
+         return;
+      }
+      NetheriteFinder.ChunkData var6 = new NetheriteFinder.ChunkData();
+      HashSet<class_2338> var7 = raw.debris;
+      var6.hints.addAll(raw.hints);
+      var6.debris = var7.size();
+      var6.fake = this.antiXray.get() && var7.size() > this.fakeLimit.get();
 
-         for (NetheriteFinder.Deposit var23 : this.deposits(var7)) {
-            if (!var6.fake || var23.exposed() || var23.confirmed()) {
-               var6.deposits.add(var23);
-               if (this.announced.add(var23.anchor())) {
-                  this.announce(var23);
-               }
+      for (NetheriteFinder.Deposit var23 : this.deposits(var7)) {
+         if (!var6.fake || var23.exposed() || var23.confirmed()) {
+            var6.deposits.add(var23);
+            if (this.announced.add(var23.anchor())) {
+               this.announce(var23);
             }
          }
+      }
 
-         if (var6.deposits.isEmpty() && var6.hints.isEmpty() && !var6.fake) {
-            this.chunks.remove(var4);
+      if (var6.deposits.isEmpty() && var6.hints.isEmpty() && !var6.fake) {
+         this.chunks.remove(var4);
+      } else {
+         this.chunks.put(var4, var6);
+      }
+   }
+
+   private void scan(int cx, int cz) {
+      this.finish(this.collect(mc.field_1687, cx, cz, this.minY.get(), this.maxY.get(), this.sectionHints.get(), this.generation));
+   }
+
+   // ---- the scan runs on a worker thread: the game thread only judges the finished chunks
+   private static final int IN_FLIGHT = 12;
+   private java.util.concurrent.ExecutorService worker;
+   private final java.util.concurrent.ConcurrentLinkedQueue<Raw> finished = new java.util.concurrent.ConcurrentLinkedQueue<>();
+   private final java.util.concurrent.atomic.AtomicInteger inFlight = new java.util.concurrent.atomic.AtomicInteger();
+   private volatile int generation;
+
+   private void startWorker() {
+      this.stopWorker();
+      this.worker = java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+         Thread t = new Thread(r, "DIHClient-NetheriteScan");
+         t.setDaemon(true);
+         t.setPriority(Thread.NORM_PRIORITY - 1);
+         return t;
+      });
+   }
+
+   private void stopWorker() {
+      java.util.concurrent.ExecutorService w = this.worker;
+      this.worker = null;
+      if (w != null) {
+         w.shutdownNow();
+      }
+      this.finished.clear();
+      this.inFlight.set(0);
+   }
+
+   /** Hands queued chunks to the worker (nearest first) and judges what came back. */
+   private void pump() {
+      java.util.concurrent.ExecutorService w = this.worker;
+      if (w == null || w.isShutdown()) {
+         for (int i = 0; i < this.speed.get() && !this.queue.isEmpty() && (i <= 0 || ScanBudget.hasTime()); i++) {
+            long key = this.queue.poll();
+            this.queued.remove(key);
+            this.scan(class_1923.method_8325(key), class_1923.method_8332(key));
+         }
+         return;
+      }
+      int low = this.minY.get();
+      int high = this.maxY.get();
+      boolean hints = this.sectionHints.get();
+      while (this.inFlight.get() < IN_FLIGHT && !this.queue.isEmpty()) {
+         long key = this.queue.poll();
+         this.queued.remove(key);
+         Object level = mc.field_1687;
+         int gen = this.generation;
+         int cx = class_1923.method_8325(key);
+         int cz = class_1923.method_8332(key);
+         this.inFlight.incrementAndGet();
+         try {
+            w.execute(() -> {
+               Raw raw;
+               try {
+                  raw = this.collect(level, cx, cz, low, high, hints, gen);
+               } catch (Throwable t) {
+                  raw = new Raw();
+                  raw.x = cx;
+                  raw.z = cz;
+                  raw.level = level;
+                  raw.generation = gen;
+                  raw.failed = true;
+               }
+               this.finished.add(raw);
+               this.inFlight.decrementAndGet();
+            });
+         } catch (RuntimeException rejected) {
+            this.inFlight.decrementAndGet();
+            this.scan(cx, cz);
+         }
+      }
+      Raw raw;
+      int done = 0;
+      while ((done < this.speed.get() * 2 || done == 0) && (done == 0 || ScanBudget.hasTime()) && (raw = this.finished.poll()) != null) {
+         done++;
+         if (raw.generation != this.generation || raw.level != mc.field_1687) {
+            continue; // from before a rescan or another world
+         }
+         if (raw.failed) {
+            this.scan(raw.x, raw.z); // the worker read something half changed: once more here, on the game thread
          } else {
-            this.chunks.put(var4, var6);
+            this.finish(raw);
          }
       }
    }
