@@ -114,7 +114,7 @@ public record LrclibTrack(
         if (object.get(name) instanceof JsonPrimitive primitive && primitive.isNumber()) {
             try {
                 return primitive.getAsLong();
-            } catch (NumberFormatException var7) {
+            } catch (NumberFormatException e) {
                 return fallback;
             }
         } else {

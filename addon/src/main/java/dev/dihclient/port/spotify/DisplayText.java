@@ -126,4 +126,20 @@ public final class DisplayText {
             default -> null;
         };
     }
+
+    /** Track time as shown on the card: m:ss, or h:mm:ss from one hour on. */
+    public static String clock(long totalSeconds) {
+        long seconds = Math.max(0L, totalSeconds);
+        long hours = seconds / 3600L;
+        long minutes = seconds / 60L % 60L;
+        StringBuilder out = new StringBuilder(8);
+        if (hours > 0L) {
+            out.append(hours).append(':').append(minutes < 10L ? "0" : "");
+        }
+        out.append(minutes).append(':');
+        if (seconds % 60L < 10L) {
+            out.append('0');
+        }
+        return out.append(seconds % 60L).toString();
+    }
 }

@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
  * Ported from Anubis Client 0.9.8 (GPL-3.0).
  * Small on-disk cache of LRCLIB answers (one JSON file per track, pruned by count and size).
  */
-final class LyricsDiskCache {
+public final class LyricsDiskCache {
     private static final int FORMAT = 1;
     private static final String SUFFIX = ".json";
     private static final Pattern KEY = Pattern.compile("[0-9a-f]{16,64}");
@@ -31,13 +31,13 @@ final class LyricsDiskCache {
     private final int maxFiles;
     private final long maxBytes;
 
-    LyricsDiskCache(Path dir, int maxFiles, long maxBytes) {
+    public LyricsDiskCache(Path dir, int maxFiles, long maxBytes) {
         this.dir = dir;
         this.maxFiles = maxFiles;
         this.maxBytes = maxBytes;
     }
 
-    LyricsDiskCache.Entry read(String key) {
+    public LyricsDiskCache.Entry read(String key) {
         Path file = this.file(key);
         if (file == null) {
             return null;
@@ -65,13 +65,13 @@ final class LyricsDiskCache {
                         }
                     }
                 }
-            } catch (JsonParseException | IllegalStateException | UnsupportedOperationException | IOException var8) {
+            } catch (JsonParseException | IllegalStateException | UnsupportedOperationException | IOException e) {
                 return null;
             }
         }
     }
 
-    void write(String key, LrclibTrack track, long fetchedAt) {
+    public void write(String key, LrclibTrack track, long fetchedAt) {
         Path file = this.file(key);
         if (file != null) {
             JsonObject object = new JsonObject();
@@ -89,16 +89,16 @@ final class LyricsDiskCache {
 
                 try {
                     Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-                } catch (IOException var9) {
+                } catch (IOException e) {
                     Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
                 }
-            } catch (IOException var10) {
+            } catch (IOException e) {
                 delete(tmp);
             }
         }
     }
 
-    void prune() {
+    public void prune() {
         if (Files.isDirectory(this.dir)) {
             List<LyricsDiskCache.Stored> stored = new ArrayList<>();
             long total = 0L;
@@ -116,7 +116,7 @@ final class LyricsDiskCache {
                         }
                     }
                 }
-            } catch (IOException var11) {
+            } catch (IOException e) {
                 return;
             }
 
@@ -146,7 +146,7 @@ final class LyricsDiskCache {
         try {
             Files.deleteIfExists(file);
             return true;
-        } catch (IOException var2) {
+        } catch (IOException e) {
             return false;
         }
     }
@@ -154,7 +154,7 @@ final class LyricsDiskCache {
     private static void touch(Path file) {
         try {
             Files.setLastModifiedTime(file, FileTime.fromMillis(System.currentTimeMillis()));
-        } catch (IOException var2) {
+        } catch (IOException e) {
         }
     }
 
@@ -166,8 +166,8 @@ final class LyricsDiskCache {
         return object.get(name) instanceof JsonPrimitive primitive && primitive.isNumber() ? primitive.getAsLong() : -1L;
     }
 
-    record Entry(LrclibTrack track, long fetchedAt) {
-        boolean found() {
+    public record Entry(LrclibTrack track, long fetchedAt) {
+        public boolean found() {
             return this.track != null;
         }
     }

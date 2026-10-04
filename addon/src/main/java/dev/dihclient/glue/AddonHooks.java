@@ -68,7 +68,8 @@ public final class AddonHooks {
                     new dev.dihclient.port.tools.FastXp(), new dev.dihclient.port.tools.HoverTotem(),
                     new dev.dihclient.port.chunks.PlayerBypass(), new dev.dihclient.port.chunks.PrimeChunkFinder(),
                     new dev.dihclient.port.vanish.AntiVanish(), new dev.dihclient.port.staff.StaffList(), new dev.dihclient.port.noinvleak.NoInvLeakModule(),
-                    new dev.dihclient.port.discord.DiscordPresence()}) {
+                    new dev.dihclient.port.discord.DiscordPresence(),
+                    new dev.dihclient.port.spotify.SpotifyHudModule()}) {
                 add.invoke(modules, m);
             }
         });

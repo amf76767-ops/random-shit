@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
  * Ported from Anubis Client 0.9.8 (GPL-3.0).
  * Picks the LRCLIB search result that really is the playing track (title, artist, duration, synced > plain).
  */
-final class LyricsMatcher {
+public final class LyricsMatcher {
     static final double DURATION_TOLERANCE_SECONDS = 3.0;
     private static final int TITLE_EXACT = 40;
     private static final int TITLE_BASE = 30;
@@ -45,7 +45,7 @@ final class LyricsMatcher {
     private LyricsMatcher() {
     }
 
-    static LrclibTrack best(List<LrclibTrack> candidates, LyricsQuery query) {
+    public static LrclibTrack best(List<LrclibTrack> candidates, LyricsQuery query) {
         if (candidates != null && !candidates.isEmpty() && query != null) {
             LrclibTrack best = null;
             int bestScore = -1;
@@ -71,7 +71,7 @@ final class LyricsMatcher {
         }
     }
 
-    static int score(LrclibTrack candidate, LyricsQuery query) {
+    public static int score(LrclibTrack candidate, LyricsQuery query) {
         if (!candidate.usable()) {
             return -1;
         } else {
@@ -108,7 +108,7 @@ final class LyricsMatcher {
         return query.hasDuration() && !(candidate.duration() <= 0.0) ? Math.abs(candidate.duration() - query.durationSeconds()) : 3.0;
     }
 
-    static int titleScore(String wanted, String offered) {
+    public static int titleScore(String wanted, String offered) {
         String a = normalize(wanted);
         String b = normalize(offered);
         if (a.isEmpty() || b.isEmpty()) {
@@ -126,7 +126,7 @@ final class LyricsMatcher {
         }
     }
 
-    static int artistScore(String wanted, String offered) {
+    public static int artistScore(String wanted, String offered) {
         String a = normalize(wanted);
         String b = normalize(offered);
         if (!a.isEmpty() && !b.isEmpty()) {
@@ -150,7 +150,7 @@ final class LyricsMatcher {
         }
     }
 
-    static String baseTitle(String title) {
+    public static String baseTitle(String title) {
         if (title == null) {
             return "";
         } else {
@@ -162,7 +162,7 @@ final class LyricsMatcher {
         }
     }
 
-    static String primaryArtist(String artist) {
+    public static String primaryArtist(String artist) {
         if (artist == null) {
             return "";
         } else {
@@ -178,7 +178,7 @@ final class LyricsMatcher {
         }
     }
 
-    static String normalize(String text) {
+    public static String normalize(String text) {
         if (text != null && !text.isEmpty()) {
             String folded = text.toLowerCase(Locale.ROOT)
                 .replace('\u0131', 'i')
@@ -214,7 +214,7 @@ final class LyricsMatcher {
         return needle.length() >= 3 && haystack.length() >= needle.length() ? (" " + haystack + " ").contains(" " + needle + " ") : false;
     }
 
-    static List<String[]> searchTerms(LyricsQuery query) {
+    public static List<String[]> searchTerms(LyricsQuery query) {
         List<String[]> terms = new ArrayList<>(2);
         terms.add(new String[]{query.title(), query.artist()});
         String title = baseTitle(query.title());

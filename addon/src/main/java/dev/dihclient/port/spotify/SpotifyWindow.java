@@ -177,7 +177,7 @@ public final class SpotifyWindow {
         }
     }
 
-    interface EnumProc extends StdCallLibrary.StdCallCallback {
+    public interface EnumProc extends StdCallLibrary.StdCallCallback {
         boolean callback(Pointer hwnd, Pointer data);
     }
 

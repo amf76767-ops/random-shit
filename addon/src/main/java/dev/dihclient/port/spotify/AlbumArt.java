@@ -17,7 +17,7 @@ public final class AlbumArt {
     }
 
     /** {@code pixels} are tightly packed RGBA rows, {@code width * height * 4} bytes. */
-    static AlbumArt crop(ByteBuffer pixels, int width, int height, int maxSide) {
+    public static AlbumArt crop(ByteBuffer pixels, int width, int height, int maxSide) {
         int side = Math.min(width, height);
         int left = (width - side) / 2;
         int top = (height - side) / 2;

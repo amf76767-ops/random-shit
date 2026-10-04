@@ -46,8 +46,8 @@ public record LyricsQuery(String title, String artist, String album, int duratio
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256").digest(identity.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(digest, 0, 16);
-        } catch (NoSuchAlgorithmException var3) {
-            throw new IllegalStateException("SHA-256 is always available", var3);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is always available", e);
         }
     }
 

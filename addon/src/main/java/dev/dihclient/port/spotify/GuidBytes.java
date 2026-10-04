@@ -5,11 +5,11 @@ package dev.dihclient.port.spotify;
  * Memory layout of a Windows GUID: the first three groups little-endian, the last two as written. Kept apart from the
  * JNA code so it can be tested without native libraries (Anubis used jna-platform's GUID class, which we do not rely on).
  */
-final class GuidBytes {
+public final class GuidBytes {
     private GuidBytes() {
     }
 
-    static byte[] of(String text) {
+    public static byte[] of(String text) {
         String hex = text.replace("-", "").replace("{", "").replace("}", "");
         if (hex.length() != 32) {
             throw new IllegalArgumentException("not a GUID: " + text);

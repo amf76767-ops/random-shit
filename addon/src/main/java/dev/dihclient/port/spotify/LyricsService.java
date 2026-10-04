@@ -40,6 +40,14 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.Flow.Subscription;
 import net.fabricmc.loader.api.FabricLoader;
 
+/**
+ * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Finds lyrics for the playing track. This is the only network code of the Spotify HUD: HTTPS GET requests to
+ * {@code https://lrclib.net/api/get} and {@code /api/search} (LRCLIB, an open lyrics database) with the query string
+ * track_name, artist_name, album_name and duration (seconds) of the playing track. Nothing else is sent (no account,
+ * no identifiers, no IP-bound token; the User-Agent is "DIHClient/&lt;version&gt; (Spotify HUD)"). Answers are cached in memory
+ * and as JSON files in {@code config/dihclient/lyrics-cache}. Switched off completely by the "Lyrics Online" setting.
+ */
 public final class LyricsService implements AutoCloseable {
     private static final URI LRCLIB = URI.create("https://lrclib.net/");
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(8L);
@@ -86,7 +94,7 @@ public final class LyricsService implements AutoCloseable {
         Path cacheDir = defaultCacheDir();
         this.disk = cacheDir == null ? null : new LyricsDiskCache(cacheDir, 400, 6291456L);
         this.userAgent = defaultUserAgent();
-        this.worker = new ThreadPoolExecutor(1, 1, 30000L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), daemonThreads("Anubis-Lyrics"));
+        this.worker = new ThreadPoolExecutor(1, 1, 30000L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), daemonThreads("DIHClient-Lyrics"));
         this.worker.allowCoreThreadTimeOut(true);
     }
 
@@ -103,7 +111,7 @@ public final class LyricsService implements AutoCloseable {
                     if (!this.closed && this.pending.add(key)) {
                         try {
                             this.worker.execute(() -> this.resolve(key, query));
-                        } catch (RejectedExecutionException var9) {
+                        } catch (RejectedExecutionException e) {
                             this.pending.remove(key);
                         }
                     }
@@ -196,15 +204,15 @@ public final class LyricsService implements AutoCloseable {
                     this.memory.put(key, new LyricsService.Memo(offline, System.currentTimeMillis() + 60000L));
                 }
             }
-        } catch (InterruptedException var35) {
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return;
-        } catch (IOException var36) {
-            DIHClient.LOG.debug("[DIHClient] Lyrics lookup for \"{}\" failed: {}", query.title(), var36.toString());
+        } catch (IOException e) {
+            DIHClient.LOG.debug("[DIHClient] Lyrics lookup for \"{}\" failed: {}", query.title(), e.toString());
             this.remember(key, stored != null ? Lyrics.of(stored.track()) : Lyrics.UNAVAILABLE, this.retryAt());
             return;
-        } catch (RuntimeException var37) {
-            DIHClient.LOG.debug("[DIHClient] Lyrics lookup for \"" + query.title() + "\" failed", (Throwable)var37);
+        } catch (RuntimeException e) {
+            DIHClient.LOG.debug("[DIHClient] Lyrics lookup for \"" + query.title() + "\" failed", e);
             this.remember(key, Lyrics.UNAVAILABLE, this.retryAt());
             return;
         } finally {
@@ -236,9 +244,9 @@ public final class LyricsService implements AutoCloseable {
                         }
                     }
                 }
-            } catch (IOException var7) {
+            } catch (IOException e) {
                 if (fallback == null) {
-                    throw var7;
+                    throw e;
                 }
 
                 return new LyricsService.Found(fallback, false);
@@ -319,14 +327,14 @@ public final class LyricsService implements AutoCloseable {
 
         try {
             return call.get(REQUEST_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS);
-        } catch (TimeoutException var6) {
+        } catch (TimeoutException e) {
             call.cancel(true);
             throw new HttpTimeoutException("LRCLIB did not answer within " + REQUEST_TIMEOUT.toMillis() + " ms");
-        } catch (InterruptedException var7) {
+        } catch (InterruptedException e) {
             call.cancel(true);
-            throw var7;
-        } catch (ExecutionException var8) {
-            Throwable cause = var8.getCause();
+            throw e;
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
             if (cause instanceof IOException io) {
                 throw io;
             } else {
@@ -355,7 +363,7 @@ public final class LyricsService implements AutoCloseable {
         } else if (this.closed) {
             throw new InterruptedException("lyrics service closed");
         } else {
-            ExecutorService executor = Executors.newCachedThreadPool(daemonThreads("Anubis-Lyrics-Http"));
+            ExecutorService executor = Executors.newCachedThreadPool(daemonThreads("DIHClient-Lyrics-Http"));
             client = HttpClient.newBuilder().connectTimeout(CONNECT_TIMEOUT).followRedirects(Redirect.NORMAL).executor(executor).build();
             this.httpExecutor = executor;
             this.http = client;
@@ -408,8 +416,8 @@ public final class LyricsService implements AutoCloseable {
     private static JsonElement json(String body) throws IOException {
         try {
             return LrclibTrack.parse(body);
-        } catch (JsonParseException var2) {
-            throw new IOException("LRCLIB sent malformed JSON", var2);
+        } catch (JsonParseException e) {
+            throw new IOException("LRCLIB sent malformed JSON", e);
         }
     }
 
@@ -420,10 +428,10 @@ public final class LyricsService implements AutoCloseable {
             long millis;
             try {
                 millis = Long.parseLong(value) * 1000L;
-            } catch (NumberFormatException var7) {
+            } catch (NumberFormatException notSeconds) {
                 try {
                     millis = ZonedDateTime.parse(value, DateTimeFormatter.RFC_1123_DATE_TIME).toInstant().toEpochMilli() - System.currentTimeMillis();
-                } catch (DateTimeParseException var6) {
+                } catch (DateTimeParseException notDate) {
                     millis = 30000L;
                 }
             }
@@ -444,29 +452,14 @@ public final class LyricsService implements AutoCloseable {
 
     private static Path defaultCacheDir() {
         try {
-            return FabricLoader.getInstance().getConfigDir().resolve("anubis").resolve("lyrics-cache");
-        } catch (LinkageError | RuntimeException var1) {
+            return FabricLoader.getInstance().getConfigDir().resolve("dihclient").resolve("lyrics-cache");
+        } catch (LinkageError | RuntimeException e) {
             return null;
         }
     }
 
     static String defaultUserAgent() {
-        String version;
-        try {
-            version = FabricLoader.getInstance()
-                .getModContainer("anubisplus")
-                .map(container -> container.getMetadata().getVersion().getFriendlyString())
-                .orElse("dev");
-        } catch (LinkageError | RuntimeException var2) {
-            version = "dev";
-        }
-
-        int build = version.indexOf(43);
-        if (build > 0) {
-            version = version.substring(0, build);
-        }
-
-        return "Anubis Client/" + version + " (https://github.com/4ldenz/Anubis-client)";
+        return "DIHClient/" + DIHClient.VERSION + " (Spotify HUD)";
     }
 
     private static final class BusyException extends IOException {

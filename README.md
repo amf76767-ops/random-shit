@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.9.1**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.10.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -198,3 +198,9 @@ Aus Anubis 0.9.8 (GPL-3.0, eigener Client) nach DIH übernommen. Alles ist nur g
 - Login-Arten: **Microsoft** (Code auf microsoft.com/link), **Cracked** (nur ein Name, mit Zufallsname; nur für Offline-Mode-Server und Einzelspieler), **Session token**, **Refresh token**. **Original** springt zurück auf den Account, mit dem das Spiel gestartet wurde. Doppelklick auf einen Eintrag loggt ein.
 - Der Wechsel funktionierte in 1.21.11 nie (der Session-Konstruktor hat 5 statt 6 Parameter). Jetzt werden neben der Session auch die Chat-Signaturschlüssel, der Report-Kontext und die Social-Interactions neu gebaut, sonst kickt ein Online-Server mit "Invalid signature for profile public key". Nicht im Spiel getestet.
 - TheAltening ist nicht dabei: es braucht einen eigenen Auth-Server für das Spiel und lässt sich ohne Test nicht sicher einbauen.
+
+### 6.10.0: Config-Dock, Spotify HUD, Discord Presence
+Nicht im Spiel getestet.
+- **Config-Dock** statt Modul "Profiles": im DIH-GUI (Rechts-Shift) sitzt unten in der Mitte der Reiter "Configs". Er klappt nach oben auf: beliebig viele Configs mit Namen (speichern, laden, überschreiben, umbenennen, löschen), Doppelklick lädt. Die alten Slots 1 bis 3 erscheinen als "Slot n". "Share code", "Import code" und "Import all" sind jetzt hier. Pro Config lassen sich Server eintragen (**+ This server** oder **+ Address…**); beim Beitritt lädt der Client dann die Config automatisch. Ein Server gehört zu einer Config, bei mehreren Treffern gewinnt der genauere Servername (play.example.net vor example.net). Die Liste steht in `dihclient/configs.json`.
+- **Spotify HUD** (Client): Titel, Künstler, Cover, Fortschritt und synchronisierte Songtexte. Nur Windows (Medien-Sitzung von Windows, Ersatz: Fenstertitel von Spotify). Netzwerk: nur `lrclib.net` für die Texte (Titel, Künstler, Album, Dauer); Schalter "Lyrics Online". Cache in `config/dihclient/lyrics-cache`. Auf Linux und Mac tut das Modul nichts.
+- **Discord Presence** (Client): zeigt "Playing Minecraft" in deinem Discord-Status, nur über den lokalen Discord-Kanal. Server-Adresse standardmäßig **aus**. Es nutzt die Anwendungs-ID des Anubis-Clients (Name im Status: "Anubis Client"); für einen eigenen Namen und ein eigenes Logo unter discord.com/developers eine Anwendung anlegen und ID plus Bildname in den Einstellungen eintragen.
