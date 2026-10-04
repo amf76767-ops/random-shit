@@ -59,7 +59,7 @@ java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.MergeTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.EmoteTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.PacketLogTests
 FASTUTIL=$CACHE/fastutil-8.5.15.jar:$SLF4J
-for t in StaffListTests ToolsTests VanishTests CrystalAuraTests ChunksTests NoInvLeakTests ConfigStoreTests DiscordTests SpotifyHudTests TridentTests DonutATests DonutCTests DonutDTests RoutePlannerTests; do
+for t in StaffListTests ToolsTests VanishTests CrystalAuraTests ChunksTests NoInvLeakTests ConfigStoreTests DiscordTests SpotifyHudTests TridentTests DonutATests DonutCTests DonutDTests RoutePlannerTests TeamTests; do
   java -cp "$BUILD/test:$BUILD/classes:$GSON:$FASTUTIL" dev.dihclient.$t
 done
 python3 ../resourcepack/build.py >/dev/null

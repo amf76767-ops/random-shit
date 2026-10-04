@@ -29,6 +29,7 @@ import dev.dihclient.modules.world.Tunnel;
 import dev.dihclient.setting.ActionSetting;
 import dev.dihclient.setting.BoolSetting;
 import dev.dihclient.setting.EnumSetting;
+import dev.dihclient.setting.StringSetting;
 import java.lang.reflect.Method;
 import java.util.Map;
 
@@ -184,6 +185,15 @@ public final class Folds {
                     net.minecraft.class_310 mc = net.minecraft.class_310.method_1551();
                     mc.execute(() -> SchematicBrowserScreen.openOptions(mc.field_1755, build));
                 }), false);
+        // team codes: build together with the alt accounts
+        StringSetting teamCode = new StringSetting("Team Code", "The code of a team. Create Team shows it; type it here on the other accounts and press Join Team.", "", 16);
+        Merge.addSetting(build, teamCode, false);
+        TeamBuild team = new TeamBuild(build, teamCode);
+        add(modules, team);
+        team.setEnabledSilently(true);
+        Merge.addSetting(build, new ActionSetting("Create Team", "Makes a team of the build that is loaded (pick a schematic in the browser first) and gives a code for your alt accounts.", team::create), false);
+        Merge.addSetting(build, new ActionSetting("Join Team", "Builds with the team whose code is in Team Code, at the same place and the same schematic.", team::join), false);
+        Merge.addSetting(build, new ActionSetting("Leave Team", "Leaves the team (the build goes on alone).", team::leave), false);
         AdvancedOptions.apply(build, AdvancedOptions.AUTOBUILD_MAIN);
     }
 

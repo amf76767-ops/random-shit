@@ -18,8 +18,11 @@ import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
+import org.objectweb.asm.tree.FieldInsnNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
+import org.objectweb.asm.tree.JumpInsnNode;
+import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
@@ -136,6 +139,7 @@ public final class Patcher {
                         }
                         if (e.getName().equals("dev/dihclient/autobuild/BuildRuntime.class")) {
                             data = redirectWalk(data);
+                            data = acceptNaturalChanges(data);
                         }
                         if (e.getName().equals("dev/dihclient/modules/automation/FlipFinder.class")) {
                             data = renameModule(data, "FlipFinder", "AutoFlipper");
@@ -432,6 +436,58 @@ public final class Patcher {
      * BuildPilot, which plans a real path and falls back to the old walkTo by itself. The walk to a restock chest and the
      * walk out of the cleanup stay as they were.
      */
+    /**
+     * In {@code BuildRuntime.statusOf}, before the block in the world is compared with the planned one: if the world has a
+     * block that the planned one turns into by itself (dirt to grass), the position is DONE.
+     */
+    static byte[] acceptNaturalChanges(byte[] data) {
+        ClassNode cn = read(data);
+        int patched = 0;
+        for (MethodNode m : cn.methods) {
+            if (!m.name.equals("statusOf") || !m.desc.startsWith("(ILdev/dihclient/autobuild/BuildRuntime$Settings;)")) {
+                continue;
+            }
+            // the second "world block != planned block" comparison is the one of ordinary blocks (the first is the fluid case)
+            int seen = 0;
+            AbstractInsnNode compare = null;
+            for (AbstractInsnNode in : m.instructions.toArray()) {
+                if (in.getOpcode() == Opcodes.IF_ACMPNE && ++seen == 2) {
+                    compare = in;
+                    break;
+                }
+            }
+            if (compare == null) {
+                throw new IllegalStateException("BuildRuntime.statusOf: block comparison not found");
+            }
+            // walk back to the ALOAD of the world state that starts the comparison: aload w; getBlock; aload p; getBlock; if_acmpne
+            AbstractInsnNode start = compare;
+            for (int back = 0; back < 4; back++) {
+                start = start.getPrevious();
+            }
+            if (!(start instanceof VarInsnNode world && world.getOpcode() == Opcodes.ALOAD)) {
+                throw new IllegalStateException("BuildRuntime.statusOf: unexpected code before the block comparison");
+            }
+            VarInsnNode planned = (VarInsnNode) start.getNext().getNext();
+            InsnList add = new InsnList();
+            LabelNode cont = new LabelNode();
+            add.add(new VarInsnNode(Opcodes.ALOAD, world.var));
+            add.add(new VarInsnNode(Opcodes.ALOAD, planned.var));
+            add.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "dev/dihclient/autobuild/BuildEquiv", "accepts",
+                    "(Lnet/minecraft/class_2680;Lnet/minecraft/class_2680;)Z", false));
+            add.add(new JumpInsnNode(Opcodes.IFEQ, cont));
+            add.add(new FieldInsnNode(Opcodes.GETSTATIC, "dev/dihclient/autobuild/BuildRuntime$Status", "DONE", "Ldev/dihclient/autobuild/BuildRuntime$Status;"));
+            add.add(new InsnNode(Opcodes.ARETURN));
+            add.add(cont);
+            m.instructions.insertBefore(start, add);
+            patched++;
+        }
+        if (patched != 1) {
+            throw new IllegalStateException("BuildRuntime.statusOf not patched: " + patched);
+        }
+        System.out.println("natural block changes (dirt to grass ...) accepted in BuildRuntime.statusOf");
+        return write(cn);
+    }
+
     static byte[] redirectWalk(byte[] data) {
         ClassNode cn = read(data);
         int layer = 0, point = 0;

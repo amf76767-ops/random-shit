@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.16.1**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.17.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -251,3 +251,12 @@ Nicht im Spiel getestet.
 - Findet die Suche keinen Weg, sucht sie danach eine Minute lang viel weiter (Radius 64, 45 000 Knoten statt 28 und 9 000), bevor die alte Methode übernimmt.
 - Die alte Methode darf eine Wand mit Stützblöcken überklettern. Springt sie nur dagegen (keine Blöcke zum Klettern oder nach 2 Sekunden immer noch fest), bleibt der Spieler stehen und meldet "Blocked by a wall: no way around found" (auch in `latest.log`), statt endlos zu springen.
 - Findet die Suche gar kein Ziel, sucht sie nicht mehr in jedem Tick neu, sondern wartet 15 Ticks.
+
+### 6.17.0: Natürliche Blockänderungen und Team-Codes
+Nicht im Spiel getestet.
+- **Natürliche Änderungen zählen nicht als falsch:** Wird ein geplanter Dirt-Block von selbst zu Gras, Podzol oder Myzel, gilt er als fertig; "Fix Wrong Blocks" baut ihn nicht mehr ab. Gleiches gilt für Ackerland, das austrocknet, Kelp und Ranken, die wachsen, Stiele, die sich anheften, Korallen, die absterben, und Kupfer, das oxidiert (nicht bei gewachstem Kupfer). Umgekehrt (Gras geplant, Erde in der Welt) bleibt es falsch.
+- **Team-Codes** (AutoBuild-Menü: **Team Code**, **Create Team**, **Join Team**, **Leave Team**):
+  - *Create Team*: Schematic im Browser wählen und die Vorschau mit Enter starten, dann *Create Team*. Es erscheint ein Code (zum Beispiel `K7QD-3MWP`) und wird in die Zwischenablage kopiert.
+  - Auf den anderen Accounts (Alts) den Code unter *Team Code* eintragen und *Join Team* drücken. Sie bauen dasselbe Schematic an derselben Stelle.
+  - Die Arbeit wird in Streifen geteilt (einer pro Mitglied, entlang der längeren Seite, alle Ebenen). Ist ein Mitglied mit seinem Streifen fertig, baut es den Rest des ganzen Schematics mit. Kommt jemand dazu oder geht, werden die Streifen neu aufgeteilt.
+  - Die Spiele finden sich über einen Ordner im Benutzerverzeichnis (`~/.dihclient/teams`). **Es geht nur auf demselben Computer** und es wird nichts über das Netzwerk gesendet. Beitreten geht nur auf demselben Server und in derselben Dimension, und die Schematic-Datei muss dieselbe sein (Prüfsumme).

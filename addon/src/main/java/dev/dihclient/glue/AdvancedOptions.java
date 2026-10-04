@@ -17,7 +17,7 @@ public final class AdvancedOptions {
     /** Names that stay in the module menu. */
     public static final Set<String> AUTOBUILD_MAIN = Set.of(
             "Source", "Mode", "Order", "From Layer", "To Layer", "Reach", "Walk", "Smart Path", "Plan First", "Hotbar Refill", "Render",
-            "Progress HUD", "Open Browser", "More Options", "Plan Route", "Pause / Resume", "Resume Last Build", "Stop");
+            "Progress HUD", "Team Code", "Create Team", "Join Team", "Leave Team", "Open Browser", "More Options", "Plan Route", "Pause / Resume", "Resume Last Build", "Stop");
 
     private AdvancedOptions() {
     }
