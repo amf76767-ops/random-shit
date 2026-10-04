@@ -75,4 +75,6 @@ java -cp "$BUILD/tools:$ASM" MixinCheck "$OUT"
 # every mixin of the add-on must find its target in the real game (a failing mixin would stop the game from starting)
 # TridentRiptideMixin: /tmp/mc-int.jar leaves two inherited calls unremapped, so the check cannot see them (the names come from the working Anubis client)
 [ -n "$MC_INT" ] && java -cp "$ASM" tools/MixinTargets.java --ignore 'TridentRiptideMixin#dih$tridentWet' --ignore 'TridentRiptideMixin#dih$tridentPush' "$BUILD/classes" "$BUILD/override" "$BASE" "$MC_INT"
+# the JVM verifies every class of the jar the way it does at game start: a patched class without a stack map frame would crash the start
+[ -n "$MC_INT" ] && java tools/VerifyClasses.java "$OUT" "$MC_INT:$BUILD/stubs:$(ls $CACHE/*.jar | tr '\n' ':')"
 echo "built $OUT"

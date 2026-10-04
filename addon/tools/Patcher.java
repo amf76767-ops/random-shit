@@ -19,6 +19,7 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldInsnNode;
+import org.objectweb.asm.tree.FrameNode;
 import org.objectweb.asm.tree.InsnList;
 import org.objectweb.asm.tree.InsnNode;
 import org.objectweb.asm.tree.JumpInsnNode;
@@ -382,6 +383,7 @@ public final class Patcher {
         pre.add(new VarInsnNode(Opcodes.ALOAD, 0));
         pre.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "dev/dihclient/glue/GuiSounds", "toggle", "(Ldev/dihclient/module/Module;)V", false));
         m.instructions.insert(pre);
+        requireFrames(cn);
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         cn.accept(cw);
         return cw.toByteArray();
@@ -423,6 +425,7 @@ public final class Patcher {
         call.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "dev/dihclient/glue/Merge", "migrate", "(Lcom/google/gson/JsonObject;)V", false));
         apply.instructions.insert(call);
         System.out.println("config migration hooked into ConfigManager.apply");
+        requireFrames(cn);
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         cn.accept(cw);
         return cw.toByteArray();
@@ -478,6 +481,8 @@ public final class Patcher {
             add.add(new FieldInsnNode(Opcodes.GETSTATIC, "dev/dihclient/autobuild/BuildRuntime$Status", "DONE", "Ldev/dihclient/autobuild/BuildRuntime$Status;"));
             add.add(new InsnNode(Opcodes.ARETURN));
             add.add(cont);
+            // a branch target needs a stack map frame: the locals are the same as at the target before (empty stack)
+            add.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
             m.instructions.insertBefore(start, add);
             patched++;
         }
@@ -541,6 +546,7 @@ public final class Patcher {
         if (n != 1) {
             throw new IllegalStateException("expected exactly one BuildRuntime.tick call in AutoBuild, found " + n);
         }
+        requireFrames(cn);
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         cn.accept(cw);
         return cw.toByteArray();
@@ -569,7 +575,44 @@ public final class Patcher {
         return cn;
     }
 
+    /**
+     * The JVM refuses a class whose branch target has no stack map frame ("Expecting a stackmap frame at branch target").
+     * COMPUTE_MAXS does not make frames, so every branch the patches add has to bring its own; this stops the build otherwise.
+     */
+    static void requireFrames(ClassNode cn) {
+        if ((cn.version & 0xFFFF) < Opcodes.V1_7) {
+            return;
+        }
+        for (MethodNode m : cn.methods) {
+            java.util.Set<org.objectweb.asm.tree.LabelNode> targets = new java.util.HashSet<>();
+            for (AbstractInsnNode in : m.instructions.toArray()) {
+                if (in instanceof org.objectweb.asm.tree.JumpInsnNode j) {
+                    targets.add(j.label);
+                } else if (in instanceof org.objectweb.asm.tree.TableSwitchInsnNode t) {
+                    targets.add(t.dflt);
+                    targets.addAll(t.labels);
+                } else if (in instanceof org.objectweb.asm.tree.LookupSwitchInsnNode l) {
+                    targets.add(l.dflt);
+                    targets.addAll(l.labels);
+                }
+            }
+            for (org.objectweb.asm.tree.TryCatchBlockNode t : m.tryCatchBlocks) {
+                targets.add(t.handler);
+            }
+            for (org.objectweb.asm.tree.LabelNode label : targets) {
+                AbstractInsnNode n = label.getNext();
+                while (n != null && (n instanceof org.objectweb.asm.tree.LabelNode || n instanceof org.objectweb.asm.tree.LineNumberNode)) {
+                    n = n.getNext();
+                }
+                if (!(n instanceof FrameNode)) {
+                    throw new IllegalStateException("branch target without a stack map frame in " + cn.name + "." + m.name + m.desc);
+                }
+            }
+        }
+    }
+
     private static byte[] write(ClassNode cn) {
+        requireFrames(cn);
         // the inserted code has no branches, so existing frames stay valid and only the stack size has to be recomputed
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         cn.accept(cw);
