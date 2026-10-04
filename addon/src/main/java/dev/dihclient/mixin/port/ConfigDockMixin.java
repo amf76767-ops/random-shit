@@ -1,6 +1,7 @@
 package dev.dihclient.mixin.port;
 
 import dev.dihclient.port.configs.ConfigDock;
+import dev.dihclient.port.configs.DonutPanel;
 import net.minecraft.class_11905;
 import net.minecraft.class_11908;
 import net.minecraft.class_11909;
@@ -16,6 +17,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 /** Puts the {@link ConfigDock} on top of the DIH GUI and gives it the clicks, keys and scrolling that belong to it. */
 @Mixin(targets = "dev.dihclient.gui.MeteorGuiScreen")
 public abstract class ConfigDockMixin {
+    /** The window of the Donut category gets a free place on the first frame (see DonutPanel). */
+    @Inject(method = "placeDefaults", at = @At("HEAD"))
+    private void dih$donutSpot(CallbackInfo ci) {
+        class_437 self = (class_437) (Object) this;
+        float scale = 1.0F;
+        try {
+            java.lang.reflect.Method m = self.getClass().getDeclaredMethod("scale");
+            m.setAccessible(true);
+            scale = (Float) m.invoke(null);
+        } catch (Throwable ignored) {
+            // scale 1
+        }
+        DonutPanel.place(self, (int) (self.field_22789 / scale));
+    }
+
     @Inject(method = "method_25394", at = @At("TAIL"))
     private void dih$drawDock(class_332 graphics, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         class_437 self = (class_437) (Object) this;

@@ -36,7 +36,7 @@ public class AntiTrap extends Module {
     private class_638 lastLevel;
 
     public AntiTrap() {
-        super("Anti Trap", Category.PLAYER, "Allows you to escape from armor stands and chest minecarts.");
+        super("Anti Trap", Category.DONUT, "Allows you to escape from armor stands and chest minecarts.");
     }
 
     @Override

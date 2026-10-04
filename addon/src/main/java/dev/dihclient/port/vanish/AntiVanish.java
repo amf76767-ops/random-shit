@@ -84,7 +84,7 @@ public class AntiVanish extends Module {
     private String lastWatch = "";
 
     public AntiVanish() {
-        super("Anti Vanish", Category.MISC, "Detects vanished players.");
+        super("Anti Vanish", Category.DONUT, "Detects vanished players.");
     }
 
     @Override

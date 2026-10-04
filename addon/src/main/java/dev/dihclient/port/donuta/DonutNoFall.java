@@ -21,7 +21,7 @@ public class DonutNoFall extends Module {
     private boolean sendingReplacement;
 
     public DonutNoFall() {
-        super("Donut NoFall", Category.MOVEMENT, "Take no fall damage on DonutSMP.");
+        super("Donut NoFall", Category.DONUT, "Take no fall damage on DonutSMP.");
     }
 
     @Override

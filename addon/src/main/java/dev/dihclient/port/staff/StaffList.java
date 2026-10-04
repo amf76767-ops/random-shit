@@ -105,7 +105,7 @@ public class StaffList extends Module {
     private String titleText = "";
 
     public StaffList() {
-        super("Staff List", Category.MISC, "Lists online DonutSMP staff.");
+        super("Staff List", Category.DONUT, "Lists online DonutSMP staff.");
         this.regionAlert.onChange(() -> {
             if (!this.regionAlert.get()) {
                 this.forgetShard();

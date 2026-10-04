@@ -14,6 +14,6 @@ public class TridentUtilModule extends Module {
     public final BoolSetting noWater = this.bool("No Water", "Lets you throw or riptide a trident without water or rain (this client only).", true);
 
     public TridentUtilModule() {
-        super("Trident Util", Category.MISC, "Use tridents out of water and charge them faster.");
+        super("Trident Util", Category.DONUT, "Use tridents out of water and charge them faster.");
     }
 }

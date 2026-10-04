@@ -98,6 +98,11 @@ public final class AddonHooks {
         });
         step("fold modules", () -> Folds.apply(modules));
         step("config dock", dev.dihclient.port.configs.Configs::install);
+        step("Donut icon", () -> {
+            java.lang.reflect.Field icons = dev.dihclient.gui.ClickGuiScreen.class.getDeclaredField("ICONS");
+            icons.setAccessible(true);
+            ((java.util.Map<dev.dihclient.module.Category, String>) icons.get(null)).put(dev.dihclient.module.Category.DONUT, "◆");
+        });
     }
 
     /** Called at the start of every client tick. */

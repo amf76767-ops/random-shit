@@ -85,7 +85,7 @@ public final class AmethystBypassModule extends Module {
     private boolean broken;
 
     public AmethystBypassModule() {
-        super("Amethyst Bypass", Category.BASEFINDING, "Shows amethyst geodes hidden by anti-xray.");
+        super("Amethyst Bypass", Category.DONUT, "Shows amethyst geodes hidden by anti-xray.");
         this.method.onChange(this::restart);
     }
 

@@ -14,6 +14,6 @@ public class TridentBoostModule extends Module {
     public final BoolSetting outOfWater = this.bool("Out Of Water", "Lets the riptide work without water or rain (this client only).", true);
 
     public TridentBoostModule() {
-        super("Trident Boost", Category.MOVEMENT, "Boosts you when using riptide with a trident.");
+        super("Trident Boost", Category.DONUT, "Boosts you when using riptide with a trident.");
     }
 }

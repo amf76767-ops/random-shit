@@ -81,7 +81,7 @@ public class FakeStats extends Module {
     private boolean nameReported;
 
     public FakeStats() {
-        super("Fake Stats", Category.MISC, "Shows your own name and stats on the sidebar and tab list. Blank stats get scrambled.");
+        super("Fake Stats", Category.DONUT, "Shows your own name and stats on the sidebar and tab list. Blank stats get scrambled.");
     }
 
     // ------------------------------------------------------------------ hooks (mixins)

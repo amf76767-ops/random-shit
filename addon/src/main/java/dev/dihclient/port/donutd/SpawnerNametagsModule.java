@@ -45,7 +45,7 @@ public final class SpawnerNametagsModule extends Module {
     private boolean broken;
 
     public SpawnerNametagsModule() {
-        super("Spawner Nametags", Category.RENDER, "Shows each spawner's mob and activation range over the block.");
+        super("Spawner Nametags", Category.DONUT, "Shows each spawner's mob and activation range over the block.");
     }
 
     @Override

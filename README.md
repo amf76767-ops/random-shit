@@ -1,6 +1,6 @@
 # DIHClient
 
-Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.11.0**.
+Fabric-Client für Minecraft **1.21.11**. Dieses Repo enthält die Version **6.12.0**.
 
 ## Korrektur gegenüber 5.6 (Absturz beim Start)
 Schon die 5.6 stürzt beim Start ab, sobald Fabric die Mixins von DIHClient prüft (Fehlermeldung `@Mixin target type
@@ -212,3 +212,6 @@ Nicht im Spiel getestet. Aus Anubis 0.9.8 (GPL-3.0, eigener Client) nach DIH üb
 - **Render / Basefinding:** Spawner Nametags, Amethyst Bypass (Methoden Bypass / Light / ANBS+ Scan).
 - Auf Servern mit Anti-Cheat (z. B. Grim) sind **Donut NoFall, Trident Util, Trident Boost, Air Stuck und Donut Speed Mine** vermutlich erkennbar. Riptide und Auto Relog sind unauffälliger. Fake Stats und Amethyst Bypass senden nichts.
 - **Alles auf Englisch:** die letzten deutschen Meldungen (VisualPack, Debug-Zeilen, Pack-Beschreibung) sind übersetzt, die deutsche Sprachdatei `de_de.json` wird nicht mehr mitgeliefert. Diese README bleibt deutsch.
+
+### 6.12.0: Eigene Kategorie "Donut"
+Die Donut-Module haben jetzt ein eigenes Fenster im GUI (neben Basefinding): Air Stuck, Amethyst Bypass, Anti Trap, Anti Vanish, Auto Relog, Donut NoFall, Donut Speed Mine, Fake Stats, Player Detection, Riptide, Spawner Nametags, Spawner Protect, Staff List, Trident Boost, Trident Util. Modul-IDs, gespeicherte Einstellungen und Tasten bleiben gleich (die Kategorie wird nicht gespeichert). Das Fenster bekommt beim ersten Öffnen einen freien Platz rechts neben den anderen. Nicht im Spiel getestet.

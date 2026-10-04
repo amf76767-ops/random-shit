@@ -17,7 +17,7 @@ public class RiptideModule extends Module {
     private boolean broken;
 
     public RiptideModule() {
-        super("Riptide", Category.MISC, "Uses a riptide trident while you hold right-click.");
+        super("Riptide", Category.DONUT, "Uses a riptide trident while you hold right-click.");
     }
 
     @Override

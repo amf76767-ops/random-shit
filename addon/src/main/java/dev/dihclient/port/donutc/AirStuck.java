@@ -20,7 +20,7 @@ public class AirStuck extends Module {
     public static volatile AirStuck active;
 
     public AirStuck() {
-        super("Air Stuck", Category.MOVEMENT, "Freezes you in place, even mid-air.");
+        super("Air Stuck", Category.DONUT, "Freezes you in place, even mid-air.");
     }
 
     @Override

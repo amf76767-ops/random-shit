@@ -55,7 +55,7 @@ public class PlayerDetection extends Module {
     private Set<String> whitelist = Set.of();
 
     public PlayerDetection() {
-        super("Player Detection", Category.MISC, "Detects when players are in the world.");
+        super("Player Detection", Category.DONUT, "Detects when players are in the world.");
     }
 
     @Override

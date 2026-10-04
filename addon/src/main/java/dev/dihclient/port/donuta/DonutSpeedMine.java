@@ -25,7 +25,7 @@ public class DonutSpeedMine extends Module {
             "Keep the wait after blocks that break instantly anyway.", true).visibleWhen(this.skipDelay::get);
 
     public DonutSpeedMine() {
-        super("Donut Speed Mine", Category.PLAYER, "Finishes breaking blocks before the full break time.");
+        super("Donut Speed Mine", Category.DONUT, "Finishes breaking blocks before the full break time.");
     }
 
     @Override

@@ -107,7 +107,7 @@ public class SpawnerProtect extends Module {
     private int failures;
 
     public SpawnerProtect() {
-        super("Spawner Protect", Category.MISC, "Mines your spawners into an ender chest when someone gets close.");
+        super("Spawner Protect", Category.DONUT, "Mines your spawners into an ender chest when someone gets close.");
     }
 
     @Override

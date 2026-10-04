@@ -37,7 +37,7 @@ public class AutoRelog extends Module implements ModuleManager.MenuTicking {
     private int rejoinTicks;
 
     public AutoRelog() {
-        super("Auto Relog", Category.MISC, "Relogs once when you go down to deepslate level.");
+        super("Auto Relog", Category.DONUT, "Relogs once when you go down to deepslate level.");
     }
 
     @Override
