@@ -154,6 +154,10 @@ public final class Patcher {
                         if (e.getName().equals("dev/dihclient/gui/MeteorGuiScreen.class") || e.getName().equals("dev/dihclient/gui/ClickGuiScreen.class")) {
                             data = routeClickSound(data, e.getName());
                         }
+                        if (e.getName().equals("dev/dihclient/gui/ClickGuiScreen.class") || e.getName().equals("dev/dihclient/hud/HudManager.class")
+                                || e.getName().equals("dev/dihclient/hud/elements/TargetElement.class")) {
+                            data = routeComponentText(data, e.getName());
+                        }
                         if (e.getName().equals("dev/dihclient/util/Notifications.class")) {
                             data = toggleSoundInNotifications(data);
                         }
@@ -347,6 +351,28 @@ public final class Patcher {
         }
         if (n != 1) {
             throw new IllegalStateException("expected one \"" + from + "\" in constructor of " + cn.name + ", found " + n);
+        }
+        ClassWriter cw = new ClassWriter(0);
+        cn.accept(cw);
+        return cw.toByteArray();
+    }
+
+    /** Text drawn as a bold component (module names, window titles) goes through Gfx, which draws it in the smooth font. */
+    static byte[] routeComponentText(byte[] data, String name) {
+        ClassNode cn = read(data);
+        int n = 0;
+        for (MethodNode m : cn.methods) {
+            for (AbstractInsnNode in : m.instructions.toArray()) {
+                if (in instanceof MethodInsnNode mi && mi.getOpcode() == Opcodes.INVOKEVIRTUAL && mi.owner.equals("net/minecraft/class_332")
+                        && mi.name.equals("method_51439") && mi.desc.equals("(Lnet/minecraft/class_327;Lnet/minecraft/class_2561;IIIZ)V")) {
+                    m.instructions.set(mi, new MethodInsnNode(Opcodes.INVOKESTATIC, "dev/dihclient/render/Gfx", "drawComponent",
+                            "(Lnet/minecraft/class_332;Lnet/minecraft/class_327;Lnet/minecraft/class_2561;IIIZ)V", false));
+                    n++;
+                }
+            }
+        }
+        if (n < 1) {
+            throw new IllegalStateException("expected component text in " + name);
         }
         ClassWriter cw = new ClassWriter(0);
         cn.accept(cw);

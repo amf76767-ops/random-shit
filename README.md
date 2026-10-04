@@ -287,3 +287,10 @@ Nicht im Spiel getestet.
 Nicht im Spiel getestet.
 - Die Themes **Classic, Neon Circuit, Frost Glass und Pixel Forge** sind entfernt, ebenso das Setting **Theme**. Es bleibt ein Setting **ClickGUI → Style** mit drei Werten: **Modern** (ein Fenster mit Seitenleiste), **Meteor** (ein Panel pro Kategorie) und **Glass** (die neue durchsichtige GUI). Modern und Meteor haben die normalen Farben mit dem einstellbaren **Accent**.
 - Alte Configs werden übernommen: Das alte Layout (Modern/Meteor) wird zum Style, und war als Theme Glass gewählt, wird der Style Glass.
+
+### 8.0.0: Weicher statt pixelig, Configs-Leiste in Glass
+Nicht im Spiel getestet.
+- **Runde Ecken sind jetzt geglättet** (vorher gestuft). Das gilt für alle Karten, Felder, Schalter, Rahmen und Schatten im GUI und im HUD.
+- **Schrift:** GUI und HUD zeichnen den Text in der glatten Schrift **Inter** (Regular und Fett; Lizenz SIL OFL, `assets/dihclient/font/OFL-Inter.txt`) statt in der Pixelschrift des Spiels. Zeichen, die Inter nicht hat (zum Beispiel ⚙ oder ▲), kommen weiter aus der normalen Schrift. Wenn die Schrift bei dir falsch aussieht oder verrutscht: **ClickGUI → Smooth Font** ausschalten, dann ist alles wie vorher.
+- **Configs-Leiste unten** hat im Style **Glass** jetzt auch durchsichtige Karten, Felder und Knöpfe. In Modern und Meteor bleibt sie wie sie war.
+- Versionsnummer ab jetzt 8.x.

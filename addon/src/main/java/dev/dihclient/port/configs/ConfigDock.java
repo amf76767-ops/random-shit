@@ -1,6 +1,8 @@
 package dev.dihclient.port.configs;
 
 import dev.dihclient.hud.HudManager;
+import dev.dihclient.module.ModuleManager;
+import dev.dihclient.modules.client.ClickGui;
 import dev.dihclient.render.Gfx;
 import dev.dihclient.util.ColorUtil;
 import dev.dihclient.util.ConfigShare;
@@ -113,12 +115,24 @@ public final class ConfigDock {
 
     // ---------------------------------------------------------------- drawing
 
+    /** True while the ClickGUI style is Glass: the dock then uses see-through cards like the rest of the GUI. */
+    private static boolean glass() {
+        ClickGui gui = ModuleManager.of(ClickGui.class);
+        return gui != null && gui.layout.get() == ClickGui.Layout.GLASS;
+    }
+
     public static void draw(class_332 g, int mx, int my, int sw, int sh) {
-        int accent = HudManager.accent();
+        final boolean glass = glass();
+        int accent = glass ? 0xFFFFFFFF : HudManager.accent();
         int tx = (sw - TAB_W) / 2;
         int ty = sh - TAB_H - 2;
         boolean hover = inTab(mx, my, sw, sh);
-        Gfx.round(g, tx, ty, TAB_W, TAB_H, open || hover ? ColorUtil.withAlpha(accent, 200) : -14079703);
+        if (glass) {
+            Gfx.rect(g, tx, ty, TAB_W, TAB_H, 8, open || hover ? 0x44FFFFFF : 0x24FFFFFF);
+            Gfx.outline(g, tx, ty, TAB_W, TAB_H, 8, open || hover ? 0x66FFFFFF : 0x33FFFFFF);
+        } else {
+            Gfx.round(g, tx, ty, TAB_W, TAB_H, open || hover ? ColorUtil.withAlpha(accent, 200) : -14079703);
+        }
         Gfx.textCentered(g, open ? "Configs  ▼" : "Configs  ▲", sw / 2, ty + 4, -1);
         if (!open) {
             return;
@@ -126,7 +140,13 @@ public final class ConfigDock {
         ConfigStore store = Configs.store();
         int x = panelX(sw);
         int y = panelY(sh);
-        Gfx.panel(g, x, y, W, H, accent);
+        if (glass) {
+            Gfx.shadow(g, x, y, W, H, 10, 4, 0.5F);
+            Gfx.rect(g, x, y, W, H, 10, 0x8C101018);
+            Gfx.outline(g, x, y, W, H, 10, 0x33FFFFFF);
+        } else {
+            Gfx.panel(g, x, y, W, H, accent);
+        }
         Gfx.text(g, "Configs", x + 10, y + 8, accent);
         Gfx.text(g, "double-click loads", x + 70, y + 8, -7564380);
 
@@ -139,7 +159,11 @@ public final class ConfigDock {
             int ry = y + 26 + i * ROW;
             boolean over = Gfx.inside(mx, my, x + 10, ry, 180, ROW - 2);
             boolean picked = entry.id == selected;
-            Gfx.round(g, x + 10, ry, 180, ROW - 2, picked ? ColorUtil.withAlpha(accent, 90) : (over ? 822083583 : 419430399));
+            if (glass) {
+                Gfx.rect(g, x + 10, ry, 180, ROW - 2, 6, picked ? 0x44FFFFFF : (over ? 0x30FFFFFF : 0x18FFFFFF));
+            } else {
+                Gfx.round(g, x + 10, ry, 180, ROW - 2, picked ? ColorUtil.withAlpha(accent, 90) : (over ? 822083583 : 419430399));
+            }
             Gfx.text(g, shorten(entry.name, 22), x + 16, ry + 5, -1);
             if (!entry.servers.isEmpty()) {
                 Gfx.text(g, "●", x + 178, ry + 5, accent);
@@ -155,7 +179,12 @@ public final class ConfigDock {
                 default -> "Server address (e.g. play.example.net):";
             };
             Gfx.text(g, prompt, rx, y + 56, -1446670);
-            Gfx.round(g, rx, y + 70, 270, 20, -14868182);
+            if (glass) {
+                Gfx.rect(g, rx, y + 70, 270, 20, 6, 0x22FFFFFF);
+                Gfx.outline(g, rx, y + 70, 270, 20, 6, 0x44FFFFFF);
+            } else {
+                Gfx.round(g, rx, y + 70, 270, 20, -14868182);
+            }
             boolean caret = (System.currentTimeMillis() / 500) % 2 == 0;
             Gfx.text(g, Gfx.trim(text + (caret ? "_" : ""), 258), rx + 6, y + 76, -1);
         } else if (e == null) {
@@ -182,8 +211,14 @@ public final class ConfigDock {
         for (Btn b : buttons(sw, sh)) {
             boolean over = b.enabled() && Gfx.inside(mx, my, b.x(), b.y(), b.w(), b.h());
             boolean danger = b.id().equals("delete") && b.label().equals("Sure?");
-            int fill = !b.enabled() ? -13421773 : (danger ? Gfx.RED : (over ? ColorUtil.withAlpha(accent, 150) : -14079703));
-            Gfx.round(g, b.x(), b.y(), b.w(), b.h(), fill);
+            if (glass) {
+                int fill = !b.enabled() ? 0x10FFFFFF : (danger ? 0xCCE0405A : (over ? 0x4CFFFFFF : 0x26FFFFFF));
+                Gfx.rect(g, b.x(), b.y(), b.w(), b.h(), 8, fill);
+                Gfx.outline(g, b.x(), b.y(), b.w(), b.h(), 8, !b.enabled() ? 0x1AFFFFFF : 0x33FFFFFF);
+            } else {
+                int fill = !b.enabled() ? -13421773 : (danger ? Gfx.RED : (over ? ColorUtil.withAlpha(accent, 150) : -14079703));
+                Gfx.round(g, b.x(), b.y(), b.w(), b.h(), fill);
+            }
             Gfx.textCentered(g, b.label(), b.x() + b.w() / 2, b.y() + (b.h() - 8) / 2, b.enabled() ? -1 : -9539986);
         }
     }

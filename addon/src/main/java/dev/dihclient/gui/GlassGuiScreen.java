@@ -3,7 +3,6 @@ package dev.dihclient.gui;
 import dev.dihclient.DIHClient;
 import dev.dihclient.glue.GuiSounds;
 import dev.dihclient.gui.theme.Anim;
-import dev.dihclient.gui.theme.Skin;
 import dev.dihclient.module.Category;
 import dev.dihclient.module.Module;
 import dev.dihclient.module.ModuleManager;
@@ -285,12 +284,7 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
         this.drawTooltip(g);
         g.method_51448().popMatrix();
 
-        Skin.begin();
-        try {
-            ConfigDock.draw(g, mx, my, this.field_22789, this.field_22790);
-        } finally {
-            Skin.end();
-        }
+        ConfigDock.draw(g, mx, my, this.field_22789, this.field_22790);
     }
 
     private void drawTabs(class_332 g, List<Category> cats) {
