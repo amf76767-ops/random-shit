@@ -69,6 +69,9 @@ public final class Patcher {
                 if (added.contains(e.getName())) {
                     throw new IllegalStateException("add-on class would overwrite " + e.getName());
                 }
+                if (e.getName().equals("assets/dihclient/lang/de_de.json")) {
+                    continue; // the client is English only; German players get the English key names
+                }
                 byte[] data;
                 try (InputStream in = zin.getInputStream(e)) {
                     data = in.readAllBytes();

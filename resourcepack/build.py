@@ -98,7 +98,7 @@ def water(size, frames, flowing):
 def files():
     mc = "assets/minecraft/"
     yield "pack.mcmeta", json.dumps({"pack": {"pack_format": FORMAT, "min_format": FORMAT, "max_format": FORMAT,
-                                              "description": "DIH Visuals: Tiefenschiefer-Stone, klares Wasser, durchsichtige Wolken, Himmelverlauf, Glanz, kleines Totem"}}, indent=2).encode()
+                                              "description": "DIH Visuals: deepslate-style stone, clear water, see-through clouds, sky gradient, colour glint, small totem"}}, indent=2).encode()
     yield mc + "textures/block/stone.png", stone()
     yield mc + "textures/misc/enchanted_glint_item.png", glint()
     yield mc + "textures/misc/enchanted_glint_armor.png", glint()

@@ -94,7 +94,7 @@ public final class LegalPlace {
         long now = System.currentTimeMillis();
         if (now - lastNote > 5000) {
             lastNote = now;
-            DIHClient.LOG.info("[DIHClient] AutoBuild: {} Platzierungen nicht gesendet, weil sie nicht legal gewesen wären", refused);
+            DIHClient.LOG.info("[DIHClient] AutoBuild: {} placements not sent because they would not have been legal", refused);
         }
     }
 

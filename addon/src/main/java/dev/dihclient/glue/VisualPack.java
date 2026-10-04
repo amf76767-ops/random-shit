@@ -135,11 +135,11 @@ public class VisualPack extends Module {
             boolean reloaded = this.switchPack(on, "file/" + name);
             this.cleanOld(on ? name : null);
             if (reloaded) {
-                Notifications.info(this.name(), on ? "Pack an (" + this.getInfo() + "), Ressourcen laden neu" : "Pack aus, Ressourcen laden neu");
+                Notifications.info(this.name(), on ? "Pack on (" + this.getInfo() + "), reloading resources" : "Pack off, reloading resources");
             }
         } catch (Throwable t) {
             DIHClient.LOG.warn("[DIHClient] VisualPack failed", t);
-            Notifications.warn(this.name(), "Fehlgeschlagen: " + t.getClass().getSimpleName() + " " + t.getMessage());
+            Notifications.warn(this.name(), "Failed: " + t.getClass().getSimpleName() + " " + t.getMessage());
         }
     }
 
@@ -166,7 +166,7 @@ public class VisualPack extends Module {
         byte[] bytes;
         try (InputStream in = VisualPack.class.getResourceAsStream(RESOURCE)) {
             if (in == null) {
-                throw new IOException("Pack fehlt in der JAR");
+                throw new IOException("Pack is missing from the jar");
             }
             bytes = PackFilter.copy(in, this::skip, look::patch);
         }
@@ -204,15 +204,15 @@ public class VisualPack extends Module {
             }
         }
         if (manager == null) {
-            throw new IllegalStateException("ResourcePackManager nicht gefunden");
+            throw new IllegalStateException("ResourcePackManager not found");
         }
         Class<?> mgr = manager.getClass();
-        invoke(mgr, manager, "method_14445"); // scanPacks, findet die neu kopierte Datei
+        invoke(mgr, manager, "method_14445"); // scanPacks, finds the file that was just copied
         Collection<String> enabled = (Collection<String>) invoke(mgr, manager, "method_29210"); // getEnabledIds
         List<String> next = new ArrayList<>(enabled);
         next.removeIf(e -> e.startsWith("file/" + PREFIX)); // earlier choices of this pack
         if (on) {
-            next.add(id); // ganz oben: spätere Einträge gewinnen
+            next.add(id); // on top: later entries win
         }
         if (next.equals(new ArrayList<>(enabled))) {
             return false;

@@ -67,7 +67,7 @@ public final class SoftKeys {
         long now = System.currentTimeMillis();
         if (now - lastLog > 2000) {
             lastLog = now;
-            DIHClient.LOG.info("[DIH-Debug] Modul drückt eine Taste (Software): {}", caller);
+            DIHClient.LOG.info("[DIH-Debug] a module presses a key (software): {}", caller);
         }
     }
 }

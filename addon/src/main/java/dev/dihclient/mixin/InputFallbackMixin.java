@@ -35,9 +35,9 @@ public abstract class InputFallbackMixin extends class_744 {
             return;
         }
         if (o.field_1894.method_1434() && ++dih$debugTicks % 40 == 0) {
-            // eine Zeile alle 2 Sekunden, solange "vorwärts" gedrückt ist (echt oder per Modul): zeigt, wo die Kette abreißt
+            // one line every 2 seconds while "forward" is held (real or by a module): shows where the chain breaks
             class_310 mc = class_310.method_1551();
-            DIHClient.LOG.info("[DIH-Debug] vorwaerts: tastatur={} software={} eingabe={} spieler={} bildschirm={}",
+            DIHClient.LOG.info("[DIH-Debug] forward: keyboard={} software={} input={} player={} screen={}",
                 KeyUtil.isPhysicallyDown(o.field_1894), soft(o.field_1894), this.field_54155,
                 mc.field_1724 == null ? "?" : String.format("%.3f", mc.field_1724.method_18798().field_1352), mc.field_1755 != null);
         }
