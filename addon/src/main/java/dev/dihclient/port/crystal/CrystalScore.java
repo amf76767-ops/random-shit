@@ -1,7 +1,7 @@
 package dev.dihclient.port.crystal;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The judgement of Crystal Aura on one blast spot: is it safe for you and your friends, is it worth it, and how good is it.
  * Pure numbers; the module reads the damage with {@link CrystalDamage} and fills in the settings.
  */

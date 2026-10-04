@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.UUID;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * One tracked staff member of the list, plus the ordering of the list. No Minecraft classes.
  */
 public final class StaffEntry {

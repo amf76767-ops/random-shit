@@ -7,7 +7,7 @@ import java.util.HexFormat;
 import java.util.Locale;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * What is asked from the lyrics service: title, artist, album and duration of the playing track.
  */
 public record LyricsQuery(String title, String artist, String album, int durationSeconds) {

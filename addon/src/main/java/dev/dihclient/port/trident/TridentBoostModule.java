@@ -6,7 +6,7 @@ import dev.dihclient.setting.BoolSetting;
 import dev.dihclient.setting.DoubleSetting;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Boosts you when using riptide with a trident. The work is done by {@code TridentRiptideMixin}, which reads these settings.
  */
 public class TridentBoostModule extends Module {

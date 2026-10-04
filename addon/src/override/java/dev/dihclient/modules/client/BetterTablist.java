@@ -18,7 +18,10 @@ import net.minecraft.class_332;
 import net.minecraft.class_640;
 import net.minecraft.class_7532;
 
-/** The TAB list as a clean card: rounded panel, one row per player with head, name, health, distance and a ping meter. */
+/**
+ * The TAB list as a clean card: rounded panel, one row per player with head, name, health, distance and a ping meter. In the Glass
+ * style of the ClickGUI the card is see-through like the rest of the GUI.
+ */
 public class BetterTablist extends Module {
     public final BoolSetting health = this.bool("Health", "Shows the health of loaded players.", true).legacy("betterTab.health");
     public final BoolSetting distance = this.bool("Distance", "Shows the distance to loaded players.", true).legacy("betterTab.distance");
@@ -62,9 +65,17 @@ public class BetterTablist extends Module {
         int height = rows * ROW_H + 34;
         int x0 = (mc.method_22683().method_4486() - width) / 2;
         int y0 = 12;
-        int accent = HudManager.accent();
+        ClickGui gui = ModuleManager.of(ClickGui.class);
+        boolean glass = gui != null && gui.layout.get() == ClickGui.Layout.GLASS;
+        int accent = glass ? 0xFFFFFFFF : HudManager.accent();
 
-        Gfx.panel(g, x0, y0, width, height, accent);
+        if (glass) {
+            Gfx.shadow(g, x0, y0, width, height, 10, 4, 0.5F);
+            Gfx.rect(g, x0, y0, width, height, 10, 0x8C101018);
+            Gfx.outline(g, x0, y0, width, height, 10, 0x33FFFFFF);
+        } else {
+            Gfx.panel(g, x0, y0, width, height, accent);
+        }
         Gfx.text(g, "Players", x0 + 8, y0 + 7, -1);
         String count = players.size() + " online";
         Gfx.text(g, count, x0 + width - 8 - Gfx.width(count), y0 + 7, 0xFF9AA0AE);
@@ -79,9 +90,9 @@ public class BetterTablist extends Module {
             boolean spectator = entry.method_2958() == class_1934.field_9219;
             boolean me = entry.method_2966().id().equals(mc.field_1724.method_5667());
             if (me) {
-                Gfx.rect(g, x, y - 1, COL_W - 4, ROW_H - 1, 3, (accent & 0x00FFFFFF) | 0x40000000);
+                Gfx.rect(g, x, y - 1, COL_W - 4, ROW_H - 1, glass ? 6 : 3, glass ? 0x33FFFFFF : (accent & 0x00FFFFFF) | 0x40000000);
             } else if ((row & 1) == 0) {
-                Gfx.rect(g, x, y - 1, COL_W - 4, ROW_H - 1, 3, 0x14FFFFFF);
+                Gfx.rect(g, x, y - 1, COL_W - 4, ROW_H - 1, glass ? 6 : 3, 0x14FFFFFF);
             }
 
             class_7532.method_52722(g, entry.method_52810(), x + 2, y, 10);

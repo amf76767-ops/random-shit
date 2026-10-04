@@ -1,7 +1,7 @@
 package dev.dihclient.port.staff;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Timing and pitch of the alarm modes of {@link StaffAlarm}; kept apart so it needs no Minecraft classes.
  */
 public final class AlarmPattern {

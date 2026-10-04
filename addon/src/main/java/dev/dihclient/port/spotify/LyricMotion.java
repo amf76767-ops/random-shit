@@ -1,6 +1,6 @@
 package dev.dihclient.port.spotify;
 
-/** Ported from Anubis Client 0.9.8 (GPL-3.0). How the lyric lines move when the song goes on to the next line. */
+/** Ported from an open-source client (GPL-3.0). How the lyric lines move when the song goes on to the next line. */
 public enum LyricMotion {
     /** The lines slide up one after the other. */
     WAVE,

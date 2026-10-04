@@ -9,7 +9,7 @@ import net.minecraft.class_634;
 import net.minecraft.class_746;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Take no fall damage on DonutSMP. After a fall of more than 3 blocks every movement packet is replaced by a full
  * position+look packet whose ground flag says "in the air" until four ground packets have passed; every second one of
  * them is sent 1e-8 higher. The server therefore never receives the landing. Needs the server to trust the client's

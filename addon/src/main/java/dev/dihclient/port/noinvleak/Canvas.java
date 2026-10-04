@@ -3,7 +3,7 @@ package dev.dihclient.port.noinvleak;
 import java.nio.IntBuffer;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * <p>
  * Software drawing onto an int pixel buffer (premultiplied ARGB, like the layered window wants). No Minecraft or OS types, so
  * it can be tested headless.

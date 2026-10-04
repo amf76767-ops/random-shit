@@ -4,7 +4,7 @@ import java.util.BitSet;
 import java.util.List;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Sorts the sky-light arrays of a chunk / light packet into {@link LightSectionStatus}. No game classes here, so it can be tested.
  */
 public final class LightDataClassifier {

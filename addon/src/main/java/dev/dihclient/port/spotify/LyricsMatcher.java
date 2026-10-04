@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Picks the LRCLIB search result that really is the playing track (title, artist, duration, synced > plain).
  */
 public final class LyricsMatcher {

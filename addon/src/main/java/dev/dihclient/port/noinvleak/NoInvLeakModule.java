@@ -14,7 +14,7 @@ import net.minecraft.class_310;
 import net.minecraft.class_746;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * <p>
  * Hides the items of your own inventory, hotbar, cursor and armor HUD on screen: the game shows a fake item instead (a totem,
  * a random believable loadout, or nothing). With Stream Only (Windows) the real items are drawn into windows that screen

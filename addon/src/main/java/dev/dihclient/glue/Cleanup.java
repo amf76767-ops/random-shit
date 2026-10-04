@@ -21,7 +21,7 @@ public final class Cleanup {
             "AutoPot", "MaceCombo", "Step", "ReverseStep", "AutoReconnect", "InvManager", "SurvivalAlerts", "MoneyHud",
             "Xray", "Chams", "DamageNumbers", "Waypoints", "DihChat", "Friends", "Enemies", "NewChunks", "BaseTraces",
             "Watchlist", "PacketBuffer", "PacketFly", "HammerTool", "Fullbright", "SafeWalk", "BoatNoClip", "AutoTrade",
-            // Profiles: now the config dock in the GUI. PlayerActivity: the old "Player Bypass"; the ported Anubis module has that name now
+            // Profiles: now the config dock in the GUI. PlayerActivity: the old "Player Bypass"; the ported module has that name now
             "PlayerActivity", "Profiles",
             // removed on request (BowAimbot: a fired arrow cannot be steered from the client)
             "AutoWalk", "BowAimbot", "DiscoMode", "DrunkMode");

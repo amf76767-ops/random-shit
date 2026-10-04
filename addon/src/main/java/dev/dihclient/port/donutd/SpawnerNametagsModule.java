@@ -22,7 +22,7 @@ import net.minecraft.class_2818;
 import net.minecraft.class_638;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Shows each spawner's mob and activation range over the block: a label with the mob, the distance and the range, and a ring on
  * the ground-plane of the spawner at that range (brighter while you are inside it). The spawners are found in the block entities
  * of the loaded chunks; the mob and the range come from the spawner data the server sent. Only what the client already has is read.

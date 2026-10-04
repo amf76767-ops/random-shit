@@ -2,7 +2,7 @@ package dev.dihclient.port.spotify;
 
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * What Spotify is doing right now (from the Windows media session, or from the title of its window as fallback).
  */
 public record NowPlaying(

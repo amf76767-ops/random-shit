@@ -1,8 +1,8 @@
 package dev.dihclient.port.spotify;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
- * Keys that can be bound to the media actions. Anubis let you press any key or mouse button in its own bind widget; the
+ * Ported from an open-source client (GPL-3.0).
+ * Keys that can be bound to the media actions. the original let you press any key or mouse button in its own bind widget; the
  * DIHClient settings have no such widget, so this is a fixed list of keys that the game itself does not use.
  */
 public enum MediaBind {

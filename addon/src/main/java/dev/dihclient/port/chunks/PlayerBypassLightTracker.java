@@ -17,10 +17,10 @@ import net.minecraft.class_6606;
 import net.minecraft.class_746;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Game side of Player Bypass: feeds the light of chunk and light packets (after the game has applied them, game thread) to the
  * {@link ChunkFlagTracker}, keeps the protected-chunk store in step with the world and walks the entry guard every tick.
- * Like in Anubis it runs whether or not the module is on, so the chunks around your own base are protected before you switch it on;
+ * Like in the original it runs whether or not the module is on, so the chunks around your own base are protected before you switch it on;
  * {@link #install()} is called by the module and is safe to call twice.
  */
 public final class PlayerBypassLightTracker {

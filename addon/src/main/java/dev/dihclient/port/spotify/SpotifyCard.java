@@ -14,9 +14,9 @@ import net.minecraft.class_310;
 import net.minecraft.class_332;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Draws the Spotify card (cover, title, artist, transport row, progress bar, lyrics) or the one-line note shown while
- * nothing plays. Anubis drew this with ImGui inside its HUD renderer; this version uses the game's own GUI drawing and the
+ * nothing plays. the original drew this with ImGui inside its HUD renderer; this version uses the game's own GUI drawing and the
  * DIHClient HUD style. Everything is laid out in GUI pixels at scale 1 and scaled as a whole by the Scale setting.
  * All methods run on the render thread (the cover becomes a game texture here).
  */

@@ -53,15 +53,15 @@ import net.minecraft.class_7828;
 import net.minecraft.class_7923;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Detects vanished players: a tab list entry that disappears or is hidden without a leave message, a switch to spectator,
  * a name the server still completes for /msg although it is not in the tab list, plus sensors (invisible player entities,
  * chest/door/lever sounds and combat particles without a visible cause). The decisions live in {@link VanishEngine};
  * this class only reads packets and the game and reports through the DIH notifications.
  * <p>
- * Differences to Anubis: the Donut staff list is gone, so "who counts" is a setting (everyone, or a list of names; the
+ * Differences to the original: the Donut staff list is gone, so "who counts" is a setting (everyone, or a list of names; the
  * Watchlist Alarm names and your enemies are included), friends can be ignored, and the alert goes to the DIH
- * notifications instead of the Anubis chat and ghost overlay.
+ * notifications instead of the original chat and ghost overlay.
  */
 public class AntiVanish extends Module {
     public enum Targets { EVERYONE, LISTED }

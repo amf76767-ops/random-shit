@@ -1,7 +1,7 @@
 package dev.dihclient.port.donuta;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The two numbers of Donut Speed Mine: how the break progress is scaled and when the delay between two blocks is dropped.
  */
 public final class DonutSpeedMineLogic {

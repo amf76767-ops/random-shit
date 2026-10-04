@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Minimal client for Discord's local IPC (rich presence): a named pipe on Windows, a unix socket elsewhere. Nothing here
  * touches the internet; the desktop app does the talking to Discord. Not thread safe: one thread owns an instance.
  * The frame format is {@code [int32 LE opcode][int32 LE length][UTF-8 JSON]}.

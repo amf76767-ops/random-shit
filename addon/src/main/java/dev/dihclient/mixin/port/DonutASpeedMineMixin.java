@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
  * Donut Speed Mine: the game adds the break progress of a block once per tick in updateBlockBreakingProgress; the
- * module scales that gain, and may zero the wait between two blocks before it is checked. (The Anubis original wraps the
+ * module scales that gain, and may zero the wait between two blocks before it is checked. (The original wraps the
  * calcBlockBreakingDelta call with MixinExtras; DIH does not ship MixinExtras, and redirecting the field write instead
  * of the call keeps the target visible to the static mixin check.)
  */

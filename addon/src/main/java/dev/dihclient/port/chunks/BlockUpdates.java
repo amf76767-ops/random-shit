@@ -9,7 +9,7 @@ import net.minecraft.class_2338;
 import net.minecraft.class_2680;
 
 /**
- * Block changes of the client world with the old and the new state (the Anubis {@code BlockUpdateEvent}); fed by
+ * Block changes of the client world with the old and the new state (the original {@code BlockUpdateEvent}); fed by
  * {@code ClientWorldUpdateMixin} on the game thread. The position may be a mutable one: do not keep it.
  */
 public final class BlockUpdates {

@@ -14,15 +14,15 @@ import net.minecraft.class_642;
 import net.minecraft.class_8732;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Shows DIHClient (and, if you allow it, the server you are on) in your Discord status. It talks only to the local Discord
  * app over its IPC pipe / unix socket (see {@link DiscordIpc}); no web request is made. By default no server address is sent.
  * Runs in the main menu too ({@link ModuleManager.MenuTicking}), so leaving a world is noticed.
  */
 public class DiscordPresence extends Module implements ModuleManager.MenuTicking {
-    /** The Anubis Client application. Its name shows as the game name in Discord; replace it to get your own. */
-    static final String DEFAULT_APP_ID = "1553391775840866314";
-    static final String DEFAULT_IMAGE = "logo";
+    /** The id of your own Discord application: its name shows as the game name in Discord. */
+    static final String DEFAULT_APP_ID = "";
+    static final String DEFAULT_IMAGE = "";
     private static final String LARGE_TEXT = "DIHClient";
     private static final long GAME_STARTED = ProcessHandle.current().info().startInstant().orElseGet(Instant::now).getEpochSecond();
 
@@ -30,7 +30,7 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
     private static boolean hookInstalled;
 
     public final StringSetting appId = this.text("Application ID",
-            "Discord application the status belongs to (discord.com/developers). The default is the Anubis Client one: Discord will show its name and 'Image Asset' from it. Put your own id here, and an image uploaded to it below.",
+            "Discord application the status belongs to (discord.com/developers). Create one at discord.com/developers (New Application), copy its Application ID here and upload an image to it for the image below. Empty: nothing is shown in Discord.",
             DEFAULT_APP_ID, 24);
     public final StringSetting imageAsset = this.text("Image Asset",
             "Name of the large image in your Discord application (Rich Presence > Art Assets). Empty = no image.",
@@ -58,6 +58,9 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
     @Override
     protected void onEnable() {
         this.session = null;
+        if (this.appId.get() == null || this.appId.get().isBlank()) {
+            dev.dihclient.util.Notifications.warn(this.name(), "Set your own Discord Application ID in the settings (discord.com/developers)");
+        }
         this.ensureLink();
         this.refresh();
     }

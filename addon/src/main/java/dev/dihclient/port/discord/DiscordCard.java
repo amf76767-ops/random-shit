@@ -3,7 +3,7 @@ package dev.dihclient.port.discord;
 import com.google.gson.JsonObject;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * What the Discord status shows, and the pure rules that build it (what may be shown, text clean-up, the JSON).
  * Everything that leaves the game is built in {@link #activity}; there is no other field.
  *

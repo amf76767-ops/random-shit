@@ -13,7 +13,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Decides from the tab-list texts (prefix, suffix, display name, team) whether a player is staff and which rank to show.
  * Pure text logic, no Minecraft classes.
  */

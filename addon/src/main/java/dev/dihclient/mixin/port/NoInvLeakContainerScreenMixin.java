@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0) (MixinNoInvLeakContainerScreen).
+ * Ported from an open-source client (GPL-3.0) (MixinNoInvLeakContainerScreen).
  * Container screens for No Inv Leak: the stack of the player's own slots, the cursor stack and the tooltip.
  */
 @Mixin(class_465.class)

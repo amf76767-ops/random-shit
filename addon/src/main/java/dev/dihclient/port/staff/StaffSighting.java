@@ -1,7 +1,7 @@
 package dev.dihclient.port.staff;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * What we know about one staff member being in OUR region (same shard) rather than only somewhere on the network.
  */
 public final class StaffSighting {

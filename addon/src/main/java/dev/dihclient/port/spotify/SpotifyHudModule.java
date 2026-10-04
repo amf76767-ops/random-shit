@@ -22,7 +22,7 @@ import net.minecraft.class_3675;
 import org.lwjgl.glfw.GLFW;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Shows what the Spotify desktop app is playing (cover, title, artist, progress) with synced lyrics, and can send
  * play/pause/next/previous. Windows only: the now-playing data comes from the Windows media session of the Spotify app
  * (WinRT, through the JNA library the game ships), with the title of the Spotify window as fallback. On other systems
@@ -31,7 +31,7 @@ import org.lwjgl.glfw.GLFW;
  * The only network traffic is the lyrics lookup at lrclib.net (artist, title, album and length of the playing track,
  * see {@link LyricsService}), which "Lyrics Online" switches off; lyrics found earlier stay readable from the disk cache.
  * <p>
- * Dropped from Anubis: the HUD layout editor (the card is placed with Position / Offset / Scale below), the chat note on
+ * Dropped from the original: the HUD layout editor (the card is placed with Position / Offset / Scale below), the chat note on
  * unsupported systems, the free key capture for the media keys (a fixed key list, see {@link MediaBind}), the glyph check
  * of the ImGui font (the game font falls back to Unifont by itself). "Card Width" is in GUI pixels now.
  */

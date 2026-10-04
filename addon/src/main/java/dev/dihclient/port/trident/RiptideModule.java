@@ -8,7 +8,7 @@ import net.minecraft.class_746;
 import org.lwjgl.glfw.GLFW;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Uses a riptide trident while you hold right-click: starts the use, lets go once it is charged, and starts again.
  * It only acts in water or rain (the same place a server accepts a riptide), no Trident Util needed.
  */

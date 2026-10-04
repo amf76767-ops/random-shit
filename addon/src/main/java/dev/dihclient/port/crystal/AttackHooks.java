@@ -7,7 +7,7 @@ import net.minecraft.class_1297;
 import net.minecraft.class_310;
 
 /**
- * Tells the crystal modules when the local player starts an attack (Anubis: PlayerAttackEntityEvent).
+ * Tells the crystal modules when the local player starts an attack (original: PlayerAttackEntityEvent).
  * Fed by {@code CrystalAttackMixin}; a listener that throws is logged and skipped.
  */
 public final class AttackHooks {

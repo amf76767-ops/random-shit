@@ -41,7 +41,7 @@ import java.util.concurrent.Flow.Subscription;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Finds lyrics for the playing track. This is the only network code of the Spotify HUD: HTTPS GET requests to
  * {@code https://lrclib.net/api/get} and {@code /api/search} (LRCLIB, an open lyrics database) with the query string
  * track_name, artist_name, album_name and duration (seconds) of the playing track. Nothing else is sent (no account,

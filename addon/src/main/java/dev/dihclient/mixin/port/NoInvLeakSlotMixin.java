@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0) (MixinNoInvLeakSlot).
+ * Ported from an open-source client (GPL-3.0) (MixinNoInvLeakSlot).
  * The grey silhouette of an empty armor/offhand slot would show through the overlay, so it is dropped for filled own slots.
  */
 @Mixin(class_1735.class)

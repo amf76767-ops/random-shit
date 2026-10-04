@@ -27,7 +27,7 @@ import net.minecraft.class_746;
 import net.minecraft.class_9334;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The few melee helpers (MeleeAttacks) the crystal modules need; friends come from the DIH social list.
  */
 final class Melee {
@@ -36,7 +36,7 @@ final class Melee {
     private Melee() {
     }
 
-    /** Same gate as the Anubis modules: no screen, not eating, not in Freecam. */
+    /** Same gate as the original modules: no screen, not eating, not in Freecam. */
     static boolean canAct(class_310 mc) {
         if (mc.field_1724 == null || mc.field_1687 == null || mc.field_1761 == null || mc.field_1755 != null) {
             return false;

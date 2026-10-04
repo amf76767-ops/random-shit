@@ -9,7 +9,7 @@ import net.minecraft.class_310;
 import org.lwjgl.glfw.GLFW;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Hold the key of this module (C by default, change it in the GUI) to zoom in. The mouse wheel changes the zoom while you
  * hold it, and the mouse turns slower the closer you are. The field of view comes from {@code ZoomRenderMixin}, the slower
  * turning and the wheel from {@code ZoomMouseMixin}. The module is always on; the key only works while no screen is open.

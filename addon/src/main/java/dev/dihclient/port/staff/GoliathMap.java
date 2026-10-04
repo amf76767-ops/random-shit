@@ -3,7 +3,7 @@ package dev.dihclient.port.staff;
 import java.util.Arrays;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Which "goliath" (DonutSMP region block) a position of the overworld belongs to. Only used to notice that you moved to
  * another region, because the staff you saw there is not your neighbour any more.
  */

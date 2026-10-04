@@ -8,7 +8,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Groups flagged chunks into connected areas (8 neighbours) and gives one point per area for the tracer: the middle of the
  * area, moved to the nearest chunk of the area when the middle is not inside it. The result is cached until the set changes.
  */

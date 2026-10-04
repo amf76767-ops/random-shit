@@ -7,7 +7,7 @@ import java.util.concurrent.locks.LockSupport;
 import java.util.function.BooleanSupplier;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The thread that owns the Discord connection. The game thread only publishes the wanted {@link DiscordCard} (null = show
  * nothing); everything that can block (finding the pipe, handshake, writes) happens here, on a daemon thread. Reconnects with
  * back-off, sends at most one update per few seconds, and clears the status when told to stop.

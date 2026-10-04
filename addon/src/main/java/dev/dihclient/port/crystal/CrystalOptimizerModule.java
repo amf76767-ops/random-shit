@@ -33,7 +33,7 @@ import net.minecraft.class_1297.class_5529;
 import net.minecraft.class_2824.class_5908;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Removes a crystal on your screen as soon as your own hit is sure to break it, so the next crystal can be placed
  * without waiting for the server. It only does so when the hit really deals damage (weapon, enchants, effects, recent hand swaps).
  */

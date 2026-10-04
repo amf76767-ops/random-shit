@@ -3,7 +3,7 @@ package dev.dihclient.port.crystal;
 import java.util.function.LongSupplier;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Limits of the anti-cheat profiles (Grim-Aldenz keeps to what Grim accepts). Pure logic, no game access.
  */
 public final class Bypass {

@@ -10,7 +10,7 @@ import net.minecraft.class_437;
 import net.minecraft.class_9334;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * <p>
  * The tooltip and the "held item name" label, drawn into their own capture-excluded windows when the game itself must not
  * draw them (they would show the real item to the stream).

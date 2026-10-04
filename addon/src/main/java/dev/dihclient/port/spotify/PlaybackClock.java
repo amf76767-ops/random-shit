@@ -2,7 +2,7 @@ package dev.dihclient.port.spotify;
 
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Smooth position of the playing track: follows the 500 ms samples of the media session without jumping back and forth.
  */
 public final class PlaybackClock {

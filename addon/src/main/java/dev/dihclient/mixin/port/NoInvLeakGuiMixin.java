@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0) (MixinNoInvLeakGui).
+ * Ported from an open-source client (GPL-3.0) (MixinNoInvLeakGui).
  * Hotbar for No Inv Leak: the stack of every hotbar/offhand slot, the held item name and the selection frame.
  */
 @Mixin(class_329.class)

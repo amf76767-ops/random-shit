@@ -32,7 +32,7 @@ import net.minecraft.class_9022;
 import net.minecraft.class_9025;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Shows your own name and stats on the sidebar and in the tab list. The sidebar of the server is copied into a private
  * objective of the client scoreboard (the server's own data stays untouched) and shown instead: the row with your name
  * gets the name you chose, a row with a stat (money, shards ...) gets the value you chose, and every other number is
@@ -42,7 +42,7 @@ import net.minecraft.class_9025;
  * lives in DonutCFakeStatsTabMixin. With the BetterTablist module on, the vanilla tab list is not drawn at all (see
  * InGameHudMixin), so only the sidebar part is visible then.
  * <p>
- * Differences to Anubis: the texts start empty (Anubis showed an advert text); it is not on by default.
+ * Differences to the original: the texts start empty (the original showed an advert text); it is not on by default.
  */
 public class FakeStats extends Module {
     private static final String OBJECTIVE = "dih_fs";

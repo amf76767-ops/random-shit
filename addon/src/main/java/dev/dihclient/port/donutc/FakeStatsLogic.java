@@ -6,7 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The text and number logic of Fake Stats, free of game classes so it can be tested: finding a stat in a sidebar line,
  * scrambling numbers (same digit count, never the real value) and the small string helpers.
  */

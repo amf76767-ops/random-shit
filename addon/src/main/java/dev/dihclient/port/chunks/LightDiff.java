@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The maths of Prime Chunk Finder, without any game class: keeping the last block-light of every section of a chunk, finding which
  * light values changed when a new light packet comes in, and the distance rules that explain a change by a known light source
  * (a lamp, exposed redstone ore, an amethyst cluster) so that it does not count as a player's work.

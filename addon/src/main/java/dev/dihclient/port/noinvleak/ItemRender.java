@@ -16,7 +16,7 @@ import org.joml.Matrix4fStack;
 import org.lwjgl.opengl.GL11;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0) (the render step of its ItemIcons).
+ * Ported from an open-source client (GPL-3.0) (the render step of its ItemIcons).
  * <p>
  * Draws one item model, lit like in a GUI slot, into a square cell of an off-screen texture. All render state it touches is put
  * back afterwards so the frame that is being built is not disturbed.

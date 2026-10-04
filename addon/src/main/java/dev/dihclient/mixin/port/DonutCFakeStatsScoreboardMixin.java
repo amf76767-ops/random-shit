@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0) (MixinFakeStatsScoreboard).
+ * Ported from an open-source client (GPL-3.0) (MixinFakeStatsScoreboard).
  * The server sets the sidebar objective through here; Fake Stats shows its own copy of it instead.
  */
 @Mixin(class_269.class)

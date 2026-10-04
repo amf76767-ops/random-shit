@@ -5,7 +5,7 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The decisions of Spawner Protect without any game class: which step comes next, when a pile of broken blocks counts as
  * "someone is digging towards us", the whitelist. The module only reads the game and carries the decisions out.
  */

@@ -46,7 +46,7 @@ import net.minecraft.class_742;
 import net.minecraft.class_746;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Places and breaks end crystals where they hurt the enemy most and you and your friends least. With the Grim-Aldenz
  * profile it only acts when the rotation the server saw already points at the target (silent rotation, see {@link ServerRotation}).
  */
@@ -277,7 +277,7 @@ public class CrystalAuraModule extends Module {
         }
     }
 
-    /** DIH's Crystal Macro also switches slots and clicks; while it is on, this module leaves the hand to it (Anubis: CombatMacroLock). */
+    /** DIH's Crystal Macro also switches slots and clicks; while it is on, this module leaves the hand to it (original: CombatMacroLock). */
     private static boolean ownedByMacro() {
         return ModuleManager.on(CrystalMacro.class);
     }

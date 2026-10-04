@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0) (ArmorStatus.shownInHud call).
+ * Ported from an open-source client (GPL-3.0) (ArmorStatus.shownInHud call).
  * The armor element of the DIH HUD reads the worn stacks; No Inv Leak may swap them for fakes.
  */
 @Mixin(targets = "dev.dihclient.hud.elements.ArmorElement")

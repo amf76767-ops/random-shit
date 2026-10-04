@@ -1,7 +1,7 @@
 package dev.dihclient.port.crystal;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The pure numbers of end crystal damage: falloff, difficulty, armor, resistance, enchants, shield angle and the
  * sight sampling of the exposure. No game classes in here, so it can be tested on its own ({@code CrystalAuraTests}).
  * Armor and enchant formulas are the ones of {@code DamageUtil} (1.21.11) for a source without weapon, which an

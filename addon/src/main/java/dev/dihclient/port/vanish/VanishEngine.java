@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Decision logic of the Anti Vanish module without any Minecraft type: it is fed with observations (tab list changes,
  * chat lines, sounds, particles ...) and with a view of the game ({@link Env}), and reports through a {@link Sink}.
  * <p>

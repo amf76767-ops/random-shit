@@ -9,7 +9,7 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The game-free parts of Player Detection: who counts, comma lists and the panic pay command.
  */
 public final class PlayerDetectionLogic {

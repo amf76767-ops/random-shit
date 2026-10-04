@@ -9,7 +9,7 @@ import net.minecraft.class_2680;
 import net.minecraft.class_3481;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Finishes breaking blocks before the full break time: the break progress of the block you mine is divided by "Break At",
  * so the client sends its "block is broken" packet at that share of the real time (the stock server accepts it from 70 %).
  * It only holds the settings; the progress is changed by {@code DonutASpeedMineMixin}. This is independent of PacketMine.

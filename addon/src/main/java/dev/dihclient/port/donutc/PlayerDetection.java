@@ -24,12 +24,12 @@ import net.minecraft.class_742;
 import net.minecraft.class_746;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Detects when other players are in the world around you (every player entity the client has loaded, so within render
  * range, not the tab list). On a change of that group it warns you, switches the listed modules, can send a panic
  * /pay, turns itself off and can disconnect after half a second.
  * <p>
- * Differences to Anubis: the Discord webhook (URL, self ping, Discord ID) is gone, the module has no HTTP code of its
+ * Differences to the original: the Discord webhook (URL, self ping, Discord ID) is gone, the module has no HTTP code of its
  * own: the alert is handed to Discord Alarm, which forwards it to the webhook you set there when it is on. The toast
  * is the DIH notification toast. Module names for "Modules To Toggle" are matched against the DIH modules.
  */

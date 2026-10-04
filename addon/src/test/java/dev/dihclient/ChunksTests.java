@@ -308,13 +308,13 @@ public final class ChunksTests {
             b.select(null, null);
             check(!b.isProtected(c1) && !b.protect(c1), "no world selected = nothing protected");
 
-            // old Anubis files are taken over once
+            // old files are taken over once
             Path legacyFile = legacy.resolve(ProtectedChunkStore.fileName("old.server", dim));
             Files.copy(file, legacyFile);
             Files.writeString(legacyFile, Files.readString(file).replace("example.com", "old.server"));
             ProtectedChunkStore c = new ProtectedChunkStore(() -> dir, () -> legacy);
             c.select("old.server", dim);
-            check(c.isProtected(c1), "old Anubis file is read when there is no new one");
+            check(c.isProtected(c1), "old file is read when there is no new one");
             c.flushAndWait();
             check(Files.isRegularFile(dir.resolve(ProtectedChunkStore.fileName("old.server", dim))), "and written to the new folder");
 

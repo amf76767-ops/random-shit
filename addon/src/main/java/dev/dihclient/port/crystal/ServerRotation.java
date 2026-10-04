@@ -5,7 +5,7 @@ import net.minecraft.class_3532;
 import net.minecraft.class_746;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Silent rotation: the aim is put on the player only while the movement packet is built, then the own view comes back.
  * Hooked by {@code CrystalPlayerMixin} and {@code CrystalKeyboardInputMixin}.
  */

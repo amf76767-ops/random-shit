@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Locale;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Reads (and controls) the Windows "System Media Transport Controls" session of the Spotify app through WinRT:
  * GlobalSystemMediaTransportControlsSessionManager -> the session whose app id contains "spotify" -> title, artist,
  * album, timeline, playback state, thumbnail. No network involved; everything stays on this PC. All calls must come

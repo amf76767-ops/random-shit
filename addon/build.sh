@@ -59,7 +59,7 @@ java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.MergeTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.EmoteTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.PacketLogTests
 FASTUTIL=$CACHE/fastutil-8.5.15.jar:$SLF4J
-for t in StaffListTests ToolsTests VanishTests CrystalAuraTests ChunksTests NoInvLeakTests ConfigStoreTests DiscordTests SpotifyHudTests TridentTests DonutATests DonutCTests DonutDTests RoutePlannerTests TeamTests; do
+for t in StaffListTests ToolsTests VanishTests CrystalAuraTests ChunksTests NoInvLeakTests ConfigStoreTests DiscordTests SpotifyHudTests TridentTests DonutATests DonutCTests DonutDTests RoutePlannerTests TeamTests LagTests; do
   java -cp "$BUILD/test:$BUILD/classes:$GSON:$FASTUTIL" dev.dihclient.$t
 done
 python3 ../resourcepack/build.py >/dev/null
@@ -73,7 +73,7 @@ java -cp "$BUILD/tools:$ASM" Patcher "$BASE" "$BUILD/classes" "$OUT" "${VERSION}
 if java -cp "$BUILD/tools:$ASM" MixinCheck "$BASE" >/dev/null; then echo "note: base jar has no mixin problem any more"; fi
 java -cp "$BUILD/tools:$ASM" MixinCheck "$OUT"
 # every mixin of the add-on must find its target in the real game (a failing mixin would stop the game from starting)
-# TridentRiptideMixin: /tmp/mc-int.jar leaves two inherited calls unremapped, so the check cannot see them (the names come from the working Anubis client)
+# TridentRiptideMixin: /tmp/mc-int.jar leaves two inherited calls unremapped, so the check cannot see them (the names come from the working original client)
 [ -n "$MC_INT" ] && java -cp "$ASM" tools/MixinTargets.java --ignore 'TridentRiptideMixin#dih$tridentWet' --ignore 'TridentRiptideMixin#dih$tridentPush' "$BUILD/classes" "$BUILD/override" "$BASE" "$MC_INT"
 # the JVM verifies every class of the jar the way it does at game start: a patched class without a stack map frame would crash the start
 [ -n "$MC_INT" ] && java tools/VerifyClasses.java "$OUT" "$MC_INT:$BUILD/stubs:$(ls $CACHE/*.jar | tr '\n' ':')"

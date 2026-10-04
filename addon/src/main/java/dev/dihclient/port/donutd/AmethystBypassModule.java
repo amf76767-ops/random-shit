@@ -32,7 +32,7 @@ import net.minecraft.class_638;
 import net.minecraft.class_2338.class_2339;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Shows amethyst geodes that anti-xray hides, in three ways:
  * <ul>
  *   <li>Bypass: the chunk data still lists which blocks a section holds (its palette), anti-xray only scrambles where they are;

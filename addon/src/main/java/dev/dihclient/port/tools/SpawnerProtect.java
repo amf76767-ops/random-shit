@@ -52,7 +52,7 @@ import net.minecraft.class_742;
 import net.minecraft.class_746;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Mines your spawners into an ender chest when blocks start breaking around you: the break packets of the server are
  * counted, and enough of them far from you (and not from a whitelisted player) set it off. Then it walks to the spawners,
  * mines them, picks them up, puts them into an ender chest (placing or buying one, /shop is the shop of the server this

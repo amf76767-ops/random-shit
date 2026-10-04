@@ -11,7 +11,7 @@ import net.minecraft.class_2596;
 
 /**
  * Packet events for the ported modules. DIH only knew "packet send"; the received packets come from {@code NetHandlerMixin}.
- * Three points in time, like in the Anubis client the modules come from:
+ * Three points in time, like in the client the modules come from:
  * <ul>
  *   <li>{@link #netty}: on the network thread, before the game sees the packet. May cancel it.</li>
  *   <li>{@link #received}: on a worker thread right after, for heavy work (the packet is never touched by the game thread).</li>

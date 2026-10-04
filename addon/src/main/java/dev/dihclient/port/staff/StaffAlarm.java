@@ -11,7 +11,7 @@ import net.minecraft.class_3417;
 import net.minecraft.class_3419;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * A short repeating alarm sound (a few seconds) that plays at full stereo, no matter where you stand. Game thread only.
  */
 public final class StaffAlarm {

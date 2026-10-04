@@ -49,14 +49,14 @@ import net.minecraft.class_7532;
 import net.minecraft.class_8042;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Lists the DonutSMP staff that are online. Everything comes from data the server already sends you (tab list, game-mode
  * updates, nearby players) matched against a built-in name list; this module makes NO network request of its own.
  * <p>
  * Besides the plain list it tries to tell which staff member is in YOUR region (shard): one that switched game mode
  * (the packet only reaches players on the same shard) or whose body is near you is marked "WATCHING YOU" and raises an alarm.
  * <p>
- * Dropped from Anubis: the spinning ghost face (needs ImGui), the "Goodluck Anubis User" note, the name hider (NameFilter)
+ * Dropped from the original: the spinning ghost face (needs ImGui), a "good luck" note, the name hider (NameFilter)
  * and the HUD layout editor (the list is drawn in onRender2D with the position settings below).
  */
 public class StaffList extends Module {

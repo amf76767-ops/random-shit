@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The state machine of Player Bypass: which chunks carry the "dark light section" signal, which ones were already
  * reported, and which ones are held back while the player is underground (their own base lights up chunks around them).
  * It was a part of {@code PlayerBypassLightTracker}; split off so it runs without the game.

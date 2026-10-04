@@ -3,7 +3,7 @@ package dev.dihclient.port.donutd;
 import java.util.function.IntPredicate;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The decisions of Amethyst Bypass and Spawner Nametags without any game class, so they can be unit tested.
  */
 public final class DonutDLogic {

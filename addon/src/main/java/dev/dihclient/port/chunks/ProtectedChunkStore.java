@@ -29,9 +29,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The chunks that must never be flagged (the ones around where you have been), per server and dimension, kept in
- * {@code config/dihclient/playerbypass-protected}. Files from the old Anubis folder are picked up once when no new file exists.
+ * {@code config/dihclient/playerbypass-protected}. Files from the old folder are picked up once when no new file exists.
  * Game thread only; the files are written on a background thread from a copy.
  */
 public final class ProtectedChunkStore implements ChunkFlagTracker.Protection {
@@ -46,7 +46,7 @@ public final class ProtectedChunkStore implements ChunkFlagTracker.Protection {
     private static final Logger LOGGER = LoggerFactory.getLogger("DIHClient");
     private static final ProtectedChunkStore INSTANCE = new ProtectedChunkStore(
             () -> FabricLoader.getInstance().getConfigDir().resolve("dihclient").resolve("playerbypass-protected"),
-            () -> FabricLoader.getInstance().getConfigDir().resolve("anubis").resolve("playerbypass-protected"));
+            null);
 
     private final Supplier<Path> directory;
     private final Supplier<Path> legacyDirectory;
@@ -63,7 +63,7 @@ public final class ProtectedChunkStore implements ChunkFlagTracker.Protection {
     private boolean dirty;
     private long dirtySince;
 
-    /** @param legacyDirectory folder of the old Anubis files, or null */
+    /** @param legacyDirectory folder of the old files, or null */
     public ProtectedChunkStore(Supplier<Path> directory, Supplier<Path> legacyDirectory) {
         this.directory = directory;
         this.legacyDirectory = legacyDirectory;

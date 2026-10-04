@@ -15,7 +15,7 @@ import net.minecraft.class_2561;
 import net.minecraft.class_634;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Flags chunks where the server sent a fully dark sky-light section below Y 62: a covered, player-made space under the
  * surface. The light data comes from {@link PlayerBypassLightTracker}; this class is the settings, the alert and the drawing.
  * Replaces the old DIH module of the same name (PlayerActivity).

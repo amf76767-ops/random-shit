@@ -26,7 +26,7 @@ import net.minecraft.class_437;
 import org.lwjgl.opengl.GL11;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * <p>
  * Stream Only: the game draws no item in the player's own slots. Instead the real items are painted into capture-excluded
  * overlay windows laid over the game window (visible on the monitor, invisible to screen capture), and the fake items are put on
@@ -37,7 +37,7 @@ import org.lwjgl.opengl.GL11;
  *       are redrawn only when something changed.</li>
  *   <li>{@link #drawFakes}: the fake pictures (slot background + fake item) are blitted onto the back buffer.</li>
  * </ol>
- * Anubis drew the fake pictures with its ImGui layer; that does not exist in DIHClient, so {@link FakeBlitter} does it.
+ * The original drew the fake pictures with its ImGui layer; that does not exist in DIHClient, so {@link FakeBlitter} does it.
  * Windows only (see {@link OverlayWindow}); everywhere else {@link #usable()} is false and the module falls back to showing
  * fakes in-game.
  */
@@ -543,9 +543,9 @@ public final class StreamOverlay {
     private static void allocate(int px) {
         int side = 7 * px;
         GpuDevice device = RenderSystem.getDevice();
-        scratch = device.createTexture("Anubis overlay icons", 15, TextureFormat.RGBA8, side, side, 1, 1);
+        scratch = device.createTexture("DIH overlay icons", 15, TextureFormat.RGBA8, side, side, 1, 1);
         scratchView = device.createTextureView(scratch);
-        scratchDepth = device.createTexture("Anubis overlay icon depth", 8, TextureFormat.DEPTH32, side, side, 1, 1);
+        scratchDepth = device.createTexture("DIH overlay icon depth", 8, TextureFormat.DEPTH32, side, side, 1, 1);
         scratchDepthView = device.createTextureView(scratchDepth);
         device.createCommandEncoder().clearColorAndDepthTextures(scratch, 0, scratchDepth, 1.0);
         iconPx = px;
@@ -582,7 +582,7 @@ public final class StreamOverlay {
                     readback.close();
                 }
 
-                readback = device.createBuffer(() -> "Anubis overlay readback", 9, needed);
+                readback = device.createBuffer(() -> "DIH overlay readback", 9, needed);
             }
 
             CommandEncoder encoder = device.createCommandEncoder();
@@ -637,7 +637,7 @@ public final class StreamOverlay {
                     asyncBuffer.close();
                 }
 
-                asyncBuffer = device.createBuffer(() -> "Anubis overlay background", 9, frameBytes);
+                asyncBuffer = device.createBuffer(() -> "DIH overlay background", 9, frameBytes);
             }
 
             CommandEncoder encoder = device.createCommandEncoder();

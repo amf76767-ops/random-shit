@@ -1,7 +1,7 @@
 package dev.dihclient.port.noinvleak;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * <p>
  * The stack count and the durability bar of an item slot, drawn with plain rectangles (a 5x7 digit font) so the overlay does not
  * need the game's font renderer. Pure Java, tested headless.

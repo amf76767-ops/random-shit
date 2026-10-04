@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0) (MixinAirStuckLocalPlayer).
+ * Ported from an open-source client (GPL-3.0) (MixinAirStuckLocalPlayer).
  * While Air Stuck is on the player's movement step (LocalPlayer#aiStep) does not run, so you neither fall nor move.
  */
 @Mixin(class_746.class)

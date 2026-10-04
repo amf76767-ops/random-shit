@@ -7,7 +7,7 @@ import net.minecraft.class_1799;
 import net.minecraft.class_1802;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * <p>
  * The "Random" style: a believable loadout per inventory slot (0-8 hotbar, 9-35 main, 36-39 armor feet to head, 40 offhand,
  * 41 anything else), rolled from one seed so a slot keeps its item until the module is switched on again.

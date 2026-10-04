@@ -8,6 +8,7 @@ import dev.dihclient.modules.render.Freecam;
 import dev.dihclient.setting.BoolSetting;
 import dev.dihclient.setting.IntSetting;
 import dev.dihclient.util.InvUtil;
+import dev.dihclient.util.Notifications;
 import it.unimi.dsi.fastutil.objects.Object2IntMap.Entry;
 import java.util.concurrent.ThreadLocalRandom;
 import net.minecraft.class_12125;
@@ -22,13 +23,16 @@ import net.minecraft.class_746;
 import net.minecraft.class_9334;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
- * Swaps to your best Lunge spear, lunges and swaps back. The module's own key (the keybind in the GUI) is the lunge key,
- * like the other key-triggered modules; the module has to be switched on for it to work.
+ * Ported from an open-source client (GPL-3.0).
+ * Swaps to your best Lunge spear, lunges and swaps back. The module's own key (the keybind in the GUI) is the lunge key.
+ * The module has no switch: it is always ready and only reacts to its key (before, it had to be switched on as well, so the key did
+ * nothing on a fresh install). A spear without Lunge is used too unless "Lunge Only" is on, and when the key cannot do anything it
+ * says why instead of staying silent.
  */
 public class SpearSwap extends Module {
     private static final int BUFFER_TICKS = 10;
 
+    public final BoolSetting lungeOnly = this.bool("Lunge Only", "Only use spears with the Lunge enchantment. Off: a spear without it is used when there is no Lunge spear.", false);
     public final IntSetting cooldown = this.integer("Cooldown", "Ticks to wait after a lunge before the next one.", 12, 0, 40);
     public final BoolSetting switchBack = this.bool("Switch Back", "Goes back to the slot you were holding after the lunge.", true);
     public final IntSetting backDelay = this.integer("Back Delay", "Ticks before it switches back.", 3, 1, 20).visibleWhen(this.switchBack::get);
@@ -43,6 +47,8 @@ public class SpearSwap extends Module {
     private int returnSlot = -1;
     private int returnTick;
     private class_746 owner;
+    /** Why the last press could not lunge (shown when the press runs out), or null. */
+    private String blocked;
 
     public SpearSwap() {
         super("Spear Swap", Category.COMBAT, "Swaps to your Lunge spear, lunges and swaps back. Bind a key to lunge.");
@@ -51,6 +57,11 @@ public class SpearSwap extends Module {
     @Override
     public boolean isActionModule() {
         return true;
+    }
+
+    @Override
+    public boolean isToggleable() {
+        return false;
     }
 
     @Override
@@ -88,6 +99,7 @@ public class SpearSwap extends Module {
         if (mc.field_1755 == null && mc.field_1724 != null && mc.field_1687 != null && !this.returning && !this.pending && this.ticks >= this.readyTick) {
             this.pending = true;
             this.pendingTicks = 0;
+            this.blocked = null;
         }
     }
 
@@ -131,6 +143,9 @@ public class SpearSwap extends Module {
     private void tryLunge(class_746 player) {
         if (++this.pendingTicks > BUFFER_TICKS) {
             this.pending = false; // could not lunge in time, the press is forgotten
+            if (this.blocked != null) {
+                Notifications.warn(this.name(), this.blocked);
+            }
             return;
         }
         if (!this.canLunge(player)) {
@@ -140,11 +155,13 @@ public class SpearSwap extends Module {
         int slot = bestSpear(inventory);
         if (slot < 0) {
             this.pending = false;
+            Notifications.warn(this.name(), this.lungeOnly.get() ? "No Lunge spear in the hotbar" : "No spear in the hotbar");
             return;
         }
         class_1799 spear = inventory.method_5438(slot);
         class_12125 weapon = spear.method_58694(class_9334.field_63631);
         if (weapon == null || !canJab(player, spear)) {
+            this.blocked = "The spear is not ready yet (attack charge)";
             return;
         }
         this.pending = false;
@@ -164,10 +181,19 @@ public class SpearSwap extends Module {
 
     private boolean canLunge(class_746 player) {
         if (mc.field_1755 != null || mc.field_1761.method_2928() || ModuleManager.on(Freecam.class)) {
+            this.blocked = "Cannot lunge now (screen, flying lock or Freecam)";
             return false;
         }
-        return !player.method_6115() && !player.method_5799() && !player.method_6128() && !player.method_5765()
-            && (player.method_7344().method_75882() || player.method_31549().field_7478);
+        if (player.method_6115()) {
+            this.blocked = "Cannot lunge while using an item";
+        } else if (player.method_5799() || player.method_6128() || player.method_5765()) {
+            this.blocked = "Cannot lunge in water, while gliding or riding";
+        } else if (!player.method_7344().method_75882() && !player.method_31549().field_7478) {
+            this.blocked = "Too hungry to lunge (you cannot sprint)";
+        } else {
+            return true;
+        }
+        return false;
     }
 
     private static boolean canJab(class_746 player, class_1799 spear) {
@@ -176,12 +202,14 @@ public class SpearSwap extends Module {
             && spear.method_45435(game.field_1687.method_45162()) && !player.method_75202(spear, 0);
     }
 
-    private static int bestSpear(class_1661 inventory) {
+    private int bestSpear(class_1661 inventory) {
         int[] levels = new int[class_1661.method_7368()];
         for (int slot = 0; slot < levels.length; slot++) {
             class_1799 stack = inventory.method_5438(slot);
             if (stack.method_57826(class_9334.field_63631) && !stack.method_63692()) {
-                levels[slot] = lungeLevel(stack);
+                int lunge = lungeLevel(stack);
+                // a Lunge spear beats a plain one (level 1), which is used only when "Lunge Only" is off
+                levels[slot] = lunge > 0 ? lunge + 1 : (this.lungeOnly.get() ? 0 : 1);
             }
         }
         return ToolsLogic.pickSpear(levels, inventory.method_67532());

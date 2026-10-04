@@ -1,7 +1,7 @@
 package dev.dihclient.port.tools;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Pure decisions of Spear Swap and Hover Totem, kept free of game classes so they can be unit tested.
  */
 public final class ToolsLogic {

@@ -7,7 +7,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
 /**
- * Not in Anubis: replaces its ImGui pass. Puts the fake slot pictures on the window's back buffer right before the buffers are
+ * Not in the original: replaces its ImGui pass. Puts the fake slot pictures on the window's back buffer right before the buffers are
  * swapped, i.e. after the real background of the slots was read back and after the game drew the frame without any item in
  * those slots. The capture-excluded overlay windows then cover them for the player, a screen capture sees only these.
  * <p>

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * One track record of the LRCLIB lyrics service (JSON in and out; the same JSON is what the disk cache stores).
  */
 public record LrclibTrack(

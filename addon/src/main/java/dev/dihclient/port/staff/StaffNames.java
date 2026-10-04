@@ -8,8 +8,8 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
- * The built-in list of DonutSMP staff accounts (hard-coded in Anubis too, nothing is downloaded) and small pure helpers.
+ * Ported from an open-source client (GPL-3.0).
+ * The built-in list of DonutSMP staff accounts (hard-coded in the original too, nothing is downloaded) and small pure helpers.
  */
 public final class StaffNames {
     public static final List<String> DONUT_STAFF = List.of(

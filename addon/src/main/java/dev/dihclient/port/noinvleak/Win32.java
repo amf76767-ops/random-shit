@@ -8,7 +8,7 @@ import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.win32.StdCallLibrary;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * <p>
  * The few Win32 calls the overlay windows need, declared against plain JNA (Minecraft ships it, jna-platform is not used).
  * Handles are {@link Pointer}s, strings are the wide ("W") variants. Nothing here is loaded off Windows: the interfaces

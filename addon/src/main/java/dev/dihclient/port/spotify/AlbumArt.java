@@ -3,7 +3,7 @@ package dev.dihclient.port.spotify;
 import java.nio.ByteBuffer;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Square RGBA album cover, centre-cropped and box-filtered down to at most the requested side. Decoding of the
  * downloaded bytes is in {@link ArtDecoder}; this class holds no Minecraft or LWJGL types.
  */

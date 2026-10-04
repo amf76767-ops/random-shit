@@ -5,7 +5,7 @@ import java.text.Normalizer.Form;
 import java.util.function.IntPredicate;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Folds typographic characters of titles and lyrics (quotes, dashes, music notes...) to what the font can draw.
  */
 public final class DisplayText {

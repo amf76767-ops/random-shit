@@ -3,7 +3,7 @@ package dev.dihclient.port.chunks;
 import java.util.Arrays;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Sky-light status of every section of one chunk, as the server last sent it.
  */
 public final class ChunkLightSnapshot {

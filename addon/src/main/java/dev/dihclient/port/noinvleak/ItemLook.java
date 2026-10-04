@@ -10,7 +10,7 @@ import net.minecraft.class_310;
 import net.minecraft.class_811;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * <p>
  * An item render state that also records what the model is made of ({@link #identity}): two stacks with the same identity look
  * the same in the GUI, so one rendered icon can serve both.

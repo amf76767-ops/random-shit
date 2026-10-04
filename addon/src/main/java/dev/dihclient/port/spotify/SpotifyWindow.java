@@ -10,9 +10,9 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Fallback for the media session: finds the window of spotify.exe and reads its title ("Artist - Title" while playing,
- * "Spotify" when paused), and can tap the global media keys. Win32 only, declared against plain JNA (Anubis used
+ * "Spotify" when paused), and can tap the global media keys. Win32 only, declared against plain JNA (the original used
  * jna-platform). Nothing leaves this PC.
  */
 public final class SpotifyWindow {

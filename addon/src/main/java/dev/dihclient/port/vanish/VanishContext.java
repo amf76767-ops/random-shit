@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0) (ShardTracker).
+ * Ported from an open-source client (GPL-3.0) (ShardTracker).
  * Notices that "where you are" changed (other world object, new player object after a respawn-less transfer, other server
  * brand), so the module forgets everything it learned: tab list and entity knowledge of the old place is worthless.
  * The Donut-only part (which Goliath map region you stand in) is dropped.

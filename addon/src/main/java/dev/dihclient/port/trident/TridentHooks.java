@@ -4,7 +4,7 @@ import dev.dihclient.DIHClient;
 import dev.dihclient.module.ModuleManager;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * What {@code TridentRiptideMixin} asks while the trident item runs. Never throws: on an error the vanilla value is used.
  */
 public final class TridentHooks {

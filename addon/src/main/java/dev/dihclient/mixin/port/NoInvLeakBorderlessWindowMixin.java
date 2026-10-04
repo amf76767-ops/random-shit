@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0) (MixinBorderlessWindow).
+ * Ported from an open-source client (GPL-3.0) (MixinBorderlessWindow).
  * While No Inv Leak wants it (Stream Only + Borderless Fullscreen), fullscreen is a borderless window covering the monitor
  * instead of exclusive fullscreen, which would hide the capture-excluded overlay windows.
  */

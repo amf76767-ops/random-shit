@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0) (MixinFakeStatsPlayerTabOverlay).
+ * Ported from an open-source client (GPL-3.0) (MixinFakeStatsPlayerTabOverlay).
  * The vanilla tab list (PlayerTabOverlay): fake money in your own row, in its score column and in header/footer.
  * Only inside the vanilla tab list: BetterTablist cancels the whole vanilla list in InGameHudMixin, then none of this runs.
  * Each handler touches only the value it is given, so it stacks with other mixins on the same methods.

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Lyrics of one track as the HUD needs them (loading / synced / plain / instrumental / not found / unavailable).
  */
 public record Lyrics(Lyrics.Status status, SyncedLyrics synced, List<String> plainLines, long sourceId) {

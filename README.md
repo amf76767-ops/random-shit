@@ -184,8 +184,8 @@ Hook in `ConfigManager.apply`), ohne neue Werte zu überschreiben.
 ### 6.8.1
 - Die GUI-Themen Larp und DIH aus 6.8.0 sind wieder draußen (der Auftrag waren nur Entwürfe). Die Bilder liegen weiter in `gui-mockups/` (`thema-*.png`, `themen-uebersicht.png`).
 
-### 6.9.0: Module aus dem Anubis-Client
-Aus Anubis 0.9.8 (GPL-3.0, eigener Client) nach DIH übernommen. Alles ist nur gebaut und mit Tests der reinen Logik geprüft, **nicht im Spiel getestet**.
+### 6.9.0: Module aus einem anderen Client
+Aus einem anderen Client (GPL-3.0) nach DIH übernommen. Alles ist nur gebaut und mit Tests der reinen Logik geprüft, **nicht im Spiel getestet**.
 - **Crystal Aura** und **Crystal Optimizer** (Combat). Crystal Aura pausiert, solange Crystal Macro an ist, und schont DIH-Freunde.
 - **Spear Swap** (Lunge-Speer, die Modul-Taste ist die Lunge-Taste), **FastXP**, **Hover Totem** (Combat).
 - **Spawner Protect** (Misc): baut Spawner in die Enderkiste ab, wenn die Spieler-Abbau-Schwelle erreicht ist. Webhook raus, Meldungen laufen über die DIH-Benachrichtigungen.
@@ -203,12 +203,12 @@ Aus Anubis 0.9.8 (GPL-3.0, eigener Client) nach DIH übernommen. Alles ist nur g
 Nicht im Spiel getestet.
 - **Config-Dock** statt Modul "Profiles": im DIH-GUI (Rechts-Shift) sitzt unten in der Mitte der Reiter "Configs". Er klappt nach oben auf: beliebig viele Configs mit Namen (speichern, laden, überschreiben, umbenennen, löschen), Doppelklick lädt. Die alten Slots 1 bis 3 erscheinen als "Slot n". "Share code", "Import code" und "Import all" sind jetzt hier. Pro Config lassen sich Server eintragen (**+ This server** oder **+ Address…**); beim Beitritt lädt der Client dann die Config automatisch. Ein Server gehört zu einer Config, bei mehreren Treffern gewinnt der genauere Servername (play.example.net vor example.net). Die Liste steht in `dihclient/configs.json`.
 - **Spotify HUD** (Client): Titel, Künstler, Cover, Fortschritt und synchronisierte Songtexte. Nur Windows (Medien-Sitzung von Windows, Ersatz: Fenstertitel von Spotify). Netzwerk: nur `lrclib.net` für die Texte (Titel, Künstler, Album, Dauer); Schalter "Lyrics Online". Cache in `config/dihclient/lyrics-cache`. Auf Linux und Mac tut das Modul nichts.
-- **Discord Presence** (Client): zeigt "Playing Minecraft" in deinem Discord-Status, nur über den lokalen Discord-Kanal. Server-Adresse standardmäßig **aus**. Es nutzt die Anwendungs-ID des Anubis-Clients (Name im Status: "Anubis Client"); für einen eigenen Namen und ein eigenes Logo unter discord.com/developers eine Anwendung anlegen und ID plus Bildname in den Einstellungen eintragen.
+- **Discord Presence** (Client): zeigt "Playing Minecraft" in deinem Discord-Status, nur über den lokalen Discord-Kanal. Server-Adresse standardmäßig **aus**. Dafür brauchst du eine eigene Discord-Anwendung (discord.com/developers, New Application): ID und Bildname in den Einstellungen eintragen. Ohne ID zeigt das Modul nichts an.
 
 ### 6.11.0: Donut-Module und alles auf Englisch
-Nicht im Spiel getestet. Aus Anubis 0.9.8 (GPL-3.0, eigener Client) nach DIH übernommen; DIH hat keine Donut-Kategorie, die Module liegen in der passenden DIH-Kategorie.
+Nicht im Spiel getestet. Aus einem anderen Client (GPL-3.0) nach DIH übernommen; DIH hat keine Donut-Kategorie, die Module liegen in der passenden DIH-Kategorie.
 - **Movement:** Donut NoFall, Trident Boost, Air Stuck.
-- **Player / Misc:** Donut Speed Mine, Anti Trap, Auto Relog, Riptide, Trident Util, Fake Stats (Name und Werte leer = unverändert; Anubis-Werbetext als Standard ist raus), Player Detection (Alarme laufen über Discord Alarm).
+- **Player / Misc:** Donut Speed Mine, Anti Trap, Auto Relog, Riptide, Trident Util, Fake Stats (Name und Werte leer = unverändert; der Werbetext als Standard ist raus), Player Detection (Alarme laufen über Discord Alarm).
 - **Render / Basefinding:** Spawner Nametags, Amethyst Bypass (Methoden Bypass / Light / ANBS+ Scan).
 - Auf Servern mit Anti-Cheat (z. B. Grim) sind **Donut NoFall, Trident Util, Trident Boost, Air Stuck und Donut Speed Mine** vermutlich erkennbar. Riptide und Auto Relog sind unauffälliger. Fake Stats und Amethyst Bypass senden nichts.
 - **Alles auf Englisch:** die letzten deutschen Meldungen (VisualPack, Debug-Zeilen, Pack-Beschreibung) sind übersetzt, die deutsche Sprachdatei `de_de.json` wird nicht mehr mitgeliefert. Diese README bleibt deutsch.
@@ -236,7 +236,7 @@ Aus einem Meteor-Addon übernommen (`addon/src/main/java/dev/dihclient/port/pack
   und `/tmp/mc-int.jar`, ohne die `build.sh` nicht läuft.
 
 ### 6.15.0: Zoom
-Aus Anubis 0.9.8 (GPL-3.0). Nicht im Spiel getestet.
+Aus einem anderen Client (GPL-3.0). Nicht im Spiel getestet.
 - **Zoom** (Render): Taste halten (Standard **C**, im GUI änderbar) zoomt hinein, das Mausrad ändert den Zoom, die Maus dreht langsamer je näher du bist. Einstellungen: Zoom, Smoothness, Scroll, Lower Sensitivity, Cinematic Camera. Das Modul hat keinen An/Aus-Schalter, die Taste wirkt nur, wenn kein Bildschirm offen ist.
 
 ### 6.16.0: AutoBuild plant die ganze Route und hat weniger Optionen
@@ -294,3 +294,14 @@ Nicht im Spiel getestet.
 - **Schrift:** GUI und HUD zeichnen den Text in der glatten Schrift **Inter** (Regular und Fett; Lizenz SIL OFL, `assets/dihclient/font/OFL-Inter.txt`) statt in der Pixelschrift des Spiels. Zeichen, die Inter nicht hat (zum Beispiel ⚙ oder ▲), kommen weiter aus der normalen Schrift. Wenn die Schrift bei dir falsch aussieht oder verrutscht: **ClickGUI → Smooth Font** ausschalten, dann ist alles wie vorher.
 - **Configs-Leiste unten** hat im Style **Glass** jetzt auch durchsichtige Karten, Felder und Knöpfe. In Modern und Meteor bleibt sie wie sie war.
 - Versionsnummer ab jetzt 8.x.
+
+### 8.1.0: Lag Finder, Spear Swap repariert, BetterTablist in Glass, Namen entfernt
+Nicht im Spiel getestet (die Logik des Lag Finders ist mit Tests geprüft).
+- **Lag Finder** (neues Modul, Kategorie Basefinding): Findet Orte, an denen der Server laggt, obwohl dort nichts los ist. Das kann eine große versteckte Basis oder Farm unter dem Boden sein, denn ein Server tickt nur, was in der Nähe eines Spielers liegt.
+  - Er misst die TPS des Servers aus der Spielzeit, die der Server jede Sekunde schickt, und merkt sie sich an dem Ort, an dem du stehst. Benachbarte Bereiche mit deutlich weniger TPS als sonst werden zu einer **Lag-Zone** (Meldung, Säule und Beschriftung in der Welt, auf Wunsch eine Linie dorthin).
+  - Proben in einer Menschenmenge (mehr als 25 Wesen in 48 Blöcken), kurz nach einem Teleport oder beim schnellen Fliegen zählen nicht, weil das Lag dort einen offensichtlichen Grund hat.
+  - Einstellungen: Lag Threshold, Min Samples (Sekunden pro Bereich), Crowd Limit, Ignore Fast Travel, Notify, Markers, Tracers, Color. Knöpfe: Show Zones, Clear. Das Modul zeigt die aktuelle TPS in der Modulliste.
+  - Grenzen: Der Client sieht nur die TPS des ganzen Servers, nicht den Ort des Lags. Die Zone ist deshalb die Schätzung, wo du standest, als die TPS fielen, und kein genauer Punkt. Eine Hintergrundlast des Servers kann das Bild verwischen, darum braucht es mehrere Sekunden pro Bereich und ein bisschen Herumlaufen.
+- **Spear Swap:** Hat jetzt keinen Schalter mehr und reagiert nur auf seine Taste (vorher musste das Modul zusätzlich eingeschaltet sein, sonst passierte nichts). Ein Speer ohne Lunge wird auch benutzt, außer **Lunge Only** ist an. Kann die Taste nichts tun, sagt eine Meldung warum (kein Speer in der Hotbar, zu wenig Hunger zum Sprinten, im Wasser, Speer noch nicht bereit, ...).
+- **BetterTablist** ist im Style Glass durchsichtig wie der Rest.
+- **Namen entfernt:** Der Name des Ursprungs-Clients steht nirgends mehr (Texte, Quellcode-Kommentare, README, Arbeitsnotizen). Die Lizenzangabe (GPL-3.0) bleibt in den Kopfzeilen. **Discord Presence** zeigte bisher den Namen des fremden Clients als Spielname an: Die Standard-ID und das Standard-Bild sind jetzt leer, das Modul braucht eine eigene Discord-Anwendungs-ID (discord.com/developers) und zeigt sonst nichts.

@@ -19,7 +19,7 @@ import net.minecraft.class_7134;
 import net.minecraft.class_746;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Relogs once when you go down to deepslate level: leaves the multiplayer server through the normal quit path, waits
  * "Delay" seconds on the server list and joins the same server again. Sends no command and no packet of its own.
  * Runs on the server list too ({@link ModuleManager.MenuTicking}), that is where the rejoin timer ticks.

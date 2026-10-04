@@ -33,7 +33,7 @@ import net.minecraft.class_3959.class_242;
 import net.minecraft.class_3959.class_3960;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Explosion damage of an end crystal on a living entity as the game will deal it: blocks in the way (exposure),
  * armor, toughness, Resistance, Protection / Blast Protection, shield and difficulty. The numbers live in {@link CrystalMath}.
  */

@@ -1,7 +1,7 @@
 package dev.dihclient.port.chunks;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * What the server sent for one sky-light section of a chunk.
  */
 public enum LightSectionStatus {

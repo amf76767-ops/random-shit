@@ -66,7 +66,7 @@ import net.minecraft.class_8886;
 import net.minecraft.class_2338.class_2339;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Below Y 0 the server sends light and block changes of chunks other players work in. This module remembers the block light of
  * every section, compares each new light packet with it and flags the chunk when something changed that no lamp, redstone ore or
  * amethyst nearby explains; redstone parts changing below Y 0 flag the chunk as well. The chunks you were in yourself are ignored.

@@ -64,7 +64,7 @@ public final class AddonHooks {
             dev.dihclient.port.zoom.Zoom zoom = new dev.dihclient.port.zoom.Zoom();
             add.invoke(modules, zoom);
             zoom.setEnabledSilently(true); // the key is read in onTick, the module has no switch
-            // modules ported from the Anubis client; Player Bypass takes the place of the old module of the same name
+            // modules ported from another client; Player Bypass takes the place of the old module of the same name
             for (dev.dihclient.module.Module m : new dev.dihclient.module.Module[]{
                     new dev.dihclient.port.crystal.CrystalAuraModule(), new dev.dihclient.port.crystal.CrystalOptimizerModule(),
                     new dev.dihclient.port.tools.SpearSwap(), new dev.dihclient.port.tools.SpawnerProtect(),
@@ -85,8 +85,12 @@ public final class AddonHooks {
                     new dev.dihclient.port.donutc.AirStuck(),
                     new dev.dihclient.port.donutd.AmethystBypassModule(),
                     new dev.dihclient.port.donutd.SpawnerNametagsModule(),
-                    new dev.dihclient.port.packets.PacketLog(), new dev.dihclient.port.packets.SpawnerReader()}) {
+                    new dev.dihclient.port.packets.PacketLog(), new dev.dihclient.port.packets.SpawnerReader(),
+                    new dev.dihclient.port.lag.LagFinder()}) {
                 add.invoke(modules, m);
+                if (m instanceof dev.dihclient.port.tools.SpearSwap) {
+                    m.setEnabledSilently(true); // no switch: it only reacts to its key
+                }
             }
         });
         step("3x3 pickaxe name", () -> Cleanup.linkHammer(modules));

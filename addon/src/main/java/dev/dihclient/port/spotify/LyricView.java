@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The animated lyrics block of the Spotify card, without any drawing: wraps the lines, keeps the scroll / fade / glow
  * state between frames and hands back the rows to draw (text, top offset, alpha, how much of it is "sung" already).
- * Anubis had this inside its ImGui HUD renderer; here it only needs a text-width function, so it can be tested headless.
+ * The original had this inside its ImGui HUD renderer; here it only needs a text-width function, so it can be tested headless.
  * All sizes are in GUI pixels at scale 1 (the card is scaled as a whole when it is drawn).
  */
 public final class LyricView {

@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Time-stamped lyrics (LRC text) with lookup by playback position; also reads LRCLIB "enhanced" word times.
  */
 public final class SyncedLyrics {

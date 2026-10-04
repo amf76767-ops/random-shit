@@ -5,7 +5,7 @@ import java.text.Normalizer.Form;
 import java.util.Locale;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Name and chat-line matching for the Anti Vanish module: confusable folding, "X left the game" detection, username checks.
  * No Minecraft types, so it can be unit tested.
  */

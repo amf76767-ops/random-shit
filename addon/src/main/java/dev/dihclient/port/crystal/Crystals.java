@@ -37,7 +37,7 @@ import net.minecraft.class_1269.class_9860;
 import net.minecraft.class_1269.class_9861;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Crystal helpers: where a crystal can stand, which hotbar slot to use, how to click, and the ping window.
  */
 public final class Crystals {

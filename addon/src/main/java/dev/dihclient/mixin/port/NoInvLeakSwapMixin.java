@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0) (MixinGameRenderer, the StreamOverlay part).
+ * Ported from an open-source client (GPL-3.0) (MixinGameRenderer, the StreamOverlay part).
  * Runs the No Inv Leak overlay once per frame, right before the window's buffers are swapped.
  */
 @Mixin(class_1041.class)

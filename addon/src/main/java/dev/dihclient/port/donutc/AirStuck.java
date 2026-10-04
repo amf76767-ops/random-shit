@@ -7,12 +7,12 @@ import net.minecraft.class_2828;
 import net.minecraft.class_9836;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Freezes you in place, even mid-air: your movement step does not run (DonutCAirStuckMixin) and the position and
  * tick-end packets are not sent, so the server keeps you where you were while you can still look around and use the
  * game. Everything else (keep-alive, teleport confirmations, chat, interaction) is sent as usual.
  * <p>
- * Anubis did not remember this module across restarts. DIH saves the state of every module, so instead it switches
+ * The original did not remember this module across restarts. DIH saves the state of every module, so instead it switches
  * itself off when you join or leave a server or change dimension.
  */
 public class AirStuck extends Module {

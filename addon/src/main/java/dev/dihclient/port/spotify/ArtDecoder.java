@@ -7,7 +7,7 @@ import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Decodes the cover bytes Windows hands over (PNG/JPEG/BMP...) with stb_image, which the game ships. Runs on the poll thread.
  */
 final class ArtDecoder {

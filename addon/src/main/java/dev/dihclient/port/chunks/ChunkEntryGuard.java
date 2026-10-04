@@ -6,7 +6,7 @@ import java.util.function.LongConsumer;
 import java.util.function.LongPredicate;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * When the player walks into a chunk that is not flagged, the chunks around it are "protected": they were fine when you stood
  * there, so a later light change there (your own base) must not raise an alarm.
  * The store is reached through {@code protect}, so the guard itself has no game or file code.

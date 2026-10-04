@@ -1,13 +1,13 @@
 package dev.dihclient.port.trident;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Pure decisions of Riptide, Trident Util and Trident Boost, kept free of game classes so they can be unit tested.
  */
 public final class TridentLogic {
     /** Vanilla: a trident has to be charged this many ticks before the release does anything. */
     public static final int VANILLA_CHARGE = 10;
-    /** Fewest ticks Riptide waits between two uses and before a release (one below vanilla, like the Anubis module). */
+    /** Fewest ticks Riptide waits between two uses and before a release (one below vanilla, like the original module). */
     public static final int MIN_TICKS = 9;
 
     public enum Step { NONE, START_USE, RELEASE }

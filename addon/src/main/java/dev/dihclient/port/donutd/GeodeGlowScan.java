@@ -15,7 +15,7 @@ import net.minecraft.class_638;
 import net.minecraft.class_2338.class_2339;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * ANBS+ Scan of Amethyst Bypass. Reads the block light the server sent (the light is not hidden by anti-xray) and looks, between
  * Y -58 and 30, for open blocks with light 0 that touch light 4 and nothing brighter: the faint glow a geode throws into the
  * hidden cave around it. The light layers of the chunk and its eight neighbours are cached once per scan.

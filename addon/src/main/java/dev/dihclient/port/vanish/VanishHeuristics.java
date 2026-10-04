@@ -4,7 +4,7 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Small pure rules of the Anti Vanish module: which sounds and particles count as "somebody is here", how an item
  * placement marks the blocks the player itself touched, scoring of silent tab removals.
  */

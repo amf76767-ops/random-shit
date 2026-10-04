@@ -1,7 +1,7 @@
 package dev.dihclient.port.donuta;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * State machine of Donut NoFall, free of game classes so it can be tested. After a fall of more than 3 blocks the module
  * reports "in the air" to the server for the next four ground packets, so the landing is never seen as a landing.
  */

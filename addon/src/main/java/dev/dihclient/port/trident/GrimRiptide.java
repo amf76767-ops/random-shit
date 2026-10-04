@@ -14,7 +14,7 @@ import net.minecraft.class_3612;
 import net.minecraft.class_6880;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Client-side checks Riptide uses so it only fires where a server accepts a riptide: in water or rain.
  */
 public final class GrimRiptide {

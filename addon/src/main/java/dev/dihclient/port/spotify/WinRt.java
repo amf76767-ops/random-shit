@@ -15,10 +15,10 @@ import java.util.ArrayDeque;
 import java.util.Locale;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Just enough of the Windows Runtime (WinRT) to call COM objects through their vtables with plain JNA: activation
  * factories, IAsyncOperation waiting, HSTRINGs. Only ever loaded on Windows (see {@link MediaSession}).
- * Anubis used jna-platform's GUID type here; this version keeps a GUID as 16 bytes of native memory instead.
+ * The original used jna-platform's GUID type here; this version keeps a GUID as 16 bytes of native memory instead.
  */
 final class WinRt {
     static final int RO_INIT_MULTITHREADED = 1;

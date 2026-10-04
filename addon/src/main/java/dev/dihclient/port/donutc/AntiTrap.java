@@ -14,13 +14,13 @@ import net.minecraft.class_638;
 import net.minecraft.class_746;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Lets you escape from armor stands and chest minecarts (servers use them as invisible walls around a player) by
  * removing them from your own world: the server is not told and keeps them, the client just stops colliding with and
  * drawing them. Removed: new ones the moment they appear (the tick after), the ones that are already there when
  * you switch the module on, and every second a sweep over all of them. Never the entity you ride, carry or look through.
  * <p>
- * Differences to Anubis: there is no entity-added event in DIH, so new entities are found by comparing the entity ids
+ * Differences to the original: there is no entity-added event in DIH, so new entities are found by comparing the entity ids
  * of every tick with the ones seen before; same result, one tick later at most.
  */
 public class AntiTrap extends Module {

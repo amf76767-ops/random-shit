@@ -8,7 +8,7 @@ import java.nio.IntBuffer;
 import org.lwjgl.glfw.GLFWNativeWin32;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * <p>
  * A click-through, layered pop-up window owned by the game window. {@code SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)}
  * makes screen capture (OBS window/display capture, Discord, the Game Bar, screenshots) skip it, while the player still sees it

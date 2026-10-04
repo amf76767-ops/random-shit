@@ -5,7 +5,7 @@ import net.minecraft.class_1041;
 import net.minecraft.class_310;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * <p>
  * Exclusive fullscreen hides every other window, including the overlay windows. While Stream Only wants borderless, the
  * game's fullscreen is a borderless window of the monitor's size instead ({@code BorderlessWindowMixin} does the switch).

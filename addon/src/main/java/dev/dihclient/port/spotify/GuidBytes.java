@@ -1,9 +1,9 @@
 package dev.dihclient.port.spotify;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Memory layout of a Windows GUID: the first three groups little-endian, the last two as written. Kept apart from the
- * JNA code so it can be tested without native libraries (Anubis used jna-platform's GUID class, which we do not rely on).
+ * JNA code so it can be tested without native libraries (the original used jna-platform's GUID class, which we do not rely on).
  */
 public final class GuidBytes {
     private GuidBytes() {

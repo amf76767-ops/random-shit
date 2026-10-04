@@ -1,7 +1,7 @@
 package dev.dihclient.port.donuta;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * The trigger of Auto Relog, free of game classes so it can be tested: fires once when the player goes below the line after
  * having been clearly above it for two seconds. Walking up and down at the line does not fire it again until the player
  * has been {@link #REARM_HEIGHT} blocks above for {@link #REARM_TICKS} ticks.

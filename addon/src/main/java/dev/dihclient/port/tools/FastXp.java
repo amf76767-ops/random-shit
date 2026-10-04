@@ -9,7 +9,7 @@ import net.minecraft.class_1802;
 import org.lwjgl.glfw.GLFW;
 
 /**
- * Ported from Anubis Client 0.9.8 (GPL-3.0).
+ * Ported from an open-source client (GPL-3.0).
  * Throws experience bottles every 100 ms while the physical right mouse button is held. It runs per frame (not per tick)
  * so the 100 ms rhythm is not tied to the 50 ms tick; the mouse is polled directly because the game's own use key
  * only fires every 4 ticks.
