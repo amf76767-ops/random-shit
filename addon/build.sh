@@ -48,7 +48,7 @@ fi
 # 2. the add-on itself, compiled against the old jar
 javac -proc:none -nowarn -Xlint:none -d "$BUILD/classes" -cp "$BUILD/override:$MCP$BASE:$BUILD/stubs:$GSON:$SLF4J:$MIXIN:$ASM:$JOML$EXTRA" $(find src/main -name '*.java')
 # 3. tests that need no Minecraft
-javac -nowarn -d "$BUILD/test" -cp "$BUILD/classes:$GSON" $(find src/test -name '*.java')
+javac -nowarn -d "$BUILD/test" -cp "$BUILD/classes:$GSON:$CACHE/fastutil-8.5.15.jar:$SLF4J" $(find src/test -name '*.java')
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.UpdateTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.SupervisorTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.SoftKeysTests
@@ -57,6 +57,10 @@ java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.Model3dTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.NavTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.MergeTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.EmoteTests
+FASTUTIL=$CACHE/fastutil-8.5.15.jar:$SLF4J
+for t in StaffListTests ToolsTests VanishTests CrystalAuraTests ChunksTests; do
+  java -cp "$BUILD/test:$BUILD/classes:$GSON:$FASTUTIL" dev.dihclient.$t
+done
 python3 ../resourcepack/build.py >/dev/null
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.PackTests
 # 4. patch + pack

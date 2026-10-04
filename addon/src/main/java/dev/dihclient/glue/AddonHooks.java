@@ -61,6 +61,15 @@ public final class AddonHooks {
             BuildPath path = new BuildPath();
             add.invoke(modules, path);
             path.setEnabledSilently(true); // harmless: draws only while AutoBuild walks
+            // modules ported from the Anubis client; Player Bypass takes the place of the old module of the same name
+            for (dev.dihclient.module.Module m : new dev.dihclient.module.Module[]{
+                    new dev.dihclient.port.crystal.CrystalAuraModule(), new dev.dihclient.port.crystal.CrystalOptimizerModule(),
+                    new dev.dihclient.port.tools.SpearSwap(), new dev.dihclient.port.tools.SpawnerProtect(),
+                    new dev.dihclient.port.tools.FastXp(), new dev.dihclient.port.tools.HoverTotem(),
+                    new dev.dihclient.port.chunks.PlayerBypass(), new dev.dihclient.port.chunks.PrimeChunkFinder(),
+                    new dev.dihclient.port.vanish.AntiVanish(), new dev.dihclient.port.staff.StaffList()}) {
+                add.invoke(modules, m);
+            }
         });
         step("3x3 pickaxe name", () -> Cleanup.linkHammer(modules));
         step("PacketFly in Flight", () -> Cleanup.mergePacketFly(modules.get(dev.dihclient.modules.movement.Flight.class),
