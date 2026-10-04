@@ -250,7 +250,7 @@ public final class AmethystBypassModule extends Module {
                 continue;
             }
             class_2841<class_2680> states = section.method_12265();
-            // hasAny(false) is true for a palette that is empty; a section without a palette entry for a bud has no geode
+            // a global palette (very many block types, e.g. a scrambled section) answers true to every question: skip it
             if (!states.method_19526(state -> false) && states.method_19526(AmethystBypassModule::isBud)) {
                 int baseY = (minSectionY + i) * 16;
                 class_2338 marker = pickMarker(chunk, section, baseY, pos);
