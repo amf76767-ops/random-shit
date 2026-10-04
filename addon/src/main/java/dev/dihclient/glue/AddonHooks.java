@@ -55,6 +55,7 @@ public final class AddonHooks {
             add.invoke(modules, new CustomModel());
             add.invoke(modules, new FakeTime());
             add.invoke(modules, new Scenes());
+            add.invoke(modules, new ShaderModule());
             Emotes emotes = new Emotes();
             add.invoke(modules, emotes);
             emotes.setEnabledSilently(true); // idle until a key is pressed

@@ -41,7 +41,8 @@ public class VisualPack extends Module {
             .onChange(this::changed);
     private final BoolSetting rain = this.bool("Invisible Rain", "Rain is not drawn. You still hear it.", true).onChange(this::changed);
     private final BoolSetting clouds = this.bool("Clear Clouds", "See-through clouds (shader).", true).onChange(this::changed);
-    private final BoolSetting sky = this.bool("Sky Gradient", "Sky with a colour gradient (shader).", true).onChange(this::changed);
+    private final BoolSetting sky = this.bool("Sky Gradient", "Sky with a colour gradient, and at night a sky full of stars with a milky way (shader).", true).onChange(this::changed);
+    private final BoolSetting noMoon = this.bool("No Moon", "The moon is not drawn, so the night is only stars.", true).onChange(this::changed);
     private final BoolSetting glint = this.bool("Colour Glint", "Enchant glint that changes its colour (shader and picture).", true).onChange(this::changed);
     private final BoolSetting stone = this.bool("Deepslate Stone", "Stone looks like deepslate.", true).onChange(this::changed);
     private final BoolSetting water = this.bool("Clear Water", "See-through, animated water.", true).onChange(this::changed);
@@ -57,6 +58,7 @@ public class VisualPack extends Module {
             new Effect(this.stone, MC + "textures/block/stone.png"),
             new Effect(this.water, MC + "textures/block/water_"),
             new Effect(this.sun, MC + "textures/environment/celestial/sun.png"),
+            new Effect(this.noMoon, MC + "textures/environment/celestial/moon/"),
             new Effect(this.totem, MC + "models/item/totem_of_undying.json"));
 
     private boolean dirty;
@@ -132,7 +134,7 @@ public class VisualPack extends Module {
             if (on) {
                 this.install(name);
             }
-            boolean reloaded = this.switchPack(on, "file/" + name);
+            boolean reloaded = switchPack(PREFIX, on, "file/" + name);
             this.cleanOld(on ? name : null);
             if (reloaded) {
                 Notifications.info(this.name(), on ? "Pack on (" + this.getInfo() + "), reloading resources" : "Pack off, reloading resources");
@@ -195,7 +197,7 @@ public class VisualPack extends Module {
 
     /** @return true when the list of enabled packs changed and the resources were reloaded */
     @SuppressWarnings("unchecked")
-    private boolean switchPack(boolean on, String id) throws Exception {
+    static boolean switchPack(String prefix, boolean on, String id) throws Exception {
         Object manager = null;
         for (Method m : mc.getClass().getMethods()) {
             if (m.getParameterCount() == 0 && m.getReturnType().getName().equals("net.minecraft.class_3283")) {
@@ -210,10 +212,14 @@ public class VisualPack extends Module {
         invoke(mgr, manager, "method_14445"); // scanPacks, finds the file that was just copied
         Collection<String> enabled = (Collection<String>) invoke(mgr, manager, "method_29210"); // getEnabledIds
         List<String> next = new ArrayList<>(enabled);
-        next.removeIf(e -> e.startsWith("file/" + PREFIX)); // earlier choices of this pack
+        next.removeIf(e -> e.startsWith("file/" + prefix)); // earlier choices of this pack
         if (on) {
             next.add(id); // on top: later entries win
         }
+        // the Shader pack always stays above the Visual pack (its glint wins)
+        List<String> shaders = new ArrayList<>();
+        next.removeIf(e -> e.startsWith("file/" + ShaderModule.PREFIX) && shaders.add(e));
+        next.addAll(shaders);
         if (next.equals(new ArrayList<>(enabled))) {
             return false;
         }

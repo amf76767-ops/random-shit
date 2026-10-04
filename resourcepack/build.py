@@ -98,7 +98,7 @@ def water(size, frames, flowing):
 def files():
     mc = "assets/minecraft/"
     yield "pack.mcmeta", json.dumps({"pack": {"pack_format": FORMAT, "min_format": FORMAT, "max_format": FORMAT,
-                                              "description": "DIH Visuals: deepslate-style stone, clear water, see-through clouds, sky gradient, colour glint, small totem"}}, indent=2).encode()
+                                              "description": "DIH Visuals: deepslate-style stone, clear water, see-through clouds, starry night sky without moon, sky gradient, colour glint, small totem"}}, indent=2).encode()
     yield mc + "textures/block/stone.png", stone()
     yield mc + "textures/misc/enchanted_glint_item.png", glint()
     yield mc + "textures/misc/enchanted_glint_armor.png", glint()
@@ -107,6 +107,9 @@ def files():
     yield mc + "textures/block/water_flow.png", water(32, 32, True)
     yield mc + "textures/block/water_flow.png.mcmeta", json.dumps({"animation": {}}).encode()
     yield mc + "textures/environment/celestial/sun.png", sun()
+    # kein Mond: alle Mondphasen durchsichtig (die Sterne kommen aus sky.fsh)
+    for phase in ("full_moon", "waning_gibbous", "third_quarter", "waning_crescent", "new_moon", "waxing_crescent", "first_quarter", "waxing_gibbous"):
+        yield mc + "textures/environment/celestial/moon/" + phase + ".png", png(32, 32, [(0, 0, 0, 0)] * (32 * 32))
     yield mc + "textures/environment/rain.png", png(32, 32, [(0, 0, 0, 0)] * (32 * 32))  # Regen unsichtbar (Geräusch bleibt)
     glint_meta = json.dumps({"texture": {"blur": True}}).encode()
     yield mc + "textures/misc/enchanted_glint_item.png.mcmeta", glint_meta

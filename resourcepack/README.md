@@ -6,7 +6,8 @@ Bauen: `python3 resourcepack/build.py` -> `dist/DIH-Visuals-1.21.11.zip`. Shader
 | Datei | Wirkung | Abschalten |
 |---|---|---|
 | `shaders/core/rendertype_clouds.fsh` | Wolken durchsichtig | `CLOUD_ALPHA = 1.0` |
-| `shaders/core/sky.fsh` + `sky.vsh` | Himmel mit Farbverlauf | `SKY_GRADIENT = 0.0` |
+| `shaders/core/sky.fsh` + `sky.vsh` | Himmel mit Farbverlauf, nachts Sternenhimmel mit Milchstraße | `SKY_GRADIENT = 0.0`, `STAR_AMOUNT = 0.0` |
+| `textures/environment/celestial/moon/*.png` | Kein Mond (durchsichtig) | |
 | `shaders/core/glint.fsh` | Glanz wechselt die Farbe (Item und Rüstung) | `GLINT_SPEED = 0.0` |
 | `textures/block/stone.png` | Stone als Tiefenschiefer (eigene Textur) | |
 | `textures/block/water_*.png` | Wasser ca. 45 % deckend, animiert | |
