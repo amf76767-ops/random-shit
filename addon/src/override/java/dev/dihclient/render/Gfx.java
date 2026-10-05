@@ -298,6 +298,19 @@ public final class Gfx {
         }
     }
 
+    public static void hFade(class_332 g, int x, int y, int w, int h, int from, int to, int bands) {
+        if (w > 0 && h > 0) {
+            int n = Math.max(1, Math.min(bands, w));
+            for (int i = 0; i < n; i++) {
+                int x0 = x + w * i / n;
+                int x1 = x + w * (i + 1) / n;
+                if (x1 > x0) {
+                    g.method_25294(x0, y, x1, y + h, ColorUtil.blend(from, to, n == 1 ? 0.0F : (float) i / (n - 1)));
+                }
+            }
+        }
+    }
+
     public static void vGradient(class_332 g, int x, int y, int w, int h, int from, int to) {
         g.method_25296(x, y, x + w, y + h, from, to);
     }

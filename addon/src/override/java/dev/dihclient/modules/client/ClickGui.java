@@ -13,11 +13,7 @@ import dev.dihclient.setting.EnumSetting;
 import dev.dihclient.util.BugReport;
 
 public class ClickGui extends Module {
-    public final EnumSetting<Layout> layout = this.mode(
-            "Style",
-            "Modern: one window with a sidebar. Meteor: one draggable, collapsible panel per category (like Meteor Client). Glass: no window, only"
-                    + " see-through cards over the blurred game with white text.",
-            Layout.MODERN).onChange(MeteorGuiScreen::onLayoutChanged);
+    public final EnumSetting<Layout> layout = this.mode("Style", "The ClickGUI style.", Layout.METEOR).visibleWhen(() -> false);
     public final ColorSetting accent = this.color("Accent", "Primary accent colour of GUI and HUD.", -1754827).legacy("accent");
     public final ColorSetting accent2 = this.color("Accent 2", "Second colour for gradients.", -30147);
     public final EnumSetting<Theme.ColorMode> colorMode = this.mode(
@@ -26,7 +22,7 @@ public class ClickGui extends Module {
             .visibleWhen(() -> this.colorMode.get() != Theme.ColorMode.STATIC);
     public final DoubleSetting scale = this.dbl("GUI Scale", "Size of the ClickGUI window.", 1.0, 0.6, 1.5, 0.05);
     public final BoolSetting animations = this.bool("Animations", "Smooth transitions, switches and scrolling.", true).onChange(this::applyAnim);
-    public final BoolSetting blur = this.bool("Blur", "Blurs the game behind the GUI (the Glass theme looks best with it on).", true);
+    public final BoolSetting blur = this.bool("Blur", "Blurs the game behind the GUI .", true);
     public final BoolSetting smoothFont = this.bool("Smooth Font", "Draws the text of the GUI and HUD in a smooth font (Inter) instead of the pixel font of the game.", true);
     public final BoolSetting smoothCorners = this.bool("Smooth Corners", "Draws rounded corners smooth. Turn it off if the game gets slower with the GUI or HUD on screen.", true);
     public final BoolSetting descriptions = this.bool("Descriptions", "Shows a module's description on its card.", true);
@@ -39,7 +35,7 @@ public class ClickGui extends Module {
             .visibleWhen(this.clickSound::get);
 
     public ClickGui() {
-        super("ClickGUI", Category.CLIENT, "Style (Modern, Meteor, Glass) and colours of the whole client. Open the GUI with Right Shift (rebind under Controls).");
+        super("ClickGUI", Category.CLIENT, "Colours and look of the whole client. Open the GUI with Right Shift (rebind under Controls).");
         this.action("Reset Window", "Centers the ClickGUI window again and resets the Meteor panels.", () -> {
             GuiState.resetLayout();
             MeteorGuiScreen.resetLayout();

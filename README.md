@@ -377,3 +377,9 @@ Nicht im Spiel getestet.
 - **Radar:** Scheiben werden zeilenweise zusammengefasst, die Kreise haben weniger Punkte, der Sweep hat etwa ein Fünftel der Rechtecke.
 - **Chunk-Radar:** Statt eines Schachbretts aus einem Rechteck pro Chunk gibt es eine Fläche und Gitterlinien.
 - **Verlauf-Balken** (Akzentleisten) nutzen weniger Streifen.
+
+### 8.10.0: Nur noch Meteor-Stil, Shader auf Hüten
+Nicht im Spiel getestet.
+- **Nur Meteor-Stil:** Die Stile Modern und Glass sind entfernt. Die Einstellung **Style** im ClickGUI gibt es nicht mehr, der Knopf "Modern Layout" unten ist weg, die Glass-Oberfläche ist gelöscht. Alte Configs mit Modern oder Glass öffnen automatisch das Meteor-GUI.
+- **Meteor-GUI verbessert:** Die Kopfzeilen der Kategorien haben einen weißen Glanz oben und eine Akzentlinie unten, die von einer Farbe in die nächste übergeht. Eingeschaltete Module haben statt einer flachen Fläche einen Farbverlauf, der nach rechts ausläuft. Die Verläufe bestehen aus wenigen Streifen, damit die FPS nicht leiden.
+- **Shader (Modul Shader):** Neuer Schalter **Hats**. Hüte bekommen einen bewegten Glanz in den Farben des gewählten Stils (Aurora, Galaxy, Fire und so weiter), mit hellen Wellen, die über den Hut laufen. **Strength** gilt auch dafür. Schwerter, Werkzeuge und Rüstung glänzen wie bisher über **Tools** und **Armor**.

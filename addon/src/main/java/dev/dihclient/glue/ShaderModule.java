@@ -37,11 +37,13 @@ public class ShaderModule extends Module {
     public final BoolSetting tools = this.bool("Tools", "Tools and weapons shine even without enchantments.", true);
     public final BoolSetting armor = this.bool("Armor", "Armor and elytra shine even without enchantments.", true);
 
+    public final BoolSetting hats = this.bool("Hats", "Hats get a moving shine in the colours of the chosen style.", true);
+
     private static volatile ShaderModule active;
     private boolean dirty;
 
     public ShaderModule() {
-        super("Shader", Category.RENDER, "Custom shine on your tools, weapons, armor and enchanted items, in a style you pick.");
+        super("Shader", Category.RENDER, "Custom shine on your swords, tools, armor, hats and enchanted items, in a style you pick.");
     }
 
     private void changed() {
@@ -58,6 +60,23 @@ public class ShaderModule extends Module {
             return true;
         }
         return m.armor.get() && stack.method_57826(class_9334.field_54196) && stack.method_57826(class_9334.field_53695);
+    }
+
+    public static int hatShine(int base, float t, float seed) {
+        ShaderModule m = active;
+        if (m == null || !m.hats.get()) {
+            return base;
+        }
+        double time = System.currentTimeMillis() % 1000000L / 1000.0;
+        double hue = 0.5 + 0.5 * Math.sin(2 * Math.PI * (t * 0.6 + time * 0.3 + seed));
+        double[] c = colour(m.style.get(), hue, (t + time * 0.2) % 1.0);
+        double wave = Math.pow(0.5 + 0.5 * Math.sin(2 * Math.PI * (t * 1.5 - time * 0.7)), 6);
+        double mixAmt = Math.min(0.92, (0.45 + 0.35 * wave) * m.strength.get());
+        double glow = 1.0 + 0.5 * wave * m.strength.get();
+        int r = clamp(((base >> 16 & 255) * (1 - mixAmt) + c[0] * mixAmt) * glow);
+        int g = clamp(((base >> 8 & 255) * (1 - mixAmt) + c[1] * mixAmt) * glow);
+        int b = clamp(((base & 255) * (1 - mixAmt) + c[2] * mixAmt) * glow);
+        return base & 0xFF000000 | r << 16 | g << 8 | b;
     }
 
     @Override
