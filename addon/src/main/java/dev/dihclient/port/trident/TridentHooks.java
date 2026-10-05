@@ -3,17 +3,13 @@ package dev.dihclient.port.trident;
 import dev.dihclient.DIHClient;
 import dev.dihclient.module.ModuleManager;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * What {@code TridentRiptideMixin} asks while the trident item runs. Never throws: on an error the vanilla value is used.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class TridentHooks {
     private static boolean warned;
 
     private TridentHooks() {
     }
 
-    /** Trident Util "No Water" or Trident Boost "Out Of Water": the trident acts as if you were wet. */
     public static boolean allowOutOfWater() {
         try {
             TridentUtilModule util = ModuleManager.of(TridentUtilModule.class);
@@ -28,7 +24,6 @@ public final class TridentHooks {
         }
     }
 
-    /** Charge ticks the trident asks for (vanilla 10), shortened by Trident Util "Charge Scale". */
     public static int minChargeTicks(int vanilla) {
         try {
             TridentUtilModule util = ModuleManager.of(TridentUtilModule.class);
@@ -39,7 +34,6 @@ public final class TridentHooks {
         }
     }
 
-    /** Trident Boost: multiplier for the riptide launch, 1 when off. */
     public static double riptideMultiplier() {
         try {
             TridentBoostModule boost = ModuleManager.of(TridentBoostModule.class);

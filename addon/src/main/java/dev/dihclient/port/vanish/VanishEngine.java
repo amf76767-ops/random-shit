@@ -18,21 +18,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Decision logic of the Anti Vanish module without any Minecraft type: it is fed with observations (tab list changes,
- * chat lines, sounds, particles ...) and with a view of the game ({@link Env}), and reports through a {@link Sink}.
- * <p>
- * Two kinds of evidence, as in the original:
- * <ul>
- *   <li>Vanish events (tab entry hidden/removed without a leave message, game mode switched to spectator, still
- *       targetable by command completion while off the tab list). They report straight away.</li>
- *   <li>Sensor signals (invisible player entity, suspicious sound or particle with no visible cause). Each one alone is
- *       only announced; two different kinds within 15 s, one of them naming a player who is provably in your region, and a
- *       combined weight of 35 raise the "is watching you" alert.</li>
- * </ul>
- * Everything except {@link #offer} runs on the game thread.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class VanishEngine {
     public static final String SPECTATOR = "spectator";
     private static final String PROBE_COMMAND = "minecraft:msg";
@@ -56,7 +42,6 @@ public final class VanishEngine {
     private static final long CONFIRMED_DEPARTURE_MS = 5000L;
     private static final int PENDING_VANISH_TICKS = 20;
 
-    /** One player entity around you (never yourself). */
     public static final class Body {
         public final UUID id;
         public final int entityId;
@@ -79,11 +64,9 @@ public final class VanishEngine {
         }
     }
 
-    /** One tab list entry. */
     public record TabEntry(UUID id, String name) {
     }
 
-    /** What the game shows right now. All calls on the game thread; null / empty when unknown. */
     public interface Env {
         long now();
 
@@ -93,24 +76,18 @@ public final class VanishEngine {
 
         double[] selfPos();
 
-        /** True while a container screen of your own is open. */
         boolean containerOpen();
 
-        /** Name of the tab list entry, or null when there is no entry for the id. */
         String tabName(UUID id);
 
         boolean inTab(UUID id);
 
-        /** Tab entries that are listed (visible in the tab overlay). */
         Collection<TabEntry> listedEntries();
 
-        /** Every connected player id, listed or not. */
         Set<UUID> connectedIds();
 
-        /** All names in the tab list, lower case. */
         Set<String> tabNamesLower();
 
-        /** Other player entities in the loaded world. */
         List<Body> players();
 
         Body playerByUuid(UUID id);
@@ -121,28 +98,21 @@ public final class VanishEngine {
 
         boolean villagerNear(double x, double y, double z, double radiusSq);
 
-        /** Registry path of the block at the position, e.g. "campfire". */
         String blockPath(int x, int y, int z);
 
-        /** Block has a POWERED property that is set, or receives redstone power. */
         boolean powered(int x, int y, int z);
 
-        /** Whether this name is one the user wants to be told about (staff list, watchlist, everyone ...). */
         boolean isTarget(String name);
 
-        /** Asks the server for command completions; may throw, the engine ignores that. */
         void sendCompletionRequest(int id, String command);
     }
 
-    /** How the engine talks to the user. */
     public interface Sink {
-        /** A sensor fired. {@code subject} is null when unknown; {@code named} says it is a player name rather than a location. */
+
         void announce(String reason, String subject, boolean named);
 
-        /** A player vanished / switched / is visible again: "{name} {what} ({detail})". */
         void news(String name, String what, String detail);
 
-        /** Strong evidence that the player is near you and watching. */
         void watching(UUID id, String name);
     }
 
@@ -150,7 +120,6 @@ public final class VanishEngine {
         TAB_REMOVE, TAB_HIDE, PLAYER_LEFT, SYSTEM_CHAT, ENTITY_METADATA, POSITIONAL_SOUND, ENTITY_SOUND, PARTICLE, EXPLOSION, GAMEMODE
     }
 
-    /** Something the packet thread saw. Immutable, handed over through a queue. */
     public record Observation(ObservationType type, UUID profileId, int entityId, double x, double y, double z, String detail) {
         public static Observation tabRemove(UUID id) {
             return new Observation(ObservationType.TAB_REMOVE, id, -1, 0.0, 0.0, 0.0, "");
@@ -251,7 +220,6 @@ public final class VanishEngine {
         }
     }
 
-    /** When a player was last seen in your region (replaces the Donut staff list's "sighting"). */
     private static final class Sighting {
         long provenAt;
         boolean nearby;
@@ -262,7 +230,6 @@ public final class VanishEngine {
         }
     }
 
-    /** A row of the summary list. */
     public record HudEntry(String name, String reason) {
         public String tag() {
             return VanishHeuristics.tag(this.name, this.reason);
@@ -309,7 +276,7 @@ public final class VanishEngine {
     private String criticalWatcher = "";
     private UUID ghostId;
     private String ghostName;
-    /** Set by the module from its setting: whether the command completion probe may be sent at all. */
+
     public volatile boolean probeEnabled = true;
 
     public VanishEngine(Env env, Sink sink) {
@@ -317,16 +284,12 @@ public final class VanishEngine {
         this.sink = sink;
     }
 
-    // ---------------------------------------------------------------- input from the packet thread
-
-    /** Thread safe. Old entries are dropped when the game thread falls behind. */
     public void offer(Observation observation) {
         if (observation != null) {
             this.observations.offer(observation);
         }
     }
 
-    /** A "players removed from tab" packet; big batches (server restart, lobby switch) are no vanish. */
     public void offerTabRemove(Collection<UUID> ids) {
         if (ids != null && ids.size() < 4) {
             for (UUID id : ids) {
@@ -335,7 +298,6 @@ public final class VanishEngine {
         }
     }
 
-    /** A "listed" update; only a few players turning unlisted at once counts. */
     public void offerTabListed(Map<UUID, Boolean> listedById) {
         if (listedById == null) {
             return;
@@ -365,7 +327,6 @@ public final class VanishEngine {
         }
     }
 
-    /** A system chat line; {@code departedName} is the argument of the vanilla "left the game" message or "". */
     public void offerChat(String text, String departedName) {
         if (text != null && !text.isBlank()) {
             offer(Observation.systemChat(text));
@@ -375,10 +336,6 @@ public final class VanishEngine {
         }
     }
 
-    /**
-     * Command completion answer. Thread safe.
-     * @return true when this was the answer to our own probe (the caller should swallow the packet)
-     */
     public boolean offerCompletion(int id, List<String> suggestions) {
         if (!this.completionRequestIds.remove(id)) {
             return false;
@@ -395,12 +352,10 @@ public final class VanishEngine {
         return true;
     }
 
-    /** Own actions: sounds and particles right after them are yours. Thread safe. */
     public void localAction() {
         this.lastLocalActionMs = this.env.now();
     }
 
-    /** Own block use: remembers the clicked block and the one next to it (and door/bed halves) as self-made. */
     public void selfInteract(int hitX, int hitY, int hitZ, int nextX, int nextY, int nextZ, String itemPath) {
         long now = this.env.now();
         this.lastLocalActionMs = now;
@@ -409,9 +364,6 @@ public final class VanishEngine {
         VanishHeuristics.markSelfFootprint(nextX, nextY, nextZ, itemPath, this.selfPlacedBlocks, until);
     }
 
-    // ---------------------------------------------------------------- tick
-
-    /** Once per client tick while in a world. */
     public void tick() {
         playPendingChime();
         this.tickCounter++;
@@ -435,7 +387,6 @@ public final class VanishEngine {
         pruneState();
     }
 
-    /** Takes the listed players on enable (before the first tick). */
     public void primeFromTab() {
         trackListedPlayers();
     }
@@ -504,8 +455,6 @@ public final class VanishEngine {
         }
     }
 
-    // ---------------------------------------------------------------- tab list
-
     private void trackListedPlayers() {
         long now = this.env.now();
         UUID self = this.env.selfId();
@@ -532,7 +481,6 @@ public final class VanishEngine {
         }
     }
 
-    /** Listed for at least 1.5 s: filters NPCs and join flicker. */
     boolean trustedListed(UUID uuid) {
         Long since = uuid == null ? null : this.listedSinceMs.get(uuid);
         return since != null && this.env.now() - since >= TRUSTED_LISTED_MS;
@@ -607,11 +555,11 @@ public final class VanishEngine {
         while (!this.pendingVanishes.isEmpty() && this.pendingVanishes.peekFirst().dueTick() <= this.tickCounter) {
             PendingVanish pending = this.pendingVanishes.removeFirst();
             if (this.env.inTab(pending.uuid())) {
-                continue; // came back (relog, server reshuffling the list)
+                continue;
             }
             long now = this.env.now();
             if (this.confirmedDepartures.getOrDefault(pending.uuid(), 0L) > now) {
-                continue; // a leave message named it: really gone
+                continue;
             }
             if (recentMessageNames(pending.name())) {
                 this.serverSendsLeaveMessages = true;
@@ -647,7 +595,6 @@ public final class VanishEngine {
         }
     }
 
-    /** A chat line of the last 8 s says this player left. */
     boolean recentMessageNames(String name) {
         if (name == null || name.isBlank()) {
             return false;
@@ -661,8 +608,6 @@ public final class VanishEngine {
         return false;
     }
 
-    // ---------------------------------------------------------------- command completion probe
-
     private void sendCompletionProbe() {
         int id = this.nextCompletionId++;
         if (this.nextCompletionId > PROBE_ID_LAST) {
@@ -675,11 +620,10 @@ public final class VanishEngine {
         try {
             this.env.sendCompletionRequest(id, PROBE_COMMAND + " ");
         } catch (Throwable ignored) {
-            // no connection right now; the id expires with the next ones
+
         }
     }
 
-    /** Names the server completes for /msg that are not in the tab list are hidden but targetable. */
     private void processCompletionProbe() {
         List<String> current = this.pendingCompletionNames;
         if (current == null) {
@@ -705,8 +649,6 @@ public final class VanishEngine {
         }
     }
 
-    // ---------------------------------------------------------------- hidden spells (what the user is told)
-
     private void reportHidden(UUID uuid, String name, boolean spectator, String reason, String detail, int score) {
         upsertDetection(detectionKey(uuid, name), name, reason, score, this.env.now() + DETECTION_TTL_MS);
         HiddenSpell spell = this.hiddenSpells.get(spellKey(name));
@@ -716,7 +658,6 @@ public final class VanishEngine {
         }
     }
 
-    /** Runs every 10 ticks: a spell is told one tick-batch after it began, as a "watching you" alert if the player is in your region. */
     private void reviewSpells() {
         Iterator<HiddenSpell> it = this.hiddenSpells.values().iterator();
         while (it.hasNext()) {
@@ -761,7 +702,7 @@ public final class VanishEngine {
         if (known == null || !this.env.isTarget(known.name())) {
             return;
         }
-        // a game mode update about this player means it is in the same place as you
+
         touchSighting(uuid, false);
         if (SPECTATOR.equals(gameMode)) {
             if (credibleSubject(uuid, known.name())) {
@@ -774,7 +715,6 @@ public final class VanishEngine {
         this.sink.news(known.name(), switchedTo(gameMode), "");
     }
 
-    /** "switched to spectator"; unknown mode -> "switched game mode". */
     public static String switchedTo(String mode) {
         return mode == null ? "switched game mode" : "switched to " + mode;
     }
@@ -786,8 +726,6 @@ public final class VanishEngine {
     private static String detectionKey(UUID uuid, String name) {
         return uuid != null ? uuid.toString() : name;
     }
-
-    // ---------------------------------------------------------------- region (who is provably around you)
 
     private RegionProof regionProof(UUID uuid) {
         if (uuid == null) {
@@ -810,9 +748,6 @@ public final class VanishEngine {
         }
     }
 
-    // ---------------------------------------------------------------- sensors
-
-    /** Every 5 ticks: refresh the region memory and look for invisible player entities. */
     private void scanPlayers() {
         double rangeSq = SENSOR_RANGE * SENSOR_RANGE;
         for (Body player : this.env.players()) {
@@ -911,7 +846,6 @@ public final class VanishEngine {
         }
     }
 
-    /** Smoke and block particles are common: only the second one within 2 s counts. */
     private boolean particleBurstReady(String particle, long now) {
         Deque<Long> burst = this.weakParticleBursts.computeIfAbsent(particle, ignored -> new ArrayDeque<>());
         burst.addLast(now);
@@ -946,7 +880,6 @@ public final class VanishEngine {
         }
     }
 
-    /** Two different kinds of signal in the window, one naming a provably nearby player, and 35 points: that player watches you. */
     private void evaluateCritical() {
         long now = this.env.now();
         pruneSignals(now);
@@ -976,7 +909,6 @@ public final class VanishEngine {
         this.ghostName = name;
     }
 
-    /** The alert is raised one tick later than the decision, like in the original. */
     private void playPendingChime() {
         if (!this.pendingChimes.isEmpty()) {
             this.pendingChimes.clear();
@@ -1014,8 +946,6 @@ public final class VanishEngine {
         }
     }
 
-    // ---------------------------------------------------------------- summary
-
     private static boolean detectionWorthShowing(Detection detection) {
         if (detection == null) {
             return false;
@@ -1042,7 +972,6 @@ public final class VanishEngine {
         return false;
     }
 
-    /** Alert first, then up to four strongest detections, one per tag and name. */
     public List<HudEntry> hudEntries() {
         long now = this.env.now();
         List<HudEntry> out = new ArrayList<>();
@@ -1061,8 +990,6 @@ public final class VanishEngine {
                 .forEach(out::add);
         return List.copyOf(out);
     }
-
-    // ---------------------------------------------------------------- upkeep
 
     private void pruneState() {
         long now = this.env.now();
@@ -1090,8 +1017,6 @@ public final class VanishEngine {
             this.signals.removeFirst();
         }
     }
-
-    // ---------------------------------------------------------------- geometry helpers
 
     private static double sensorRangeSq() {
         return SENSOR_RANGE * SENSOR_RANGE;
@@ -1126,7 +1051,6 @@ public final class VanishEngine {
         return VanishHeuristics.located(x - me[0], y - me[1], z - me[2]);
     }
 
-    /** A visible player or a projectile within 4 blocks explains the sound or particle. */
     private boolean hasVisibleCause(double x, double y, double z) {
         for (Body player : this.env.players()) {
             if (!player.invisible) {
@@ -1176,7 +1100,6 @@ public final class VanishEngine {
         return false;
     }
 
-    /** Doors and trapdoors next to a redstone signal (or one that was powered in the last 5 s) are machines, not players. */
     private boolean isPoweredMechanism(double x, double y, double z, String soundId) {
         String path = shortId(soundId);
         if (!path.contains("door") && !path.contains("trapdoor")) {
@@ -1210,8 +1133,6 @@ public final class VanishEngine {
     private static String shortId(String id) {
         return VanishHeuristics.path(id);
     }
-
-    // ---------------------------------------------------------------- state for tests and the module's info line
 
     public boolean serverSendsLeaveMessages() {
         return this.serverSendsLeaveMessages;

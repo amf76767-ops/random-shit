@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Hides the vanilla body of a player that is drawn as a custom 3D model: shrunk to nothing, armor and items shrink with it. */
 @Mixin(targets = "net.minecraft.class_922")
 public abstract class CustomModelMixin {
     @Inject(

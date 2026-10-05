@@ -35,22 +35,10 @@ import dev.dihclient.setting.StringSetting;
 import java.lang.reflect.Method;
 import java.util.Map;
 
-/**
- * The module clean-up of 6.7.0:
- * <ul>
- *   <li>AutoMine + Tunnel → <b>Miner</b></li>
- *   <li>Goto + ElytraBot (+ SafeRoute as a switch) → <b>Goto</b></li>
- *   <li>Scaffold + SmartBridge → <b>Scaffold</b></li>
- *   <li>AutoMend → a switch "Mend" in AutoArmor</li>
- *   <li>MapArt, ModelBuild, Demolish and AutoRestock → options of <b>AutoBuild</b> (Source: Schematic / MapArt / Model / Demolish)</li>
- *   <li>StashSorter disappears from the lists (TaskQueue still uses its engine), AutoTrade is removed (see Cleanup), FlipFinder is now AutoFlipper</li>
- * </ul>
- */
 public final class Folds {
     private Folds() {
     }
 
-    /** What AutoBuild builds from. */
     public enum Source { SCHEMATIC, MAPART, MODEL, DEMOLISH }
 
     private static void add(ModuleManager modules, Module m) throws ReflectiveOperationException {
@@ -60,7 +48,7 @@ public final class Folds {
     }
 
     public static void apply(ModuleManager modules) throws ReflectiveOperationException {
-        // the engine that keeps the folded modules running
+
         MergeBus bus = new MergeBus();
         add(modules, bus);
         bus.setEnabledSilently(true);
@@ -85,7 +73,7 @@ public final class Folds {
             Merge.hide(modules, walk);
             Merge.hide(modules, fly);
             Merge.hide(modules, safe);
-            add(modules, hub); // same name as the old Goto: the saved settings of Goto are the settings of the hub
+            add(modules, hub);
         });
         step("Scaffold", () -> {
             Hubs.ScaffoldHub hub = new Hubs.ScaffoldHub(scaffold, smart);
@@ -102,7 +90,7 @@ public final class Folds {
             Hubs.BlinkHub hub = new Hubs.BlinkHub(blink, freeze);
             Merge.hide(modules, blink);
             Merge.hide(modules, freeze);
-            add(modules, hub); // same name as Blink
+            add(modules, hub);
         });
         step("Block ESP + Storage ESP + Block Notifier", () -> blockEsp(modules));
         step("Amethyst Bypass in Sus ChunkFinder", () -> amethyst(modules));
@@ -150,7 +138,7 @@ public final class Folds {
                 "Schematic: build a file · MapArt: turn a picture into map art · Model: turn a 3D model into blocks · Demolish: take down the loaded build.", Source.SCHEMATIC);
         BoolSetting refill = new BoolSetting("Hotbar Refill",
                 "Refills the hotbar from your inventory and fetches low items from nearby chests (the old AutoRestock).", false);
-        // everything AutoBuild had belongs to "Schematic"
+
         Merge.gateAll(build, () -> source.get() == Source.SCHEMATIC);
         Merge.addSetting(build, source, true);
         Merge.addSetting(build, refill, false);
@@ -174,7 +162,6 @@ public final class Folds {
         Merge.hide(modules, model);
         Merge.hide(modules, demolish);
 
-        // plan the whole route before the build, and keep the module menu short (the rest lives in the browser)
         BoolSetting planFirst = new BoolSetting("Plan First",
                 "Before a build starts, works out the whole route (all layers, the fewest stand spots, the shortest way between them) and then follows it.", true);
         Merge.addSetting(build, planFirst, false);
@@ -210,7 +197,7 @@ public final class Folds {
                     try {
                         net.minecraft.class_310.method_1551().field_1774.method_1455(String.join("\n", dev.dihclient.autobuild.BuildLog.last(60)));
                     } catch (Throwable ignored) {
-                        // no clipboard
+
                     }
                 }), false);
         Merge.addSetting(build, new ActionSetting("Plan Route",
@@ -220,7 +207,7 @@ public final class Folds {
                     net.minecraft.class_310 mc = net.minecraft.class_310.method_1551();
                     mc.execute(() -> SchematicBrowserScreen.openOptions(mc.field_1755, build));
                 }), false);
-        // team codes: build together with the alt accounts
+
         StringSetting teamCode = new StringSetting("Team Code", "The code of a team. Create Team shows it; type it here on the other accounts and press Join Team.", "", 16);
         Merge.addSetting(build, teamCode, false);
         TeamBuild team = new TeamBuild(build, teamCode);
@@ -232,10 +219,6 @@ public final class Folds {
         AdvancedOptions.apply(build, AdvancedOptions.AUTOBUILD_MAIN);
     }
 
-    /**
-     * Amethyst Bypass is no module of its own any more: it is the "Amethyst" part of Sus ChunkFinder (the switch keeps its name).
-     * Its settings (Method, Min Cells, Tracer) show there while Amethyst is on, and its finds count as amethyst points.
-     */
     private static void amethyst(ModuleManager modules) throws ReflectiveOperationException {
         dev.dihclient.modules.basefinding.SusChunkFinder sus = modules.get(dev.dihclient.modules.basefinding.SusChunkFinder.class);
         dev.dihclient.port.donutd.AmethystBypassModule bypass = modules.get(dev.dihclient.port.donutd.AmethystBypassModule.class);

@@ -13,21 +13,12 @@ import net.minecraft.class_1802;
 import net.minecraft.class_310;
 import net.minecraft.class_746;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * <p>
- * Hides the items of your own inventory, hotbar, cursor and armor HUD on screen: the game shows a fake item instead (a totem,
- * a random believable loadout, or nothing). With Stream Only (Windows) the real items are drawn into windows that screen
- * capture cannot see, so only the player sees them; the game window itself, which is what a capture records, shows the fakes.
- * <p>
- * The static hooks below are called from the mixins on every slot draw. They never throw: on any error the slot is shown
- * empty (hidden is the safe side for this module).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class NoInvLeakModule extends Module {
     public enum Style { TOTEM, RANDOM, EMPTY }
 
     private static volatile NoInvLeakModule active;
-    /** The registered module, also while it is switched on but not yet enabled (config loaded before the world). */
+
     private static volatile NoInvLeakModule instance;
     private static class_1799 totem;
     private static boolean hookFailureLogged;
@@ -60,7 +51,6 @@ public class NoInvLeakModule extends Module {
         this.borderless.onChange(BorderlessFullscreen::tick);
     }
 
-    /** True while Stream Only wants the borderless window mode (read by {@link BorderlessFullscreen}). */
     static boolean wantsBorderless() {
         NoInvLeakModule module = instance;
         return module != null && module.isEnabled() && module.streamOnly.get() && module.borderless.get();
@@ -90,9 +80,6 @@ public class NoInvLeakModule extends Module {
         return this.streamOnly.get() && StreamOverlay.usable() ? "Stream" : null;
     }
 
-    // ---- hooks called by the mixins ----
-
-    /** Hotbar slot draw: {@code seed} is vanilla's 1..9 for hotbar slots, 10 for the offhand. */
     public static class_1799 hotbar(class_1799 stack, int x, int y, int seed) {
         try {
             NoInvLeakModule module = active;
@@ -110,7 +97,6 @@ public class NoInvLeakModule extends Module {
         }
     }
 
-    /** Container screen slot draw, for slots of the player's own inventory only. */
     public static class_1799 container(class_1799 stack, class_1735 slot, int x, int y, boolean hovered) {
         try {
             NoInvLeakModule module = active;
@@ -127,7 +113,6 @@ public class NoInvLeakModule extends Module {
         }
     }
 
-    /** The stack on the cursor. */
     public static class_1799 carried(class_1799 stack, int x, int y) {
         try {
             NoInvLeakModule module = active;
@@ -144,7 +129,6 @@ public class NoInvLeakModule extends Module {
         }
     }
 
-    /** Armor HUD element. */
     public static class_1799 shownInHud(class_1799 stack, class_1304 slot) {
         try {
             NoInvLeakModule module = active;
@@ -169,7 +153,6 @@ public class NoInvLeakModule extends Module {
         return module != null && module.fillEmpty.get() && module.style.get() != Style.EMPTY;
     }
 
-    /** True while the capture-proof overlay really takes over. */
     public static boolean overlaying() {
         NoInvLeakModule module = active;
         return module != null && module.streamOnly.get() && StreamOverlay.usable();
@@ -179,7 +162,6 @@ public class NoInvLeakModule extends Module {
         return this.streamOnly.get() && StreamOverlay.usable();
     }
 
-    /** True for a slot of the player's own inventory (not a chest, a crafting grid, ...). */
     public static boolean ownSlot(class_1735 slot) {
         return active != null && slot != null && slot.field_7871 instanceof class_1661;
     }

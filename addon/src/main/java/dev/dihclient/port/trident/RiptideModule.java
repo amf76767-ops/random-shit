@@ -7,11 +7,7 @@ import net.minecraft.class_1268;
 import net.minecraft.class_746;
 import org.lwjgl.glfw.GLFW;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Uses a riptide trident while you hold right-click: starts the use, lets go once it is charged, and starts again.
- * It only acts in water or rain (the same place a server accepts a riptide), no Trident Util needed.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class RiptideModule extends Module {
     private int releasedTick = -100;
     private boolean broken;

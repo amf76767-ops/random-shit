@@ -7,17 +7,10 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import org.lwjgl.glfw.GLFWNativeWin32;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * <p>
- * A click-through, layered pop-up window owned by the game window. {@code SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)}
- * makes screen capture (OBS window/display capture, Discord, the Game Bar, screenshots) skip it, while the player still sees it
- * on the monitor. Pixels are premultiplied ARGB in a DIB section that {@code UpdateLayeredWindow} blends onto the desktop.
- * Windows 10 2004 (build 19041) or newer; older builds reject the affinity flag and the constructor throws.
- */
+/** Ported from an open-source client (GPL-3.0). */
 final class OverlayWindow {
     private static final String CLASS_NAME = "DIHNoInvLeakOverlay";
-    /** Strong reference: JNA only keeps a weak one to a callback. */
+
     private static final Win32.WindowProc PROC = (hwnd, message, wParam, lParam) -> Win32.User32.INSTANCE.DefWindowProcW(hwnd, message, wParam, lParam);
     private static boolean classRegistered;
 
@@ -64,7 +57,6 @@ final class OverlayWindow {
         this.blend.alphaFormat = (byte) Win32.AC_SRC_ALPHA;
     }
 
-    /** Cleared pixel buffer for the next picture; its row length is {@link #stride()}. */
     IntBuffer pixels(int width, int height) {
         if (width > this.capacityWidth || height > this.capacityHeight) {
             int nextWidth = Math.max(width, this.capacityWidth);
@@ -73,7 +65,7 @@ final class OverlayWindow {
             Win32.BitmapInfo info = new Win32.BitmapInfo();
             info.biSize = 40;
             info.biWidth = nextWidth;
-            info.biHeight = -nextHeight; // negative: top-down rows
+            info.biHeight = -nextHeight;
             info.biPlanes = 1;
             info.biBitCount = 32;
             info.biCompression = 0;

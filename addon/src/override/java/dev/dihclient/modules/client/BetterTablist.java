@@ -18,10 +18,6 @@ import net.minecraft.class_332;
 import net.minecraft.class_640;
 import net.minecraft.class_7532;
 
-/**
- * The TAB list as a clean card: rounded panel, one row per player with head, name, health, distance and a ping meter. In the Glass
- * style of the ClickGUI the card is see-through like the rest of the GUI.
- */
 public class BetterTablist extends Module {
     public final BoolSetting health = this.bool("Health", "Shows the health of loaded players.", true).legacy("betterTab.health");
     public final BoolSetting distance = this.bool("Distance", "Shows the distance to loaded players.", true).legacy("betterTab.distance");
@@ -38,7 +34,6 @@ public class BetterTablist extends Module {
         return ms < 0 ? 0xFF777777 : ms < 80 ? 0xFF4ADE80 : ms < 160 ? 0xFFFACC15 : ms < 300 ? 0xFFFB923C : 0xFFEF4444;
     }
 
-    /** Four small bars, filled by how good the connection is. */
     private static void pingMeter(class_332 g, int x, int y, int ms) {
         int filled = ms < 0 ? 0 : ms < 80 ? 4 : ms < 160 ? 3 : ms < 300 ? 2 : 1;
         int color = pingColor(ms);

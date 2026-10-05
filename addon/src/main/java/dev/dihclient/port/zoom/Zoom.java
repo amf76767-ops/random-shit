@@ -8,12 +8,7 @@ import dev.dihclient.setting.IntSetting;
 import net.minecraft.class_310;
 import org.lwjgl.glfw.GLFW;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Hold the key of this module (C by default, change it in the GUI) to zoom in. The mouse wheel changes the zoom while you
- * hold it, and the mouse turns slower the closer you are. The field of view comes from {@code ZoomRenderMixin}, the slower
- * turning and the wheel from {@code ZoomMouseMixin}. The module is always on; the key only works while no screen is open.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class Zoom extends Module {
     private static final float MIN_ZOOM = 1.1F;
     private static final float MAX_ZOOM = 50.0F;
@@ -43,7 +38,6 @@ public class Zoom extends Module {
         instance = this;
     }
 
-    // the key is held, not pressed: the module manager must not toggle the module
     @Override
     public boolean isActionModule() {
         return true;
@@ -56,7 +50,7 @@ public class Zoom extends Module {
 
     @Override
     public void onAction() {
-        // the state is read from the key itself in onTick
+
     }
 
     @Override
@@ -97,19 +91,16 @@ public class Zoom extends Module {
         }
     }
 
-    /** Called every frame by the render mixin: the field of view divided by the current zoom. */
     public static float fov(float fov) {
         float factor = advance();
         return factor > 1.0001F ? fov / factor : fov;
     }
 
-    /** How much the mouse turn is scaled (1 = not zoomed). */
     public static double turnScale() {
         Zoom module = instance;
         return module != null && module.lowerSensitivity.get() && current > 1.0001F ? 1.0 / current : 1.0;
     }
 
-    /** The mouse wheel while zooming. @return true when the zoom used it */
     public static boolean scroll(double amount) {
         Zoom module = instance;
         if (module != null && module.zooming && module.scroll.get() && amount != 0.0) {
@@ -120,7 +111,6 @@ public class Zoom extends Module {
         return false;
     }
 
-    /** Moves the shown zoom towards the wanted one; the frame time keeps it independent of the frame rate. */
     private static float advance() {
         long now = System.nanoTime();
         float seconds = lastNanos == 0L ? 0.0F : Math.min(MAX_FRAME_SECONDS, (float) (now - lastNanos) / 1.0E9F);

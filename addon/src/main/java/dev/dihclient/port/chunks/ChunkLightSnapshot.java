@@ -2,17 +2,14 @@ package dev.dihclient.port.chunks;
 
 import java.util.Arrays;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Sky-light status of every section of one chunk, as the server last sent it.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class ChunkLightSnapshot {
-    /** Sections whose top block is below this height count for the base signal. */
+
     public static final int BASE_DETECT_CEILING_Y = 62;
 
     public final int sectionCount;
     public final int bottomSectionY;
-    /** One entry per light section: the world sections plus one below and one above. */
+
     public final LightSectionStatus[] sky;
 
     public ChunkLightSnapshot(int sectionCount, int bottomSectionY) {
@@ -22,7 +19,6 @@ public final class ChunkLightSnapshot {
         Arrays.fill(this.sky, LightSectionStatus.UNKNOWN);
     }
 
-    /** Light sections from this index up never count for the base signal (their top is at or above the ceiling). */
     public int signalSections() {
         int i = 1;
         while (i < this.sectionCount + 1 && (this.bottomSectionY + i - 1) * 16 + 15 < BASE_DETECT_CEILING_Y) {

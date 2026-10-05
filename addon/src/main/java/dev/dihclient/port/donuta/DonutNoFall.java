@@ -8,16 +8,10 @@ import net.minecraft.class_2828.class_2830;
 import net.minecraft.class_634;
 import net.minecraft.class_746;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Take no fall damage on DonutSMP. After a fall of more than 3 blocks every movement packet is replaced by a full
- * position+look packet whose ground flag says "in the air" until four ground packets have passed; every second one of
- * them is sent 1e-8 higher. The server therefore never receives the landing. Needs the server to trust the client's
- * ground flag (see {@link DonutNoFallLogic}).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class DonutNoFall extends Module {
     private final DonutNoFallLogic logic = new DonutNoFallLogic();
-    /** True while our own replacement packet passes the packet hook again. */
+
     private boolean sendingReplacement;
 
     public DonutNoFall() {
@@ -32,7 +26,7 @@ public class DonutNoFall extends Module {
 
     @Override
     public void onWorldChange() {
-        // a fall started in the old world must not leak into the new one
+
         this.logic.reset();
     }
 

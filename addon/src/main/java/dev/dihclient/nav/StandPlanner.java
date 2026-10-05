@@ -6,11 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-/**
- * Picks the spot to stand on from which the most blocks of a build can be placed. The score of a spot is the number of
- * open blocks within reach that can be seen from there, minus a little for the way to get there, so the builder works
- * through the schematic in a few well chosen stops instead of walking up to every single block.
- */
 public final class StandPlanner {
     private StandPlanner() {
     }
@@ -22,13 +17,6 @@ public final class StandPlanner {
         return Nav.key(x >> 2, y >> 2, z >> 2);
     }
 
-    /**
-     * @param open        block coordinates {x, y, z} that still have to be placed
-     * @param reach       how far the player can reach, measured from the eyes to the middle of the block
-     * @param eye         eye height above the feet
-     * @param travelCost  score lost per unit of walking cost
-     * @param forbidden   cells that must not be used (for example cells inside the schematic that are still empty)
-     */
     public static Choice best(Nav.Region region, List<int[]> open, Nav.Terrain world, double reach, double eye, double travelCost,
                               Predicate<Nav.Cell> forbidden) {
         if (open.isEmpty()) {
@@ -54,7 +42,7 @@ public final class StandPlanner {
             return null;
         }
         top.sort((a, b) -> Double.compare(b.score(), a.score()));
-        // the best few by count get the exact test: a block behind another one cannot be placed from there
+
         Choice best = null;
         for (int i = 0; i < Math.min(12, top.size()); i++) {
             Choice ch = top.get(i);
@@ -95,10 +83,6 @@ public final class StandPlanner {
         return n;
     }
 
-    /**
-     * The straight line from the eyes to the middle of the block is not blocked by a solid block, except by the blocks
-     * right next to the target (the block you click on to place it is one of them).
-     */
     static boolean visible(Nav.Terrain world, double ex, double ey, double ez, int[] b) {
         double tx = b[0] + 0.5, ty = b[1] + 0.5, tz = b[2] + 0.5;
         double dx = tx - ex, dy = ty - ey, dz = tz - ez;
@@ -112,7 +96,7 @@ public final class StandPlanner {
             }
             int manhattan = Math.abs(x - b[0]) + Math.abs(y - b[1]) + Math.abs(z - b[2]);
             if (manhattan <= 1) {
-                continue; // a neighbour of the target: this is where you click
+                continue;
             }
             if (world.support(x, y, z)) {
                 return false;
@@ -121,7 +105,6 @@ public final class StandPlanner {
         return true;
     }
 
-    /** The open blocks that can really be placed from the cell: within reach and with a clear line from the eyes. */
     public static List<int[]> coveredBy(Nav.Cell cell, List<int[]> open, Nav.Terrain world, double reach, double eye) {
         double ex = cell.x + 0.5, ey = cell.y + eye, ez = cell.z + 0.5;
         double r2 = reach * reach;

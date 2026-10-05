@@ -21,20 +21,7 @@ import net.minecraft.class_332;
 import net.minecraft.class_3675;
 import org.lwjgl.glfw.GLFW;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Shows what the Spotify desktop app is playing (cover, title, artist, progress) with synced lyrics, and can send
- * play/pause/next/previous. Windows only: the now-playing data comes from the Windows media session of the Spotify app
- * (WinRT, through the JNA library the game ships), with the title of the Spotify window as fallback. On other systems
- * the module does nothing and says nothing.
- * <p>
- * The only network traffic is the lyrics lookup at lrclib.net (artist, title, album and length of the playing track,
- * see {@link LyricsService}), which "Lyrics Online" switches off; lyrics found earlier stay readable from the disk cache.
- * <p>
- * Dropped from the original: the HUD layout editor (the card is placed with Position / Offset / Scale below), the chat note on
- * unsupported systems, the free key capture for the media keys (a fixed key list, see {@link MediaBind}), the glyph check
- * of the ImGui font (the game font falls back to Unifont by itself). "Card Width" is in GUI pixels now.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class SpotifyHudModule extends Module {
     private static final long POLL_INTERVAL_MS = 500L;
     private static final long WINDOW_POLL_MS = 1000L;
@@ -172,8 +159,6 @@ public class SpotifyHudModule extends Module {
         }
     }
 
-    // ---- what the card asks (render thread) ----
-
     NowPlaying nowPlaying() {
         return this.nowPlaying;
     }
@@ -186,7 +171,6 @@ public class SpotifyHudModule extends Module {
         return now.active() || this.showWhenIdle.get();
     }
 
-    /** Lyrics of the track the poller published, null while the poller has not settled on this track yet. */
     Lyrics lyricsFor(NowPlaying now) {
         TrackLyrics current = this.lyrics;
         Poller running = this.poller;
@@ -199,8 +183,6 @@ public class SpotifyHudModule extends Module {
     boolean wantsLyrics(NowPlaying now) {
         return this.showLyrics.get() && now != null && now.lyricsEligible();
     }
-
-    // ---- tick: media keys ----
 
     @Override
     public void onTick() {
@@ -231,7 +213,7 @@ public class SpotifyHudModule extends Module {
         }
         this.lastKeyAt = now;
         if (running.press(key) && key == SpotifyWindow.MediaKey.PLAY_PAUSE) {
-            // show the new state at once; the next poll corrects it if the app did not follow
+
             synchronized (this.publishLock) {
                 if (this.poller == running) {
                     this.nowPlaying = this.nowPlaying.toggled();
@@ -249,15 +231,13 @@ public class SpotifyHudModule extends Module {
                 : class_3675.method_15987(client.method_22683(), bind.code);
     }
 
-    // ---- HUD ----
-
     @Override
     public void onRender2D(class_332 g, float partialTicks) {
         if (!this.windows) {
             return;
         }
         if (!this.shouldShowHud()) {
-            // frees the cover texture while nothing is shown
+
             this.releaseCard();
             return;
         }
@@ -276,13 +256,9 @@ public class SpotifyHudModule extends Module {
         }
     }
 
-    // ---- poller (own thread) ----
-
-    /** Lyrics query the poller settled on for the playing track. */
     private record TrackLyrics(String title, String artist, LyricsQuery query) {
     }
 
-    /** Polls the media session twice a second on its own thread: WinRT calls may block and must never run on the render thread. */
     private final class Poller {
         final ScheduledThreadPoolExecutor executor;
         final LyricsService lyricsService = new LyricsService();
@@ -319,10 +295,10 @@ public class SpotifyHudModule extends Module {
 
         void stop() {
             try {
-                // the WinRT objects must be released on the thread that created them
+
                 this.executor.execute(this::closeMedia);
             } catch (RejectedExecutionException ignored) {
-                // already shut down
+
             }
             this.executor.shutdown();
             this.lyricsService.close();
@@ -351,7 +327,7 @@ public class SpotifyHudModule extends Module {
             try {
                 NowPlaying next = this.readSession();
                 if (next == null) {
-                    // a short hiccup of the session keeps the last good state instead of falling back to the window title
+
                     if (this.sessionFailures > 0 && this.sessionFailures <= SESSION_HICCUPS
                             && SpotifyHudModule.this.nowPlaying.source() == NowPlaying.Source.SESSION) {
                         return;
@@ -437,7 +413,7 @@ public class SpotifyHudModule extends Module {
             if (this.media != null && !this.mediaFailed && !this.media.isUnsupported()) {
                 return NowPlaying.NOT_RUNNING;
             }
-            // neither source works on this system: stop polling for good
+
             this.executor.shutdown();
             return NowPlaying.UNSUPPORTED;
         }
@@ -448,10 +424,6 @@ public class SpotifyHudModule extends Module {
             this.windowFailed = true;
         }
 
-        /**
-         * The lyrics are only looked up when the same track was seen on two polls in a row, so skipping through a playlist
-         * does not send a request for every title that flashes by.
-         */
         private TrackLyrics lyricsFor(NowPlaying now) {
             if (!SpotifyHudModule.this.wantsLyrics(now)) {
                 this.lyricsCandidate = null;

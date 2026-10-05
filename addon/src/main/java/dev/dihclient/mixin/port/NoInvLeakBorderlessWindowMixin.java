@@ -14,11 +14,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Ported from an open-source client (GPL-3.0) (MixinBorderlessWindow).
- * While No Inv Leak wants it (Stream Only + Borderless Fullscreen), fullscreen is a borderless window covering the monitor
- * instead of exclusive fullscreen, which would hide the capture-excluded overlay windows.
- */
+/** Ported from an open-source client (GPL-3.0). */
 @Mixin(class_1041.class)
 public abstract class NoInvLeakBorderlessWindowMixin implements BorderlessFullscreen.Switchable {
     @Shadow
@@ -58,7 +54,7 @@ public abstract class NoInvLeakBorderlessWindowMixin implements BorderlessFullsc
                 if (monitor != null) {
                     boolean exclusive = GLFW.glfwGetWindowMonitor(this.field_5187) != 0L;
                     if (!exclusive && !this.dih$borderless) {
-                        // remember the windowed rectangle
+
                         this.field_5175 = this.field_5183;
                         this.field_5185 = this.field_5198;
                         this.field_5174 = this.field_5182;
@@ -81,7 +77,7 @@ public abstract class NoInvLeakBorderlessWindowMixin implements BorderlessFullsc
                 this.dih$leaveBorderless();
             }
         } catch (RuntimeException e) {
-            // leave the vanilla mode switch to run
+
             this.dih$borderless = false;
         }
     }

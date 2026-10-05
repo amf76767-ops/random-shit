@@ -7,7 +7,6 @@ import dev.dihclient.render.Render3D;
 import net.minecraft.class_2596;
 import net.minecraft.class_332;
 
-/** Hidden, always on: runs the merged-in modules (see {@link Merge}) because the module manager no longer knows them. */
 public class MergeBus extends Module {
     private static final java.lang.reflect.Method SEND = find();
 

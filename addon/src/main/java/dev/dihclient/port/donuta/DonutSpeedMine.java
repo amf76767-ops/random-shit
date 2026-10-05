@@ -8,13 +8,7 @@ import net.minecraft.class_2246;
 import net.minecraft.class_2680;
 import net.minecraft.class_3481;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Finishes breaking blocks before the full break time: the break progress of the block you mine is divided by "Break At",
- * so the client sends its "block is broken" packet at that share of the real time (the stock server accepts it from 70 %).
- * It only holds the settings; the progress is changed by {@code DonutASpeedMineMixin}. This is independent of PacketMine.
- * Spawners and everything that is mined with a shovel or an axe are left alone (gravel is not).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class DonutSpeedMine extends Module {
     private static volatile DonutSpeedMine active;
 
@@ -38,13 +32,11 @@ public class DonutSpeedMine extends Module {
         active = null;
     }
 
-    /** Called by the mixin for the break progress of one tick. */
     public static float scaleProgress(class_2680 state, float progress) {
         DonutSpeedMine module = active;
         return module != null && affects(state) ? DonutSpeedMineLogic.scaleProgress(progress, module.breakAt.get()) : progress;
     }
 
-    /** Called by the mixin while the game still waits between two blocks. */
     public static boolean dropsDelay(class_2680 state, float progress) {
         DonutSpeedMine module = active;
         return module != null && affects(state)

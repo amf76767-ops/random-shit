@@ -4,7 +4,6 @@ import dev.dihclient.nav.Nav;
 import dev.dihclient.nav.RoutePlanner;
 import java.util.Set;
 
-/** The planned route of the build that is running, for the pilot (which spot next) and for the preview drawing. */
 public final class RoutePlans {
     private static volatile BuildPlan owner;
     private static volatile RoutePlanner.Result result;
@@ -22,7 +21,6 @@ public final class RoutePlans {
         result = null;
     }
 
-    /** The plan of this build, or null when none was made (or it was made for another build). */
     public static RoutePlanner.Result of(BuildPlan plan) {
         return plan != null && plan == owner ? result : null;
     }
@@ -31,10 +29,6 @@ public final class RoutePlans {
         return result;
     }
 
-    /**
-     * The first stop of the layer that still has open blocks, as a cell the pilot can walk to; null when the plan has nothing
-     * (left) for this layer and the pilot has to choose by itself.
-     */
     public static Nav.Cell nextStop(BuildPlan plan, int layer, Set<Long> openKeys, Nav.Region region, Set<Long> avoid) {
         RoutePlanner.Result r = of(plan);
         if (r == null) {

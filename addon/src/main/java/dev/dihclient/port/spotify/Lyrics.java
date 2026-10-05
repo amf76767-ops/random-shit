@@ -3,10 +3,7 @@ package dev.dihclient.port.spotify;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Lyrics of one track as the HUD needs them (loading / synced / plain / instrumental / not found / unavailable).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public record Lyrics(Lyrics.Status status, SyncedLyrics synced, List<String> plainLines, long sourceId) {
     public static final Lyrics LOADING = new Lyrics(Lyrics.Status.LOADING, SyncedLyrics.EMPTY, List.of(), 0L);
     public static final Lyrics NOT_FOUND = new Lyrics(Lyrics.Status.NOT_FOUND, SyncedLyrics.EMPTY, List.of(), 0L);

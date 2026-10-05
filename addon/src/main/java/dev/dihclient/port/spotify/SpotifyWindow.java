@@ -9,12 +9,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Fallback for the media session: finds the window of spotify.exe and reads its title ("Artist - Title" while playing,
- * "Spotify" when paused), and can tap the global media keys. Win32 only, declared against plain JNA (the original used
- * jna-platform). Nothing leaves this PC.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class SpotifyWindow {
     private static final String EXECUTABLE = "spotify.exe";
     private static final String MAIN_CLASS = "Chrome_WidgetWin_0";
@@ -38,10 +33,9 @@ public final class SpotifyWindow {
     private long foundAt;
     private Pointer best;
     private int bestScore;
-    // JNA only keeps a weak link to a callback object: this field keeps it alive
+
     private final EnumProc finder = this::consider;
 
-    /** Title of the Spotify window, null when there is none. Slow path (window enumeration) at most every 10 s. */
     public String readTitle() {
         long now = System.currentTimeMillis();
         if (this.window != null && User32.INSTANCE.IsWindow(this.window) && this.isSpotify(this.processOf(this.window))) {
@@ -55,7 +49,6 @@ public final class SpotifyWindow {
         return this.window == null ? null : this.text(this.window);
     }
 
-    /** Press and release a media key as if it were on the keyboard (the OS hands it to the media session). */
     public static void tap(MediaKey key) {
         send(key.virtualKey, KEYEVENTF_EXTENDEDKEY);
         send(key.virtualKey, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP);
@@ -150,7 +143,6 @@ public final class SpotifyWindow {
         return length <= 0 ? "" : new String(this.classBuffer, 0, Math.min(length, this.classBuffer.length));
     }
 
-    /** One keyboard INPUT record written by hand: 40 bytes on 64-bit Windows, 28 on 32-bit (the union is padded to a pointer). */
     private static void send(int virtualKey, int flags) {
         int pointer = Native.POINTER_SIZE;
         int unionAt = pointer;

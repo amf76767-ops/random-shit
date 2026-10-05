@@ -20,19 +20,11 @@ import net.minecraft.class_2818;
 import net.minecraft.class_2826;
 import net.minecraft.class_310;
 
-/**
- * Finds the blocks a module looks for (Block ESP, Xray, Spawner Finder, the chunk finders ...) in the loaded chunks.
- * <p>
- * Faster than the 5.6 version: that one scanned every loaded chunk again and again (a new full pass every four seconds), so a
- * finder never stopped scanning. This one scans every chunk once, then only keeps the results up to date: a block change
- * ({@link #blockChanged}) adds or removes that one position directly, a chunk that is loaded again is scanned again, and a slow
- * safety pass (once a minute) catches anything missed. The list of all results is cached until something changes.
- */
 public final class BlockScanner {
     private static final class_310 mc = class_310.method_1551();
     private static final long REFILL_MS = 4000L;
     private static final long FULL_PASS_MS = 60000L;
-    /** All scanners alive, for {@link #blockChanged}. */
+
     private static final Set<BlockScanner> LIVE = Collections.newSetFromMap(new WeakHashMap<>());
 
     private final Predicate<class_2680> filter;
@@ -43,7 +35,7 @@ public final class BlockScanner {
     private final Map<Long, List<class_2338>> results = new ConcurrentHashMap<>();
     private final Deque<Long> queue = new ArrayDeque<>();
     private final Set<Long> queued = new HashSet<>();
-    /** Chunks scanned since they were loaded (or since the last full pass). */
+
     private final Set<Long> scanned = new HashSet<>();
     private int chunksPerTick;
     private int maxPerChunk = 512;
@@ -62,7 +54,6 @@ public final class BlockScanner {
         }
     }
 
-    /** A block of the client world changed (game thread). Every scanner that cares updates that one position. */
     public static void blockChanged(class_2338 pos, class_2680 oldState, class_2680 newState) {
         List<BlockScanner> all;
         synchronized (LIVE) {
@@ -87,7 +78,7 @@ public final class BlockScanner {
         }
         long key = class_1923.method_8331(pos.method_10263() >> 4, pos.method_10260() >> 4);
         if (!this.scanned.contains(key)) {
-            return; // the scan of that chunk will find it
+            return;
         }
         List<class_2338> old = this.results.get(key);
         List<class_2338> list = old == null ? new ArrayList<>() : new ArrayList<>(old);
@@ -143,7 +134,7 @@ public final class BlockScanner {
         long now = System.currentTimeMillis();
         if (now - this.lastFullPass > FULL_PASS_MS) {
             this.lastFullPass = now;
-            this.scanned.clear(); // the safety pass: everything once more, slowly, in the background
+            this.scanned.clear();
         }
         if (this.queue.isEmpty() && now - this.lastRefill > REFILL_MS) {
             this.lastRefill = now;
@@ -163,7 +154,6 @@ public final class BlockScanner {
         }
     }
 
-    /** A chunk was loaded (or changed a lot): scan it first. */
     public void prioritize(int chunkX, int chunkZ) {
         long key = class_1923.method_8331(chunkX, chunkZ);
         this.scanned.remove(key);
@@ -172,7 +162,6 @@ public final class BlockScanner {
         }
     }
 
-    /** Queues the loaded chunks that were not scanned yet, nearest first. */
     private void refill() {
         int radius = mc.field_1690.method_38521() + 1;
         class_1923 center = mc.field_1724.method_31476();
@@ -227,7 +216,7 @@ public final class BlockScanner {
         outer:
         for (int s = 0; s < sections.length; s++) {
             class_2826 section = sections[s];
-            // the palette says in a few steps whether a wanted block can be in the section at all
+
             if (section == null || section.method_38292() || !section.method_19523(this.cachedFilter)) {
                 continue;
             }
@@ -255,7 +244,6 @@ public final class BlockScanner {
         return Collections.unmodifiableMap(this.results);
     }
 
-    /** All positions found; the list is shared until something changes, so it must not be changed by the caller. */
     public List<class_2338> all() {
         List<class_2338> cached = this.allCache;
         if (cached == null) {

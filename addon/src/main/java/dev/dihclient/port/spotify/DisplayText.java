@@ -4,10 +4,7 @@ import java.text.Normalizer;
 import java.text.Normalizer.Form;
 import java.util.function.IntPredicate;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Folds typographic characters of titles and lyrics (quotes, dashes, music notes...) to what the font can draw.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class DisplayText {
     private DisplayText() {
     }
@@ -127,7 +124,6 @@ public final class DisplayText {
         };
     }
 
-    /** Track time as shown on the card: m:ss, or h:mm:ss from one hour on. */
     public static String clock(long totalSeconds) {
         long seconds = Math.max(0L, totalSeconds);
         long hours = seconds / 3600L;

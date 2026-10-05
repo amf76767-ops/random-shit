@@ -31,12 +31,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Minimal client for Discord's local IPC (rich presence): a named pipe on Windows, a unix socket elsewhere. Nothing here
- * touches the internet; the desktop app does the talking to Discord. Not thread safe: one thread owns an instance.
- * The frame format is {@code [int32 LE opcode][int32 LE length][UTF-8 JSON]}.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class DiscordIpc implements Closeable {
     public static final int OP_HANDSHAKE = 0;
     public static final int OP_FRAME = 1;
@@ -60,16 +55,12 @@ public final class DiscordIpc implements Closeable {
         this.pipe = pipe;
     }
 
-    // ---- pure protocol helpers (unit tested) ----
-
-    /** One frame on the wire. */
     public static byte[] encode(int opcode, byte[] body) {
         ByteBuffer frame = ByteBuffer.allocate(8 + body.length).order(ByteOrder.LITTLE_ENDIAN);
         frame.putInt(opcode).putInt(body.length).put(body);
         return frame.array();
     }
 
-    /** Reads the 8 byte header and returns {opcode, length}; rejects lengths we would never accept. */
     public static int[] parseHeader(byte[] header) throws IOException {
         if (header == null || header.length < 8) {
             throw new EOFException("short frame header");
@@ -83,7 +74,6 @@ public final class DiscordIpc implements Closeable {
         return new int[] {opcode, length};
     }
 
-    /** Decodes exactly one complete frame. */
     public static Frame decode(byte[] data) throws IOException {
         int[] h = parseHeader(data);
         if (data.length != 8 + h[1]) {
@@ -98,7 +88,6 @@ public final class DiscordIpc implements Closeable {
         return GSON.toJson(element);
     }
 
-    /** SET_ACTIVITY command; a null activity clears the presence. */
     public static JsonObject setActivityCommand(JsonObject activity, long pid, String nonce) {
         JsonObject args = new JsonObject();
         args.addProperty("pid", pid);
@@ -121,15 +110,11 @@ public final class DiscordIpc implements Closeable {
         return osName != null && osName.toLowerCase(Locale.ROOT).startsWith("windows");
     }
 
-    // ---- connection ----
-
-    /** @return a ready connection, or null when Discord is not running (no pipe / socket found). */
     public static DiscordIpc connect(String applicationId) throws IOException {
         boolean windows = isWindows(System.getProperty("os.name"));
         return connect(applicationId, windows, windows ? List.of() : unixFolders());
     }
 
-    /** Same, with the places to look in given by the caller (tests use a temp folder). */
     public static DiscordIpc connect(String applicationId, boolean windows, Iterable<Path> folders) throws IOException {
         Pipe pipe = windows ? openWindowsPipe() : openUnixSocket(folders);
         if (pipe == null) {
@@ -145,7 +130,6 @@ public final class DiscordIpc implements Closeable {
         }
     }
 
-    /** @param activity the activity, or null to clear */
     public void setActivity(JsonObject activity) throws IOException, RefusedException {
         String nonce = UUID.randomUUID().toString();
         this.send(OP_FRAME, setActivityCommand(activity, PID, nonce));
@@ -159,7 +143,6 @@ public final class DiscordIpc implements Closeable {
         }
     }
 
-    /** Answers pings and notices a hang-up; call regularly while idle. */
     public void poll() throws IOException {
         Frame frame;
         while ((frame = this.readFrame(System.nanoTime() + REPLY_TIMEOUT_NANOS, false)) != null) {
@@ -172,7 +155,7 @@ public final class DiscordIpc implements Closeable {
         try {
             this.pipe.close();
         } catch (IOException ignored) {
-            // nothing to do
+
         }
     }
 
@@ -249,14 +232,12 @@ public final class DiscordIpc implements Closeable {
         return value != null && value.isJsonPrimitive() ? value.getAsString() : null;
     }
 
-    // ---- finding the pipe ----
-
     private static Pipe openWindowsPipe() {
         for (int slot = 0; slot < SOCKET_SLOTS; slot++) {
             try {
                 return new WindowsPipe(new RandomAccessFile("\\\\.\\pipe\\discord-ipc-" + slot, "rw"));
             } catch (FileNotFoundException ignored) {
-                // slot not in use
+
             }
         }
         return null;
@@ -280,14 +261,13 @@ public final class DiscordIpc implements Closeable {
                         throw e;
                     }
                 } catch (IOException | RuntimeException ignored) {
-                    // stale socket file or no permission: try the next one
+
                 }
             }
         }
         return null;
     }
 
-    /** Where the desktop app puts its socket: the temp folders, plus the flatpak ({@code app/*}) and snap ({@code snap.*}) ones. */
     static Set<Path> unixFolders() {
         Set<Path> roots = new LinkedHashSet<>();
         for (String variable : UNIX_TEMP_VARIABLES) {
@@ -296,7 +276,7 @@ public final class DiscordIpc implements Closeable {
                 try {
                     roots.add(Path.of(value));
                 } catch (InvalidPathException ignored) {
-                    // bad variable, skip
+
                 }
             }
         }
@@ -321,11 +301,9 @@ public final class DiscordIpc implements Closeable {
                 }
             }
         } catch (SecurityException | IOException ignored) {
-            // unreadable folder
+
         }
     }
-
-    // ---- types ----
 
     public record Frame(int opcode, byte[] body) {
         public JsonObject json() throws IOException {
@@ -335,14 +313,14 @@ public final class DiscordIpc implements Closeable {
                     return parsed.getAsJsonObject();
                 }
             } catch (JsonParseException ignored) {
-                // falls through to the error below
+
             }
             throw new IOException("Discord sent a frame that is not a JSON object");
         }
     }
 
     private interface Pipe extends Closeable {
-        /** Reads what is there without blocking; 0 when nothing is waiting. */
+
         int readWaiting(ByteBuffer into) throws IOException;
 
         void write(ByteBuffer from, long deadline) throws IOException;
@@ -385,7 +363,7 @@ public final class DiscordIpc implements Closeable {
     private record WindowsPipe(RandomAccessFile file) implements Pipe {
         @Override
         public int readWaiting(ByteBuffer into) throws IOException {
-            // length() of a pipe handle is the number of bytes waiting, which lets us read without blocking
+
             long waiting = this.file.length();
             if (waiting <= 0L) {
                 return 0;

@@ -3,10 +3,7 @@ package dev.dihclient.port.staff;
 import java.util.Comparator;
 import java.util.UUID;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * One tracked staff member of the list, plus the ordering of the list. No Minecraft classes.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class StaffEntry {
     public enum Presence { ONLINE, SPECTATOR, VANISHED }
 
@@ -15,7 +12,7 @@ public final class StaffEntry {
     public String rank = "";
     public int seniority;
     public Presence presence = Presence.ONLINE;
-    /** Scans in a row in which the player was missing from the tab list but their body was still around. */
+
     public int offTabScans;
 
     public StaffEntry(UUID id) {
@@ -29,7 +26,6 @@ public final class StaffEntry {
         this.presence = presence;
     }
 
-    /** 0 = standing next to you, 1 = proven in your region, 2 = hidden/spectating, 3 = plain online somewhere. */
     public static int group(StaffEntry s, StaffSighting seen, long now) {
         if (seen != null && seen.nearby) {
             return 0;
@@ -40,7 +36,6 @@ public final class StaffEntry {
         }
     }
 
-    /** Most relevant first, then the more senior rank, then by name. */
     public static Comparator<StaffEntry> order(java.util.function.Function<UUID, StaffSighting> sightings, long now) {
         return Comparator.<StaffEntry>comparingInt(s -> group(s, sightings.apply(s.id), now))
                 .thenComparingInt(s -> s.seniority)

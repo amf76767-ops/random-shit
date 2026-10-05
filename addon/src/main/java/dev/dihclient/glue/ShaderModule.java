@@ -23,11 +23,6 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.class_1799;
 import net.minecraft.class_9334;
 
-/**
- * Shader: a custom shine (the enchantment glint) in a chosen style on tools, weapons, armor and everything enchanted. The style is a
- * small resource pack made on the spot (two glint pictures) that sits above every other pack; changing the style reloads the
- * resources once. With "Tools" / "Armor" on, those shine even without enchantments.
- */
 public class ShaderModule extends Module {
     static final String PREFIX = "DIH-Shader";
     private static final int SIZE = 128;
@@ -53,7 +48,6 @@ public class ShaderModule extends Module {
         this.dirty = true;
     }
 
-    /** Called from the glint check of every item stack (see GlintMixin): must stay cheap. */
     public static boolean forceGlint(class_1799 stack) {
         ShaderModule m = active;
         if (m == null || stack.method_7960()) {
@@ -128,12 +122,12 @@ public class ShaderModule extends Module {
                     try {
                         Files.deleteIfExists(p);
                     } catch (IOException ignored) {
-                        // still open, next time
+
                     }
                 }
             }
         } catch (IOException ignored) {
-            // nothing to clean
+
         }
     }
 
@@ -145,7 +139,7 @@ public class ShaderModule extends Module {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (ZipOutputStream zip = new ZipOutputStream(out)) {
             put(zip, "pack.mcmeta", mcmeta.getBytes(StandardCharsets.UTF_8));
-            // the vanilla glint shader (from the game jar): it keeps the colour of the style (the Visual pack's glint changes colours)
+
             try (java.io.InputStream in = ShaderModule.class.getResourceAsStream("/assets/minecraft/shaders/core/glint.fsh")) {
                 if (in != null) {
                     put(zip, "assets/minecraft/shaders/core/glint.fsh", in.readAllBytes());
@@ -165,9 +159,6 @@ public class ShaderModule extends Module {
         zip.closeEntry();
     }
 
-    // ---------------------------------------------------------------- the pictures
-
-    /** The glint is added on top of the item: black is no shine. The picture tiles (it is scrolled across the item). */
     static int[] glintPixels(Style style, double strength) {
         int[] px = new int[SIZE * SIZE];
         for (int y = 0; y < SIZE; y++) {
@@ -228,7 +219,6 @@ public class ShaderModule extends Module {
         return (int) Math.max(0, Math.min(255, Math.round(v)));
     }
 
-    /** A plain RGBA PNG (no java.desktop needed). */
     static byte[] png(int w, int h, int[] argb) throws IOException {
         byte[] raw = new byte[h * (w * 4 + 1)];
         int i = 0;

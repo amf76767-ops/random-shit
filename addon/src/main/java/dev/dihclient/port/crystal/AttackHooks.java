@@ -6,10 +6,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import net.minecraft.class_1297;
 import net.minecraft.class_310;
 
-/**
- * Tells the crystal modules when the local player starts an attack (original: PlayerAttackEntityEvent).
- * Fed by {@code CrystalAttackMixin}; a listener that throws is logged and skipped.
- */
 public final class AttackHooks {
     public interface Listener {
         void onAttack(class_1297 target);
@@ -30,7 +26,6 @@ public final class AttackHooks {
         LISTENERS.remove(l);
     }
 
-    /** Called from the mixin for every PlayerEntity.attack; only the local player on the game thread counts. */
     public static void fire(Object attacker, class_1297 target) {
         if (LISTENERS.isEmpty() || target == null) {
             return;

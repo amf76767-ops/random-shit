@@ -52,17 +52,7 @@ import net.minecraft.class_7439;
 import net.minecraft.class_7828;
 import net.minecraft.class_7923;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Detects vanished players: a tab list entry that disappears or is hidden without a leave message, a switch to spectator,
- * a name the server still completes for /msg although it is not in the tab list, plus sensors (invisible player entities,
- * chest/door/lever sounds and combat particles without a visible cause). The decisions live in {@link VanishEngine};
- * this class only reads packets and the game and reports through the DIH notifications.
- * <p>
- * Differences to the original: the Donut staff list is gone, so "who counts" is a setting (everyone, or a list of names; the
- * Watchlist Alarm names and your enemies are included), friends can be ignored, and the alert goes to the DIH
- * notifications instead of the original chat and ghost overlay.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class AntiVanish extends Module {
     public enum Targets { EVERYONE, LISTED }
 
@@ -176,8 +166,6 @@ public class AntiVanish extends Module {
         return lines;
     }
 
-    // ---------------------------------------------------------------- who counts
-
     private void refreshListed() {
         String own = this.names.get();
         Watchlist watch = ModuleManager.of(Watchlist.class);
@@ -213,8 +201,6 @@ public class AntiVanish extends Module {
             return false;
         }
     }
-
-    // ---------------------------------------------------------------- packets (network thread)
 
     private boolean onNetty(class_2596<?> packet) {
         if (packet instanceof class_7828 remove) {
@@ -270,7 +256,6 @@ public class AntiVanish extends Module {
         return id == null ? "" : id.toString();
     }
 
-    /** Argument of the vanilla "multiplayer.player.left" translation, or "". */
     private static String departedPlayerName(class_2561 component) {
         if (component != null && component.method_10851() instanceof class_2588 translated && "multiplayer.player.left".equals(translated.method_11022())) {
             Object[] args = translated.method_11023();
@@ -280,8 +265,6 @@ public class AntiVanish extends Module {
         }
         return "";
     }
-
-    // ---------------------------------------------------------------- reporting
 
     private final class Reporter implements VanishEngine.Sink {
         @Override
@@ -311,8 +294,6 @@ public class AntiVanish extends Module {
             }
         }
     }
-
-    // ---------------------------------------------------------------- the game as the engine sees it (game thread)
 
     private final class GameEnv implements VanishEngine.Env {
         @Override

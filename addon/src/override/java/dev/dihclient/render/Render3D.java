@@ -307,12 +307,10 @@ public final class Render3D {
       }
    }
 
-   /** Vertex buffer of the textured entity-style layer, flushed with the other layers of this frame (used by the 3D model module). */
    public class_4588 texturedBuffer(class_2960 var1) {
       return this.buffer(class_12249.method_76000(var1));
    }
 
-   /** Matrix entry the vertices of this frame are written with. */
    public class_4665 matrixEntry() {
       return this.matrices.method_23760();
    }

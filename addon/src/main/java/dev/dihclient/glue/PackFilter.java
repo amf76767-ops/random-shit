@@ -9,7 +9,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
-/** Copies a resource pack zip and leaves out the files the player switched off. */
 public final class PackFilter {
     private PackFilter() {
     }
@@ -18,7 +17,6 @@ public final class PackFilter {
         return copy(zip, skip, (name, data) -> data);
     }
 
-    /** @param patch may change the content of a file (name, content) */
     public static byte[] copy(InputStream zip, Predicate<String> skip, BiFunction<String, byte[], byte[]> patch) throws IOException {
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         try (ZipInputStream zin = new ZipInputStream(zip); ZipOutputStream zout = new ZipOutputStream(buf)) {

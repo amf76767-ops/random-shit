@@ -13,13 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * The list of named configs behind the config dock. The settings themselves are written by DIH's own profile code
- * (one file per number, see {@link Backend}); this class only keeps the names and the servers a config loads on.
- * Numbers 1 to 3 are the old profile slots, new configs start at 1000.
- */
 public final class ConfigStore {
-    /** What writes and reads the real settings. */
+
     public interface Backend {
         boolean save(int id);
 
@@ -65,9 +60,6 @@ public final class ConfigStore {
         return null;
     }
 
-    // ---------------------------------------------------------------- actions
-
-    /** Saves the current settings as a new config. @return the entry, or null when saving failed or the name is empty */
     public Entry add(String rawName, long now) {
         String name = cleanName(rawName);
         if (name.isEmpty()) {
@@ -85,7 +77,6 @@ public final class ConfigStore {
         return entry;
     }
 
-    /** Writes the current settings into an existing config. */
     public boolean overwrite(Entry entry, long now) {
         if (!this.backend.save(entry.id)) {
             return false;
@@ -120,7 +111,7 @@ public final class ConfigStore {
         if (host.isEmpty()) {
             return false;
         }
-        // one server loads one config: take it away from the others
+
         for (Entry other : this.entries) {
             other.servers.remove(host);
         }
@@ -134,7 +125,6 @@ public final class ConfigStore {
         this.save();
     }
 
-    /** The config to load when joining {@code address}: the longest saved server name that equals it or is a parent domain of it. */
     public Entry forServer(String address) {
         String host = normalize(address);
         if (host.isEmpty()) {
@@ -152,8 +142,6 @@ public final class ConfigStore {
         }
         return best;
     }
-
-    // ---------------------------------------------------------------- names and addresses
 
     public static String cleanName(String raw) {
         if (raw == null) {
@@ -181,7 +169,6 @@ public final class ConfigStore {
         return false;
     }
 
-    /** "Play.Example.NET.:25565" becomes "play.example.net". Empty when there is no host in it. */
     public static String normalize(String raw) {
         if (raw == null) {
             return "";
@@ -195,7 +182,7 @@ public final class ConfigStore {
         if (slash >= 0) {
             s = s.substring(0, slash);
         }
-        if (s.startsWith("[")) { // IPv6 literal, keep it whole
+        if (s.startsWith("[")) {
             int end = s.indexOf(']');
             return end > 0 ? s.substring(0, end + 1) : "";
         }
@@ -209,8 +196,6 @@ public final class ConfigStore {
         return s.matches("[a-z0-9._-]+") ? s : "";
     }
 
-    // ---------------------------------------------------------------- file
-
     private int nextId() {
         int id = FIRST_ID;
         for (Entry e : this.entries) {
@@ -219,7 +204,6 @@ public final class ConfigStore {
         return id;
     }
 
-    /** Old profile slots 1 to 3 that exist on disk show up as configs too. */
     public void syncLegacy() {
         boolean changed = false;
         for (int slot = 1; slot <= LEGACY_SLOTS; slot++) {
@@ -231,7 +215,7 @@ public final class ConfigStore {
                 changed = true;
             }
         }
-        // a config whose file was removed outside the game goes away
+
         changed |= this.entries.removeIf(e -> !this.backend.exists(e.id));
         if (changed) {
             this.entries.sort((a, b) -> Integer.compare(a.id, b.id));
@@ -264,12 +248,12 @@ public final class ConfigStore {
                             this.entries.add(e);
                         }
                     } catch (RuntimeException ignored) {
-                        // skips an entry it cannot read
+
                     }
                 }
             }
         } catch (IOException | RuntimeException ignored) {
-            // starts with an empty list
+
         }
     }
 
@@ -292,7 +276,7 @@ public final class ConfigStore {
             Files.createDirectories(this.file.toAbsolutePath().getParent());
             Files.writeString(this.file, GSON.toJson(root));
         } catch (IOException ignored) {
-            // the config files themselves are fine, only the names would be lost
+
         }
     }
 }

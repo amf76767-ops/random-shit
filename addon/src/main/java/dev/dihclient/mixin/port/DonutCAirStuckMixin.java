@@ -7,10 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Ported from an open-source client (GPL-3.0) (MixinAirStuckLocalPlayer).
- * While Air Stuck is on the player's movement step (LocalPlayer#aiStep) does not run, so you neither fall nor move.
- */
+/** Ported from an open-source client (GPL-3.0). */
 @Mixin(class_746.class)
 public abstract class DonutCAirStuckMixin {
     @Inject(method = "method_6007", at = @At("HEAD"), cancellable = true)

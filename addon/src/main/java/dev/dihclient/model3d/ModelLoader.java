@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Locale;
 
-/** Picks the right reader for a model file. */
 public final class ModelLoader {
     public static final String[] EXTENSIONS = {".glb", ".gltf", ".obj"};
 

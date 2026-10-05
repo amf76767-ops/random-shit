@@ -45,11 +45,7 @@ import net.minecraft.class_638;
 import net.minecraft.class_742;
 import net.minecraft.class_746;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Places and breaks end crystals where they hurt the enemy most and you and your friends least. With the Grim-Aldenz
- * profile it only acts when the rotation the server saw already points at the target (silent rotation, see {@link ServerRotation}).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class CrystalAuraModule extends Module {
     public enum DamageMode { NORMAL, SAFE }
 
@@ -270,14 +266,12 @@ public class CrystalAuraModule extends Module {
         }
     }
 
-    /** Your own hit on a crystal (by hand or by this module): it is gone soon, do not hit it again right away. */
     private void onAttack(class_1297 target) {
         if (target instanceof class_1511 crystal && crystal.method_73183().method_8608()) {
             this.markBreak(crystal);
         }
     }
 
-    /** DIH's Crystal Macro also switches slots and clicks; while it is on, this module leaves the hand to it (original: CombatMacroLock). */
     private static boolean ownedByMacro() {
         return ModuleManager.on(CrystalMacro.class);
     }
@@ -286,7 +280,6 @@ public class CrystalAuraModule extends Module {
         return Melee.canAct(mc) && !player.method_7325() ? !this.requireHold.get() || KeyUtil.isPhysicallyDown(mc.field_1690.field_1904) : false;
     }
 
-    /** Copies the settings into the pure scoring config once per tick. */
     private void syncScore() {
         CrystalScore.Config c = this.score;
         c.minDamage = this.minDamage.getFloat();

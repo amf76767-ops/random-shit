@@ -9,10 +9,6 @@ import dev.dihclient.setting.EnumSetting;
 import dev.dihclient.util.MoveUtil;
 import net.minecraft.class_243;
 
-/**
- * Client flight. Vanilla = free flight, Glide = slow descent, Packet = the old PacketFly (phase and fly through blocks with
- * position packets). PacketFly is no module of its own any more; its settings are shown here while Packet is selected.
- */
 public class Flight extends Module {
     public final EnumSetting<Flight.Mode> mode = this.mode("Mode",
             "Vanilla: free flight. Glide: slow descent. Packet: fly and phase through blocks with position packets (server-dependent, raise Factor slowly).",
@@ -37,7 +33,6 @@ public class Flight extends Module {
         return ModuleManager.of(PacketFly.class);
     }
 
-    /** Leaves Packet mode: PacketFly is a hidden helper that runs only while Flight is in Packet mode. */
     private void stopPacket() {
         PacketFly pf = packetFly();
         if (pf != null && pf.isEnabled()) {

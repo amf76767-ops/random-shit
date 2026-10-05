@@ -8,22 +8,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Where the server's tick rate was low. Every sample is the TPS the server managed in the last second, taken at the place the player
- * stood. A server only ticks what is near a player, so a huge hidden farm or base makes the TPS drop exactly while you are within its
- * range and recover when you leave: the cells with a clearly lower average than the normal TPS, joined together, mark such a place.
- * Pure logic, no game classes.
- */
 public final class LagMap {
-    /** Side of a cell in blocks. */
+
     public static final int CELL = 32;
     private static final int RECENT = 400;
-    /** Slow cells up to this many cells apart belong to the same zone (a source slows the server within about 100 blocks). */
+
     private static final int LINK = 3;
 
-    /** A group of neighbouring slow cells. */
     public record Zone(double x, double z, double radius, double avgTps, int samples, int cells) {
-        /** A key that stays the same while the zone only grows a little. */
+
         public long id() {
             return ((long) Math.floorDiv((int) x, 96) << 32) ^ (Math.floorDiv((int) z, 96) & 0xFFFFFFFFL);
         }
@@ -71,7 +64,6 @@ public final class LagMap {
         this.recentCount = Math.min(RECENT, this.recentCount + 1);
     }
 
-    /** The usual TPS: the median of the latest samples (20 when there are too few). */
     public double baseline() {
         if (this.recentCount < 12) {
             return 20.0;
@@ -81,10 +73,6 @@ public final class LagMap {
         return Math.min(20.0, copy[copy.length / 2]);
     }
 
-    /**
-     * @param drop        how many TPS below the normal TPS a cell has to average to count as slow
-     * @param minSamples  samples a cell needs before it is judged
-     */
     public List<Zone> zones(double drop, int minSamples) {
         double normal = this.baseline();
         Map<Long, Cell> hot = new HashMap<>();
@@ -138,7 +126,7 @@ public final class LagMap {
                 double dz = (cz(k) + 0.5) * CELL - z;
                 radius = Math.max(radius, Math.sqrt(dx * dx + dz * dz) + CELL / 2.0);
             }
-            // one lonely cell is only a place that happened to be slow once; it needs a second cell or twice the samples
+
             if (group.size() >= 2 || n >= minSamples * 2) {
                 out.add(new Zone(x, z, radius, sum / n, n, group.size()));
             }

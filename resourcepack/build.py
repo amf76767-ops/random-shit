@@ -34,7 +34,6 @@ def stone():
     px = []
     for y in range(16):
         for x in range(16):
-            # weiche Lagen (waagerecht gestreckt) plus Pixelrauschen
             soft = (grid[y][x] + grid[y][(x + 1) % 16] + grid[y][(x + 2) % 16] + grid[(y + 1) % 16][x]) / 4
             band = 0.5 + 0.5 * math.sin((y + 0.7 * math.sin(x * 0.9)) * math.pi / 2.6)
             v = clamp01(0.45 * soft + 0.30 * band + 0.25 * rng.random())
@@ -107,7 +106,6 @@ def files():
     yield mc + "textures/block/water_flow.png", water(32, 32, True)
     yield mc + "textures/block/water_flow.png.mcmeta", json.dumps({"animation": {}}).encode()
     yield mc + "textures/environment/celestial/sun.png", sun()
-    # kein Mond: alle Mondphasen durchsichtig (die Sterne kommen aus sky.fsh)
     for phase in ("full_moon", "waning_gibbous", "third_quarter", "waning_crescent", "new_moon", "waxing_crescent", "first_quarter", "waxing_gibbous"):
         yield mc + "textures/environment/celestial/moon/" + phase + ".png", png(32, 32, [(0, 0, 0, 0)] * (32 * 32))
     yield mc + "textures/environment/rain.png", png(32, 32, [(0, 0, 0, 0)] * (32 * 32))  # Regen unsichtbar (Geräusch bleibt)
@@ -117,7 +115,6 @@ def files():
     for path in sorted((ROOT / "static").rglob("*")):
         if path.is_file():
             yield path.relative_to(ROOT / "static").as_posix(), path.read_bytes()
-    # Totem kleiner: gilt für Item-Rahmen und die Pop-Animation, falls sie den Kontext "fixed" nutzt
     yield mc + "models/item/totem_of_undying.json", json.dumps({
         "parent": "minecraft:item/generated",
         "textures": {"layer0": "minecraft:item/totem_of_undying"},

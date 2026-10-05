@@ -10,12 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.class_2596;
 import net.minecraft.class_2960;
 
-/**
- * Ported from a Meteor addon.
- * Readable packet names and field lists. The game runs with intermediary names at run time (the packet class is
- * {@code class_2626}), so the name comes from the packet type id the packet itself reports ("block_update"). The
- * accessor that returns it is found by its shape (a record that holds an {@link class_2960}), not by a mapped name.
- */
 public final class PacketNames {
     private static final Map<Class<?>, String> NAMES = new ConcurrentHashMap<>();
     private static final Map<Class<?>, Field[]> FIELDS = new ConcurrentHashMap<>();
@@ -42,7 +36,6 @@ public final class PacketNames {
         return null;
     }
 
-    /** The packet id without the namespace ("block_update"), or the class name when the packet does not tell. Never null. */
     public static String name(class_2596<?> packet) {
         Class<?> type = packet.getClass();
         String cached = NAMES.get(type);
@@ -61,7 +54,7 @@ public final class PacketNames {
                     }
                 }
             } catch (Throwable ignored) {
-                // falls back to the class name below
+
             }
         }
         if (name == null) {
@@ -71,7 +64,6 @@ public final class PacketNames {
         return name;
     }
 
-    /** " {field=value, ...}" with every value cut to {@code maxLength}; empty when the packet has no fields. */
     public static String describe(class_2596<?> packet, int maxLength) {
         Field[] fields = FIELDS.computeIfAbsent(packet.getClass(), PacketNames::instanceFields);
         StringBuilder sb = new StringBuilder();
@@ -94,7 +86,7 @@ public final class PacketNames {
                     try {
                         f.setAccessible(true);
                     } catch (Throwable ignored) {
-                        // read fails soft in describe()
+
                     }
                 })
                 .toArray(Field[]::new);

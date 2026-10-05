@@ -25,22 +25,7 @@ import net.minecraft.class_408;
 import net.minecraft.class_437;
 import org.lwjgl.opengl.GL11;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * <p>
- * Stream Only: the game draws no item in the player's own slots. Instead the real items are painted into capture-excluded
- * overlay windows laid over the game window (visible on the monitor, invisible to screen capture), and the fake items are put on
- * the game window itself so a capture shows them. Steps per frame, at the end of the frame right before the buffers swap:
- * <ol>
- *   <li>{@link #endFrame}: icons of the real stacks are rendered off-screen and read back once, the slot background (what the
- *       game drew behind the item, e.g. the hover highlight) is read back from the main frame buffer, and the overlay windows
- *       are redrawn only when something changed.</li>
- *   <li>{@link #drawFakes}: the fake pictures (slot background + fake item) are blitted onto the back buffer.</li>
- * </ol>
- * The original drew the fake pictures with its ImGui layer; that does not exist in DIHClient, so {@link FakeBlitter} does it.
- * Windows only (see {@link OverlayWindow}); everywhere else {@link #usable()} is false and the module falls back to showing
- * fakes in-game.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class StreamOverlay {
     private static final int SLOTS = 41;
     private static final int CURSOR = 41;
@@ -96,7 +81,7 @@ public final class StreamOverlay {
     private static int cursorY;
     private static final ItemLook look = new ItemLook();
     private static final Object2ObjectOpenHashMap<List<Object>, int[]> icons = new Object2ObjectOpenHashMap();
-    // 0..41 the real stacks, 42..82 the fake stack of slot 0..40
+
     private static final int[][] slotIcon = new int[FAKE_ENTRIES][];
     private static final boolean[] entryPending = new boolean[FAKE_ENTRIES];
     private static final List<Object>[] entryKey = newKeys(FAKE_ENTRIES);
@@ -188,7 +173,6 @@ public final class StreamOverlay {
         return fakeMask != 0L;
     }
 
-    /** One slot's fake picture and what it was built from; rebuilt only when one of those changes. */
     private static final class FakeCell {
         class_1799 stack;
         int[] background;
@@ -199,7 +183,6 @@ public final class StreamOverlay {
         int[] image;
     }
 
-    /** Called right after {@link #endFrame()}, still before the buffers swap. */
     public static void drawFakes() {
         long bits = fakeMask;
         int scale = fakeScale;
@@ -472,11 +455,6 @@ public final class StreamOverlay {
         return cell / 7 * px;
     }
 
-    /**
-     * Makes sure every recorded stack, and the fake stack of every recorded slot, has an icon or is queued for one of the cells
-     * of the scratch texture. Equal looks share a cell. Returns the number of cells that were rendered; they are read back by
-     * {@link #synchronousRead}. What does not fit in this frame waits for the next one.
-     */
     private static int resolveIcons(long bits, int px) {
         int pending = 0;
         cellOfKey.clear();

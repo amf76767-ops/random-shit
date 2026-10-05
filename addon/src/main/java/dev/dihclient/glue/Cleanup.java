@@ -10,30 +10,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Takes modules out of the client and adds the small settings that did not exist: the modules that were marked useless
- * or double are removed from the module list (so they are no longer in the GUI, are not ticked, rendered, saved or bound
- * to keys); the instance stays reachable for the few places in the code that look it up by class and then ask whether it is on.
- */
 public final class Cleanup {
-    /** Simple class names of the removed modules. */
+
     static final Set<String> REMOVED = Set.of(
             "AutoPot", "MaceCombo", "Step", "ReverseStep", "AutoReconnect", "InvManager", "SurvivalAlerts", "MoneyHud",
             "Xray", "Chams", "DamageNumbers", "Waypoints", "DihChat", "Friends", "Enemies", "NewChunks", "BaseTraces",
             "Watchlist", "PacketBuffer", "PacketFly", "HammerTool", "Fullbright", "SafeWalk", "BoatNoClip", "AutoTrade",
-            // Profiles: now the config dock in the GUI. PlayerActivity: the old "Player Bypass"; the ported module has that name now
+
             "PlayerActivity", "Profiles",
-            // removed on request (BowAimbot: a fired arrow cannot be steered from the client)
+
             "AutoWalk", "BowAimbot", "DiscoMode", "DrunkMode");
 
-    /** Removed by display name (several modules share a class, like the hotbar macros). Glowstone Macro was only Anchor Macro again. */
     static final Set<String> REMOVED_NAMES = Set.of("Glowstone Macro");
 
     private static boolean gone(Module m) {
         return REMOVED.contains(m.getClass().getSimpleName()) || REMOVED_NAMES.contains(m.name());
     }
 
-    /** Light / normal / heavy for the Performance module. */
     public enum Quality { LIGHT, NORMAL, HEAVY }
 
     private Cleanup() {
@@ -51,7 +44,6 @@ public final class Cleanup {
         byName.values().removeIf(Cleanup::gone);
     }
 
-    /** PacketFly lives on as a hidden helper of Flight: its settings are added to Flight and only show in Packet mode. */
     @SuppressWarnings("unchecked")
     public static void mergePacketFly(dev.dihclient.modules.movement.Flight flight, dev.dihclient.modules.movement.PacketFly pf)
             throws ReflectiveOperationException {
@@ -63,10 +55,6 @@ public final class Cleanup {
         }
     }
 
-    /**
-     * The 3x3 pickaxe is no module any more: every automation module with a "3x3 Pickaxe" switch gets the tool-name field
-     * itself (it is the same setting everywhere, so it only has to be typed once).
-     */
     public static void linkHammer(ModuleManager manager) throws ReflectiveOperationException {
         dev.dihclient.modules.player.HammerTool tool = manager.get(dev.dihclient.modules.player.HammerTool.class);
         Method add = Module.class.getDeclaredMethod("add", dev.dihclient.setting.Setting.class);
@@ -81,17 +69,16 @@ public final class Cleanup {
                     owners.add(m);
                 }
             } catch (NoSuchFieldException ignored) {
-                // this module has no 3x3 switch
+
             }
         }
-        // one shared setting, shown wherever any of the 3x3 switches is on
+
         tool.names.visibleWhen(() -> switches.stream().anyMatch(dev.dihclient.setting.BoolSetting::get));
         for (Module m : owners) {
             add.invoke(m, tool.names);
         }
     }
 
-    /** Performance gets one switch instead of four separate sliders and toggles. */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void performance(Performance p) throws ReflectiveOperationException {
         Method mode = Module.class.getDeclaredMethod("mode", String.class, String.class, Enum.class);

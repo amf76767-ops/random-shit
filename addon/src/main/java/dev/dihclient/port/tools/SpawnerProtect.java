@@ -51,19 +51,9 @@ import net.minecraft.class_638;
 import net.minecraft.class_742;
 import net.minecraft.class_746;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Mines your spawners into an ender chest when blocks start breaking around you: the break packets of the server are
- * counted, and enough of them far from you (and not from a whitelisted player) set it off. Then it walks to the spawners,
- * mines them, picks them up, puts them into an ender chest (placing or buying one, /shop is the shop of the server this
- * was made for) and finally logs out.
- *
- * While a run is going the module owns the movement keys, the head and the attack button, so you cannot disturb it.
- * The decisions live in {@link SpawnerProtectLogic}; the packet hooks are in SpawnerProtectPacketMixin, the attack and mouse
- * locks in SpawnerProtectAttackMixin and SpawnerProtectMouseMixin.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class SpawnerProtect extends Module {
-    /** The running instance for the mixins, null while the module is off. */
+
     public static volatile SpawnerProtect active;
 
     private static final int SCAN_RADIUS = 16;
@@ -136,7 +126,7 @@ public class SpawnerProtect extends Module {
 
     @Override
     public void onWorldChange() {
-        // new world = new player, targets and the open menu of the old one mean nothing
+
         if (this.isEnabled()) {
             this.resetModule();
             this.releaseKeys();
@@ -166,12 +156,10 @@ public class SpawnerProtect extends Module {
         this.miningTicks = 0;
     }
 
-    /** A run is going: the module owns keys, head and attack button. */
     public boolean isDriving() {
         return this.isEnabled() && this.currentState != State.WAITING_FOR_STRANGER;
     }
 
-    /** Used by the mixin that stops mouse look. Free look in camera mode leaves the player's head alone anyway. */
     public boolean blocksMouseTurn() {
         if (!this.isDriving() || ModuleManager.on(Freecam.class)) {
             return false;
@@ -184,9 +172,6 @@ public class SpawnerProtect extends Module {
         return this.isDriving();
     }
 
-    // ---------------------------------------------------------------- block updates
-
-    /** Called by the mixin on the game thread just before the game applies a single block update. */
     public void onBlockUpdatePacket(class_2626 packet) {
         if (this.canDetect()) {
             this.checkBlockUpdate(packet.method_11309(), packet.method_11308());
@@ -221,13 +206,13 @@ public class SpawnerProtect extends Module {
             if (pos.method_10264() <= SpawnerProtectLogic.MIN_DETECTION_Y || !newState.method_26215()) {
                 return;
             }
-            // the packet is not applied yet, so the world still has the block that is being broken
+
             class_2680 oldState = level.method_8320(pos);
             if (oldState.method_26215() || oldState.method_26204() instanceof class_2480) {
-                return; // nothing was there, or a shulker box (people empty those)
+                return;
             }
             if (player.method_33571().method_1022(center) < OWN_BREAK_RADIUS) {
-                return; // our own digging
+                return;
             }
             double dx = player.method_23317() - pos.method_10263();
             double dz = player.method_23321() - pos.method_10260();
@@ -241,7 +226,7 @@ public class SpawnerProtect extends Module {
                 this.currentState = State.WORKING;
                 String text = "Remote detection: a block was broken nearby (" + (int) horizontal + "m horizontally, Y " + pos.method_10264() + ")";
                 DIHClient.LOG.info("[DIHClient] Spawner Protect: {}", text);
-                // Discord Alarm forwards warnings, so this also reaches the phone
+
                 Notifications.warn(this.name(), text);
             }
         } catch (Throwable t) {
@@ -261,8 +246,6 @@ public class SpawnerProtect extends Module {
         }
         return this.whitelistNames;
     }
-
-    // ---------------------------------------------------------------- tick
 
     @Override
     public void onTick() {
@@ -284,7 +267,7 @@ public class SpawnerProtect extends Module {
 
     private void step(class_746 player, class_638 level, class_636 gameMode) {
         this.spawnerScanEmptyThisTick = false;
-        // a server menu was open and is closed now: drop a half-finished block break from before
+
         if (mc.field_1755 instanceof class_465<?> container && container.method_17577().field_7763 != 0) {
             this.serverMenuSeen = true;
         } else if (this.serverMenuSeen && mc.field_1755 == null) {
@@ -392,7 +375,7 @@ public class SpawnerProtect extends Module {
         this.forwardHeld = false;
         this.miningTicks++;
         if (this.miningTicks > RIGHT_CLICK_AFTER_TICKS) {
-            // a spawner that does not break (the server wants something else): click it once in a while
+
             gameMode.method_2896(player, class_1268.field_5808, new class_3965(class_243.method_24953(this.targetBlock), class_2350.field_11036, this.targetBlock, false));
             player.method_6104(class_1268.field_5808);
             this.miningTicks = 0;
@@ -480,7 +463,7 @@ public class SpawnerProtect extends Module {
                 break;
             }
         }
-        // the block search is only needed when the inventory is empty of spawners
+
         boolean spawnerBlockNearby = spawnerSlot < 0 && this.lagWaitTicks >= SpawnerProtectLogic.DEPOSIT_WAIT_TICKS
             && findNearestBlock(player, level, class_2246.field_10260, SCAN_RADIUS) != null;
         switch (SpawnerProtectLogic.deposit(this.lagWaitTicks, hasSpace, spawnerSlot >= 0, spawnerBlockNearby)) {
@@ -559,7 +542,7 @@ public class SpawnerProtect extends Module {
         }
         int slot = InvUtil.findHotbar(class_1802.field_8466);
         if (slot == -1) {
-            // in the main inventory: shift-click moves it into the hotbar
+
             int inMain = InvUtil.findInventory(stack -> stack.method_7909() == class_1802.field_8466);
             if (inMain >= 9) {
                 gameMode.method_2906(player.field_7512.field_7763, inMain, 0, class_1713.field_7794, player);
@@ -609,8 +592,6 @@ public class SpawnerProtect extends Module {
         }
     }
 
-    // ---------------------------------------------------------------- keys
-
     private void updateSneak(class_746 player, boolean sneak) {
         if (player != null) {
             player.method_5660(sneak);
@@ -627,7 +608,6 @@ public class SpawnerProtect extends Module {
         this.forwardHeld = false;
     }
 
-    /** Presses the keys the run wants and holds the others up. Runs at the end of every tick. */
     private void applyKeys(class_746 player) {
         class_315 options = mc.field_1690;
         if (options == null) {
@@ -647,7 +627,6 @@ public class SpawnerProtect extends Module {
         }
     }
 
-    /** Gives the keys back to the real keyboard. */
     private void releaseKeys() {
         this.keysOwned = false;
         class_315 options = mc.field_1690;
@@ -662,8 +641,6 @@ public class SpawnerProtect extends Module {
             }
         }
     }
-
-    // ---------------------------------------------------------------- world scans
 
     private static class_1542 findDroppedSpawner(class_746 player, class_638 level) {
         class_1542 best = null;

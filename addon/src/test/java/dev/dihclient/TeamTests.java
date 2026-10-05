@@ -24,7 +24,7 @@ public final class TeamTests {
     }
 
     public static void main(String[] args) throws Exception {
-        // natural block changes
+
         check(NaturalChanges.accepts("dirt", "grass_block"), "dirt may become grass");
         check(NaturalChanges.accepts("dirt", "podzol") && NaturalChanges.accepts("dirt", "mycelium"), "dirt may become podzol / mycelium");
         check(!NaturalChanges.accepts("grass_block", "dirt"), "grass planned, dirt in the world is not accepted");
@@ -41,7 +41,6 @@ public final class TeamTests {
         check(!NaturalChanges.accepts("waxed_copper_block", "exposed_copper") && !NaturalChanges.accepts("copper_block", "waxed_copper_block"), "waxed copper does not change");
         check(!NaturalChanges.accepts("copper_block", "exposed_cut_copper"), "a different copper block is wrong");
 
-        // codes
         Random r = new Random(7);
         Set<String> seen = new HashSet<>();
         for (int i = 0; i < 500; i++) {
@@ -54,7 +53,6 @@ public final class TeamTests {
         check(TeamStore.normalizeCode("abcd efgh").equals("ABCD-EFGH") && TeamStore.normalizeCode("abcdefgh").equals("ABCD-EFGH"), "typed codes are cleaned");
         check(TeamStore.normalizeCode("ABC").isEmpty() && TeamStore.normalizeCode("ABCD-EFG0").isEmpty() && TeamStore.normalizeCode(null).isEmpty(), "bad codes refused");
 
-        // strips
         for (int n = 1; n <= 6; n++) {
             int[] count = new int[n];
             for (int c = 0; c < 37; c++) {
@@ -73,7 +71,6 @@ public final class TeamTests {
         }
         check(Partition.strip(5, 0, 0, 3) == 0 && Partition.strip(-9, 0, 10, 3) == 0 && Partition.strip(99, 0, 10, 3) == 2, "edges clamp");
 
-        // the store
         Path dir = Files.createTempDirectory("teams");
         TeamStore store = new TeamStore(dir);
         String code = "ABCD-EFGH";
@@ -85,7 +82,7 @@ public final class TeamTests {
 
         store.heartbeat(code, "b", "Alt", 2000L);
         store.heartbeat(code, "a", "Host", 1000L);
-        store.heartbeat(code, "a", "Host", 5000L); // renewal keeps the join time
+        store.heartbeat(code, "a", "Host", 5000L);
         List<TeamStore.Member> members = store.active(code, 6000L, 15000L);
         check(members.size() == 2 && members.get(0).id().equals("a") && members.get(0).joined() == 1000L, "first to join is first");
         check(store.active(code, 100000L, 15000L).isEmpty(), "stale members are gone");

@@ -4,7 +4,6 @@ import dev.dihclient.port.crystal.Bypass;
 import dev.dihclient.port.crystal.CrystalMath;
 import dev.dihclient.port.crystal.CrystalScore;
 
-/** Pure-math tests of the Crystal Aura port: blast damage, sight sampling, anti-cheat limits and the spot ranking. */
 public final class CrystalAuraTests {
     static int failed;
     static int passed;
@@ -43,7 +42,6 @@ public final class CrystalAuraTests {
         near(CrystalMath.difficulty(2, 50), 50.0, "normal");
         near(CrystalMath.difficulty(3, 50), 75.0, "hard x1.5");
 
-        // full diamond: 20 armor, 8 toughness. The armor floor (20 %) protects at big hits, the formula at small ones.
         near(CrystalMath.armor(85, 20, 8), 71.4, "diamond armor, big hit hits the 20 % floor");
         near(CrystalMath.armor(10, 20, 8), 3.0, "diamond armor, small hit");
         near(CrystalMath.armor(40, 0, 0), 40.0, "no armor");
@@ -55,7 +53,6 @@ public final class CrystalAuraTests {
         near(CrystalMath.resistance(4), 0.0, "resistance V is immune");
         near(CrystalMath.resistance(9), 0.0, "never below zero");
 
-        // hard player, 3 blocks away, full exposure, diamond + 20 protection points
         near(CrystalMath.damage(3.0, 1.0, true, 3, null, 20, 8, 1.0F, 20), 14.1435, "full pipeline");
         near(CrystalMath.damage(3.0, 1.0, true, 3, null, 20, 8, 0.8F, 20), 11.3148, "full pipeline with Resistance I");
         near(CrystalMath.damage(6.0, 0.5, false, 2, null, 0, 0, 1.0F, 0), 14.125, "mob, half exposure, no gear");
@@ -70,7 +67,6 @@ public final class CrystalAuraTests {
         float upper = CrystalMath.upperBound(2.0, true, 3, 12, 2, 0.8F, 5);
         check(exact <= upper, "upper bound is never below the real damage");
 
-        // shield takes a share away before armor
         near(CrystalMath.damage(3.0, 1.0, true, 2, d -> d * 0.5F, 0, 0, 1.0F, 0), CrystalMath.falloff(0.75) * 0.5, "shield half");
         near(CrystalMath.damage(3.0, 1.0, true, 2, d -> 0.0F, 0, 0, 1.0F, 0), CrystalMath.falloff(0.75), "shield that blocks nothing");
 
@@ -202,7 +198,6 @@ public final class CrystalAuraTests {
         near(CrystalScore.rank(c, false, 0, 0, 12, 20, false, none), 1200.0, "safe mode with no self damage");
         near(CrystalScore.rank(c, false, 4, 0, 12, 20, false, none), 3.0, "safe mode ranks by the ratio");
 
-        // all stages at once give the same as the stages one by one
         c.safeMode = false;
         near(CrystalScore.rank(c, false, 2, 20, false, false, 0, -1, 12, 20, false, none), 12.0, "combined call");
         near(CrystalScore.rank(c, false, 25, 20, false, false, 0, -1, 12, 20, false, none), none, "combined call, self blocked");

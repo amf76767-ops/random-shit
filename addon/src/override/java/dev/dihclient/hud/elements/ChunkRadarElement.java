@@ -14,10 +14,6 @@ import net.minecraft.class_1923;
 import net.minecraft.class_243;
 import net.minecraft.class_332;
 
-/**
- * Chunk map: a checkerboard of chunks (your chunk framed), marked chunks as bright tiles with a light top edge,
- * ore finds as small stars, you in the middle with the view direction, and the chunk coordinates underneath.
- */
 public class ChunkRadarElement extends HudElement {
    public ChunkRadarElement() {
       super("chunk_radar", "Chunk Radar", "chunkradar", 4, 150, () -> HudStyle.hud().chunkRadar);
@@ -118,7 +114,6 @@ public class ChunkRadarElement extends HudElement {
          }
       }
 
-      // you, with the view direction
       double px = (mc.field_1724.method_23317() - (me.field_9181 << 4)) / 16.0;
       double pz = (mc.field_1724.method_23321() - (me.field_9180 << 4)) / 16.0;
       int x = ox + (int)((range + px) * cell);

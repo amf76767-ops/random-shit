@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Block types with their average colour, and the nearest block for a colour. */
 public final class BlockPalette {
     public enum Set { CONCRETE, WOOL, TERRACOTTA, MIXED, WOOD_AND_STONE }
 
@@ -73,7 +72,6 @@ public final class BlockPalette {
         }
     }
 
-    /** The block of the set that looks most like the colour (weighted RGB distance that follows how the eye sees it). */
     public static Entry nearest(List<Entry> palette, int rgb) {
         int r = rgb >> 16 & 255, g = rgb >> 8 & 255, b = rgb & 255;
         Entry best = palette.get(0);

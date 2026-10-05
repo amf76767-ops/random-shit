@@ -16,13 +16,7 @@ import net.minecraft.class_642;
 import net.minecraft.class_6606;
 import net.minecraft.class_746;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Game side of Player Bypass: feeds the light of chunk and light packets (after the game has applied them, game thread) to the
- * {@link ChunkFlagTracker}, keeps the protected-chunk store in step with the world and walks the entry guard every tick.
- * Like in the original it runs whether or not the module is on, so the chunks around your own base are protected before you switch it on;
- * {@link #install()} is called by the module and is safe to call twice.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class PlayerBypassLightTracker {
     private static final AtomicBoolean INSTALLED = new AtomicBoolean();
     private static final ProtectedChunkStore PROTECTED_CHUNKS = ProtectedChunkStore.get();
@@ -34,7 +28,6 @@ public final class PlayerBypassLightTracker {
     private PlayerBypassLightTracker() {
     }
 
-    /** Hooks the packet bus and makes sure the protected chunks are written when the game closes. */
     public static void install() {
         if (!INSTALLED.compareAndSet(false, true)) {
             return;
@@ -45,7 +38,7 @@ public final class PlayerBypassLightTracker {
                 try {
                     PROTECTED_CHUNKS.flushAndWait();
                 } catch (Throwable ignored) {
-                    // closing anyway
+
                 }
             }, "DIHClient Player Bypass flush"));
         } catch (Throwable t) {
@@ -53,7 +46,6 @@ public final class PlayerBypassLightTracker {
         }
     }
 
-    /** Called at the start of every client tick (game thread). */
     public static void onTick() {
         try {
             class_310 mc = class_310.method_1551();

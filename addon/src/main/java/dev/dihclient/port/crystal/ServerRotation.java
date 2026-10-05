@@ -4,11 +4,7 @@ import net.minecraft.class_10185;
 import net.minecraft.class_3532;
 import net.minecraft.class_746;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Silent rotation: the aim is put on the player only while the movement packet is built, then the own view comes back.
- * Hooked by {@code CrystalPlayerMixin} and {@code CrystalKeyboardInputMixin}.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class ServerRotation {
     private static Rotation requested;
     private static Rotation sent;

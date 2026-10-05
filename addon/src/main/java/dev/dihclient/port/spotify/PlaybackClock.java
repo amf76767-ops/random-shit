@@ -1,10 +1,6 @@
 package dev.dihclient.port.spotify;
 
-
-/**
- * Ported from an open-source client (GPL-3.0).
- * Smooth position of the playing track: follows the 500 ms samples of the media session without jumping back and forth.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class PlaybackClock {
     static final long SNAP_MS = 1200L;
     static final long CATCHUP_MS = 1500L;

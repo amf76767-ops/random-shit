@@ -5,24 +5,19 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * The text and number logic of Fake Stats, free of game classes so it can be tested: finding a stat in a sidebar line,
- * scrambling numbers (same digit count, never the real value) and the small string helpers.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class FakeStatsLogic {
-    /** Where a stat sits: in the name column or in the number column of a sidebar row, and which characters. */
+
     public record Hit(int stat, boolean inNumber, int start, int end) {
     }
 
     private static final Pattern MONEY = Pattern.compile("\\$\\s?(\\d[\\d.,]*[KkMmBbTtQq]?)");
-    /** The small-caps alphabet servers use for labels ("ᴍᴏɴᴇʏ"), a to z in order. */
+
     private static final String SMALL_CAPS = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀꜱᴛᴜᴠᴡxʏᴢ";
 
     private FakeStatsLogic() {
     }
 
-    /** First stat (in list order) whose marker appears in the name or number text of a row. */
     public static Hit find(List<String[]> markers, String name, String number) {
         for (int i = 0; i < markers.size(); i++) {
             String[] stat = markers.get(i);
@@ -31,7 +26,7 @@ public final class FakeStatsLogic {
                 return new Hit(i, false, value[0], value[1]);
             }
             if (value != null) {
-                // "Money:" in the name column and nothing after it: the value is the whole number column
+
                 return new Hit(i, true, 0, number.length());
             }
             value = valueAfter(number, stat);
@@ -42,7 +37,6 @@ public final class FakeStatsLogic {
         return null;
     }
 
-    /** Start (inclusive) and end (exclusive) of the text after the first marker found, or null. */
     public static int[] valueAfter(String line, String[] markers) {
         for (String marker : markers) {
             int at = markerAt(line, marker);
@@ -61,7 +55,6 @@ public final class FakeStatsLogic {
         return null;
     }
 
-    /** Index of {@code marker} in the line (case-insensitive, small caps folded, whole word when it starts/ends with a letter). */
     public static int markerAt(String line, String marker) {
         if (marker.isEmpty()) {
             return -1;
@@ -80,7 +73,6 @@ public final class FakeStatsLogic {
         return -1;
     }
 
-    /** Small caps to plain letters, same length so indexes stay valid. */
     public static String folded(String line) {
         char[] out = line.toCharArray();
         for (int i = 0; i < out.length; i++) {
@@ -96,13 +88,11 @@ public final class FakeStatsLogic {
         return Character.isLetterOrDigit(c) || c == '_';
     }
 
-    /** The custom value in the shape of the real one: keeps a leading "$" only when the real value had one. */
     public static String fit(String real, String custom) {
         String bare = custom.startsWith("$") ? custom.substring(1).strip() : custom;
         return real.startsWith("$") ? "$" + bare : bare;
     }
 
-    /** Amounts after a "$" in a tab text, as {start, end} of the number part. */
     public static List<int[]> moneyRanges(String text) {
         Matcher matcher = MONEY.matcher(text);
         List<int[]> ranges = new ArrayList<>();
@@ -112,7 +102,6 @@ public final class FakeStatsLogic {
         return ranges;
     }
 
-    /** The money to show in the tab list: the custom value, else the one found on the sidebar, without "$"; null = leave it. */
     public static String tabMoney(String custom, String sidebarMoney) {
         String shown = custom.strip().isEmpty() ? sidebarMoney : custom.strip();
         if (shown == null) {
@@ -135,14 +124,10 @@ public final class FakeStatsLogic {
         return out.toString();
     }
 
-    /** Private-use name of a fake score holder; no real player can have it. */
     public static String holderName(int row) {
         return new String(new char[] {'', (char) (0xE010 + row)});
     }
 
-    // ------------------------------------------------------------------ scrambling
-
-    /** Replaces every number in the text by another one of the same shape. @param number counter shared by the pieces of one line */
     public static String maskText(long seed, String text, int row, int[] number) {
         StringBuilder out = null;
         int i = 0;
@@ -181,7 +166,6 @@ public final class FakeStatsLogic {
         return out == null ? text : out.toString();
     }
 
-    /** Same digit count and separators, different value; stable for one seed so a row does not flicker. */
     public static String fakeNumber(long seed, int row, int index, String raw) {
         int digits = 0;
         for (int i = 0; i < raw.length(); i++) {
@@ -233,13 +217,12 @@ public final class FakeStatsLogic {
     private static long shifted(long value, long offset, long span, int digits, boolean leadingZero) {
         long fake = Math.floorMod(value + offset, span);
         if (!leadingZero && digits > 1 && fake < span / 10L) {
-            // keep the first digit non-zero so the number does not get shorter
+
             fake += span / 10L;
         }
         return fake;
     }
 
-    /** More than 15 digits do not fit a long safely: shift every digit on its own. */
     private static String shiftWide(long seed, int row, int index, String raw) {
         long salt = mix(seed ^ row * 1315423911L ^ index);
         StringBuilder result = new StringBuilder(raw.length());

@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** Tells the DummyPlayer when you swing, so it can take damage and knockback. */
 @Mixin({class_310.class})
 public abstract class DummyHitMixin {
     @Inject(

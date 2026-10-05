@@ -35,7 +35,7 @@ public class AutoLog extends Module {
 
    @Override
    public void onTick() {
-      if (!mc.field_1724.method_7325()) {   // spectators only: creative counts too, so the Y check works while you build
+      if (!mc.field_1724.method_7325()) {
          String var1 = null;
          float var2 = mc.field_1724.method_6032();
          if (this.healthEnabled.get() && var2 > 0.0F && var2 <= this.health.get()) {

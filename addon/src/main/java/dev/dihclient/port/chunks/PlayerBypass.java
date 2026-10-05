@@ -14,12 +14,7 @@ import net.minecraft.class_243;
 import net.minecraft.class_2561;
 import net.minecraft.class_634;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Flags chunks where the server sent a fully dark sky-light section below Y 62: a covered, player-made space under the
- * surface. The light data comes from {@link PlayerBypassLightTracker}; this class is the settings, the alert and the drawing.
- * Replaces the old DIH module of the same name (PlayerActivity).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class PlayerBypass extends Module {
     private static final int RENDER_DISTANCE_CHUNKS = 16;
     private static final double MARKER_Y = 64.0;
@@ -35,7 +30,7 @@ public final class PlayerBypass extends Module {
 
     private final ChunkAreas chunkAreas = new ChunkAreas();
     private final LongOpenHashSet flagged = new LongOpenHashSet();
-    /** The flagged chunks around the player, worked out 4 times a second instead of every frame. */
+
     private long[] drawn = new long[0];
     private long drawnAt;
 

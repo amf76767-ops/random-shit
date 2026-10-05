@@ -2,11 +2,7 @@ package dev.dihclient.port.spotify;
 
 import java.nio.ByteBuffer;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Square RGBA album cover, centre-cropped and box-filtered down to at most the requested side. Decoding of the
- * downloaded bytes is in {@link ArtDecoder}; this class holds no Minecraft or LWJGL types.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class AlbumArt {
     private final int size;
     private final byte[] rgba;
@@ -16,7 +12,6 @@ public final class AlbumArt {
         this.rgba = rgba;
     }
 
-    /** {@code pixels} are tightly packed RGBA rows, {@code width * height * 4} bytes. */
     public static AlbumArt crop(ByteBuffer pixels, int width, int height, int maxSide) {
         int side = Math.min(width, height);
         int left = (width - side) / 2;
@@ -61,7 +56,6 @@ public final class AlbumArt {
         return this.rgba.length;
     }
 
-    /** One pixel as 0xAARRGGBB, which is what the game's NativeImage setter takes. */
     public int argb(int x, int y) {
         int i = (y * this.size + x) * 4;
         return (this.rgba[i + 3] & 255) << 24 | (this.rgba[i] & 255) << 16 | (this.rgba[i + 1] & 255) << 8 | this.rgba[i + 2] & 255;

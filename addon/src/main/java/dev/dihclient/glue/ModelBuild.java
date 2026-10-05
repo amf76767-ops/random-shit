@@ -24,11 +24,6 @@ import java.util.List;
 import java.util.Map;
 import net.minecraft.class_156;
 
-/**
- * Builds a 3D model out of blocks: the model from the CustomModel folder is turned into a block sculpture whose colours
- * come from its texture (concrete, wool, terracotta ...), saved as a schematic and handed to AutoBuild, which shows the
- * preview and builds it like any other schematic.
- */
 public class ModelBuild extends Module {
     private static final int DATA_VERSION = 4671;
     private static final int MAX_BLOCKS = 120_000;
@@ -98,7 +93,7 @@ public class ModelBuild extends Module {
                         used.merge(id, 1, Integer::sum);
                     }
                 }
-                if (used.size() > maxTypes) { // keep the most used, give the rest the nearest of those
+                if (used.size() > maxTypes) {
                     List<Map.Entry<String, Integer>> order = new ArrayList<>(used.entrySet());
                     order.sort((a, b) -> Integer.compare(b.getValue(), a.getValue()));
                     List<BlockPalette.Entry> kept = new ArrayList<>();

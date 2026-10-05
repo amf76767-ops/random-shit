@@ -27,20 +27,20 @@ public final class DonutATests {
 
     static void noFall() {
         DonutNoFallLogic n = new DonutNoFallLogic();
-        // normal walking: nothing changes, the real ground flag goes out
+
         check(!n.tick(0.0), "no force while not armed");
         DonutNoFallLogic.Send s = n.packet(true, true);
         check(!s.nudge && s.onGround, "unarmed: real flag, no nudge");
-        // a short fall does not arm
+
         n.tick(2.9);
         n.tick(0.0);
         check(!n.armed(), "fall of 2.9 does not arm");
-        // a long fall arms one tick after the landing resets the distance
+
         n.tick(3.5);
         check(!n.armed(), "still falling: not armed yet");
         check(!n.tick(0.0) && n.armed(), "armed the tick after the 3.5 block fall");
         check(n.tick(0.0), "armed: player is held in the air");
-        // 4 hidden ground packets: nudge on 1 and 3, flag false, then back to normal
+
         s = n.packet(false, true);
         check(!s.nudge && !s.onGround && n.groundTicks() == 0, "air packet while armed: no count, flag false");
         s = n.packet(true, true);
@@ -54,7 +54,7 @@ public final class DonutATests {
         s = n.packet(true, true);
         check(!s.nudge && s.onGround, "afterwards the real flag again");
         check(!n.tick(0.0), "no force after the reset");
-        // exactly 3.0 does not arm (strictly greater)
+
         n.reset();
         n.tick(3.0);
         n.tick(0.0);
@@ -64,7 +64,7 @@ public final class DonutATests {
         check(n.armed(), "3.01 arms");
         n.reset();
         check(!n.armed() && n.groundTicks() == 0, "reset");
-        // the player is in the air (not on ground) in the packet: false either way
+
         n.tick(10.0);
         n.tick(0.0);
         s = n.packet(false, false);
@@ -86,14 +86,14 @@ public final class DonutATests {
 
     static void relog() {
         AutoRelogLogic r = new AutoRelogLogic();
-        // never fires without having been above the line first
+
         check(!r.tick(-10.0, 0.0), "below the line from the start: no relog");
-        // above for 39 ticks: not armed
+
         for (int i = 0; i < 39; i++) {
             check(!r.tick(64.0, 0.0), "above");
         }
         check(!r.tick(-1.0, 0.0), "39 ticks above is not enough");
-        // armed after 40 ticks, fires once on the way down
+
         for (int i = 0; i < 45; i++) {
             r.tick(64.0, 0.0);
         }
@@ -102,18 +102,18 @@ public final class DonutATests {
         check(!r.tick(0.0, 0.0), "exactly on the line is not below");
         check(r.tick(-0.5, 0.0), "below the line while armed: fire");
         check(!r.tick(-5.0, 0.0), "no second relog");
-        // within the 4 block band the counter does not grow: standing at line+3 never arms
+
         for (int i = 0; i < 100; i++) {
             r.tick(3.0, 0.0);
         }
         check(!r.tick(-1.0, 0.0), "hovering at the line does not arm");
-        // a custom line
+
         for (int i = 0; i < 40; i++) {
             r.tick(-40.0, -60.0);
         }
         check(!r.tick(-59.0, -60.0), "line -60: -59 is above");
         check(r.tick(-61.0, -60.0), "line -60: -61 fires");
-        // reset (world change) disarms
+
         for (int i = 0; i < 40; i++) {
             r.tick(64.0, 0.0);
         }

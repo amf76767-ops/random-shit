@@ -14,10 +14,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/**
- * The "Accounts" button of the title screen. 5.6 hooked the click on {@code Screen}, but since 1.21.9 the title
- * screen declares {@code mouseClicked} itself, so that hook never ran and the button did nothing. Both hooks sit on the title screen.
- */
 @Mixin(class_442.class)
 public abstract class TitleScreenMixin {
     private static final int BTN_X = 6;

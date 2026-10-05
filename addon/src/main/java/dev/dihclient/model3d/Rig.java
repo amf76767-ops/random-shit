@@ -1,11 +1,9 @@
 package dev.dihclient.model3d;
 
-/** Poses a {@link Model} (node animation) and turns it into vertex positions (rigid parts and skinning). */
 public final class Rig {
     private Rig() {
     }
 
-    /** Fills {@code globals} (16 floats per node) for the animation at {@code time} seconds (looping), or the rest pose when {@code anim} is null. */
     public static void pose(Model m, Model.Animation anim, double time, float[] globals) {
         int n = m.nodeCount;
         float[] t = m.restT.clone();
@@ -42,7 +40,6 @@ public final class Rig {
         }
     }
 
-    /** Bind pose to positions and normals of the posed model. {@code outPos} and {@code outNrm} have 3 floats per vertex. */
     public static void skin(Model m, float[] globals, float[] outPos, float[] outNrm) {
         int jc = m.jointNode.length;
         float[] jm = new float[jc * 16];
@@ -106,7 +103,6 @@ public final class Rig {
         }
     }
 
-    /** Value of a channel at time t, into out[0..comps). */
     static void sample(Model.Channel c, float t, float[] out) {
         float[] times = c.times;
         int n = times.length;

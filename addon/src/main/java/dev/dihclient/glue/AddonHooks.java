@@ -10,17 +10,12 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.class_310;
 import net.minecraft.class_442;
 
-/**
- * The few entry points the patched {@code DIHClient} and {@code ModuleManager} call. Every one of them
- * swallows its own failures: an update check or the supervisor must never be able to crash the game.
- */
 public final class AddonHooks {
     private static boolean toasted;
 
     private AddonHooks() {
     }
 
-    /** Called at the end of {@code DIHClient.onInitializeClient}. */
     public static void init() {
         try {
             UpdateManager.init(FabricLoader.getInstance().getConfigDir().resolve("dihclient"));
@@ -29,7 +24,6 @@ public final class AddonHooks {
         }
     }
 
-    /** One step of the module set-up; a failing step is logged and does not stop the others. */
     private interface Step {
         void run() throws Throwable;
     }
@@ -42,14 +36,13 @@ public final class AddonHooks {
         }
     }
 
-    /** Called at the end of {@code ModuleManager.registerAll}. */
     public static void registerModules(ModuleManager modules) {
         step("add modules", () -> {
             Method add = ModuleManager.class.getDeclaredMethod("add", dev.dihclient.module.Module.class);
             add.setAccessible(true);
             AutomationSupervisor supervisor = new AutomationSupervisor();
             add.invoke(modules, supervisor);
-            // on by default; the saved config, loaded right after this, wins as soon as the player has switched it off
+
             supervisor.setEnabledSilently(true);
             add.invoke(modules, new VisualPack());
             add.invoke(modules, new CustomModel());
@@ -58,16 +51,16 @@ public final class AddonHooks {
             add.invoke(modules, new ShaderModule());
             Emotes emotes = new Emotes();
             add.invoke(modules, emotes);
-            emotes.setEnabledSilently(true); // idle until a key is pressed
+            emotes.setEnabledSilently(true);
             BuildPath path = new BuildPath();
             add.invoke(modules, path);
-            path.setEnabledSilently(true); // harmless: draws only while AutoBuild walks
-            // the block finders keep their results up to date from single block changes instead of scanning everything again and again
+            path.setEnabledSilently(true);
+
             dev.dihclient.port.chunks.BlockUpdates.add(dev.dihclient.scan.BlockScanner::blockChanged);
             dev.dihclient.port.zoom.Zoom zoom = new dev.dihclient.port.zoom.Zoom();
             add.invoke(modules, zoom);
-            zoom.setEnabledSilently(true); // the key is read in onTick, the module has no switch
-            // modules ported from another client; Player Bypass takes the place of the old module of the same name
+            zoom.setEnabledSilently(true);
+
             for (dev.dihclient.module.Module m : new dev.dihclient.module.Module[]{
                     new dev.dihclient.port.crystal.CrystalAuraModule(), new dev.dihclient.port.crystal.CrystalOptimizerModule(),
                     new dev.dihclient.port.tools.SpearSwap(), new dev.dihclient.port.tools.SpawnerProtect(),
@@ -92,7 +85,7 @@ public final class AddonHooks {
                     new dev.dihclient.port.lag.LagFinder(), new dev.dihclient.port.profile.FrameProfiler()}) {
                 add.invoke(modules, m);
                 if (m instanceof dev.dihclient.port.tools.SpearSwap) {
-                    m.setEnabledSilently(true); // no switch: it only reacts to its key
+                    m.setEnabledSilently(true);
                 }
             }
         });
@@ -116,7 +109,6 @@ public final class AddonHooks {
         });
     }
 
-    /** Called at the start of every client tick. */
     public static void tick(class_310 mc) {
         try {
             AutomationSupervisor.creativeGuard();

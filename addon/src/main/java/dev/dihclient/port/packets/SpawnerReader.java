@@ -26,16 +26,6 @@ import net.minecraft.class_2680;
 import net.minecraft.class_2818;
 import net.minecraft.class_638;
 
-/**
- * Ported from a Meteor addon.
- * Reads the packets the server sends and reports spawners below a Y limit, once each, in the chat and in latest.log, and
- * highlights them (the whole chunk, or a beam up from the block). It only reports what the server really put in those packets;
- * if the server hides spawners from your client there is nothing to read.
- * <p>
- * Differences to the Meteor addon: the packets are looked at after the game has applied them ({@link PacketBus#applied}, game
- * thread), so a chunk packet is read through the block entities of the loaded chunk, and that also covers block entity data
- * packets (they have no own setting any more). A spawner that is broken is dropped from the list.
- */
 public class SpawnerReader extends Module {
     public enum Highlight { CHUNK, BEAM }
 
@@ -59,7 +49,6 @@ public class SpawnerReader extends Module {
     public final ColorSetting lineColor = this.color("Line Color", "Outline colour.", 0xFFFFAA00)
             .visibleWhen(this.render::get);
 
-    /** Spawners found so far, so each is only reported once. Only touched on the game thread. */
     private final Set<class_2338> spawners = new HashSet<>();
     private final PacketBus.Listener appliedListener = this::onApplied;
 
@@ -90,7 +79,6 @@ public class SpawnerReader extends Module {
         return Integer.toString(this.spawners.size());
     }
 
-    /** Game thread, after the game has handled the packet. */
     private void onApplied(class_2596<?> packet) {
         try {
             if (this.blockUpdates.get() && packet instanceof class_2626 update) {
@@ -122,7 +110,7 @@ public class SpawnerReader extends Module {
         if (state.method_26204() == class_2246.field_10260) {
             this.report(pos);
         } else {
-            this.spawners.remove(pos); // broken or replaced
+            this.spawners.remove(pos);
         }
     }
 
@@ -130,7 +118,7 @@ public class SpawnerReader extends Module {
         if (pos.method_10264() >= this.maxY.get()) {
             return;
         }
-        // copy: the position of a packet can be a mutable one
+
         if (!this.spawners.add(pos.method_10062())) {
             return;
         }
@@ -150,7 +138,7 @@ public class SpawnerReader extends Module {
             int line = this.lineColor.get();
             boolean chunks = this.highlight.get() == Highlight.CHUNK;
             double half = this.beamWidth.get() / 2;
-            // chunk mode: several spawners in one chunk only need one box
+
             Set<Long> drawn = new HashSet<>();
             for (class_2338 pos : this.spawners) {
                 class_238 box;

@@ -17,23 +17,11 @@ import java.util.Collection;
 import java.util.List;
 import net.fabricmc.loader.api.FabricLoader;
 
-/**
- * Switches the bundled "DIH Visuals" resource pack on and off. Every effect has its own switch: the pack is rebuilt from
- * the copy in this jar without the parts that are switched off and put into {@code resourcepacks/}. The file name
- * contains the choice, so a new combination never has to overwrite a pack that the game still has open.
- *
- * What is in it: Fullbright (lightmap shader), invisible rain, clear clouds and a sky gradient (shaders), a colour-changing
- * enchant glint (shader and picture), Deepslate-style stone, clear water, round sun, small totem.
- *
- * The Minecraft calls are found by signature through reflection, so a wrong guess shows up as a message in the game
- * instead of a crash. Turning the module on or off, or changing a switch, reloads the resources once.
- */
 public class VisualPack extends Module {
     private static final String RESOURCE = "/dihclient/DIH-Visuals.zip";
     private static final String PREFIX = "DIH-Visuals";
     private static final String MC = "assets/minecraft/";
 
-    /** One switch of the pack and the files of the pack that belong to it. */
     private record Effect(BoolSetting on, String... files) {
     }
 
@@ -71,7 +59,6 @@ public class VisualPack extends Module {
         instance = this;
     }
 
-    /** The colour mood from Scenes. The pack is rebuilt and the resources reload (when the module is on). */
     public void setLook(Look next) {
         if (look != next) {
             look = next;
@@ -106,7 +93,7 @@ public class VisualPack extends Module {
     @Override
     public void onTick() {
         if (this.dirty && mc.field_1724 != null) {
-            this.dirty = false; // several switches changed together (a loaded config) cost one reload
+            this.dirty = false;
             this.apply(true);
         }
     }
@@ -177,7 +164,6 @@ public class VisualPack extends Module {
         Files.move(tmp, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
     }
 
-    /** Removes the packs of earlier choices. A file the game still holds open is left for the next start. */
     private void cleanOld(String keep) {
         Path dir = FabricLoader.getInstance().getGameDir().resolve("resourcepacks");
         try (DirectoryStream<Path> ds = Files.newDirectoryStream(dir, PREFIX + "*.zip")) {
@@ -186,16 +172,15 @@ public class VisualPack extends Module {
                     try {
                         Files.deleteIfExists(p);
                     } catch (IOException ignored) {
-                        // in use, next time
+
                     }
                 }
             }
         } catch (IOException ignored) {
-            // no folder, nothing to clean
+
         }
     }
 
-    /** @return true when the list of enabled packs changed and the resources were reloaded */
     @SuppressWarnings("unchecked")
     static boolean switchPack(String prefix, boolean on, String id) throws Exception {
         Object manager = null;
@@ -209,14 +194,14 @@ public class VisualPack extends Module {
             throw new IllegalStateException("ResourcePackManager not found");
         }
         Class<?> mgr = manager.getClass();
-        invoke(mgr, manager, "method_14445"); // scanPacks, finds the file that was just copied
-        Collection<String> enabled = (Collection<String>) invoke(mgr, manager, "method_29210"); // getEnabledIds
+        invoke(mgr, manager, "method_14445");
+        Collection<String> enabled = (Collection<String>) invoke(mgr, manager, "method_29210");
         List<String> next = new ArrayList<>(enabled);
-        next.removeIf(e -> e.startsWith("file/" + prefix)); // earlier choices of this pack
+        next.removeIf(e -> e.startsWith("file/" + prefix));
         if (on) {
-            next.add(id); // on top: later entries win
+            next.add(id);
         }
-        // the Shader pack always stays above the Visual pack (its glint wins)
+
         List<String> shaders = new ArrayList<>();
         next.removeIf(e -> e.startsWith("file/" + ShaderModule.PREFIX) && shaders.add(e));
         next.addAll(shaders);
@@ -225,7 +210,7 @@ public class VisualPack extends Module {
         }
         Method set = null;
         for (Method m : mgr.getMethods()) {
-            if (m.getName().equals("method_14447") && m.getParameterCount() == 1) { // setEnabledProfiles
+            if (m.getName().equals("method_14447") && m.getParameterCount() == 1) {
                 set = m;
             }
         }
@@ -237,7 +222,7 @@ public class VisualPack extends Module {
         Method reload = null;
         for (Method m : mc.getClass().getMethods()) {
             if (m.getParameterCount() == 0 && m.getReturnType().getName().equals("java.util.concurrent.CompletableFuture")) {
-                if (reload == null || m.getName().equals("method_1521")) { // reloadResources
+                if (reload == null || m.getName().equals("method_1521")) {
                     reload = m;
                 }
             }
@@ -249,18 +234,17 @@ public class VisualPack extends Module {
         return true;
     }
 
-    /** Writes the list into options.txt as well, so the pack is already active at the next start. Best effort. */
     @SuppressWarnings("unchecked")
     private static void remember(List<String> ids) {
         try {
             Object options = mc.field_1690;
-            Field f = options.getClass().getField("field_1887"); // resourcePacks
+            Field f = options.getClass().getField("field_1887");
             List<String> list = (List<String>) f.get(options);
             list.clear();
             list.addAll(ids);
-            options.getClass().getMethod("method_1640").invoke(options); // write
+            options.getClass().getMethod("method_1640").invoke(options);
         } catch (Throwable ignored) {
-            // not critical: the module switches the pack on again when it starts
+
         }
     }
 

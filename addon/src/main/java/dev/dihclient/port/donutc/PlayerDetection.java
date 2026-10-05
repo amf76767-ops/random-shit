@@ -23,16 +23,7 @@ import net.minecraft.class_638;
 import net.minecraft.class_742;
 import net.minecraft.class_746;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Detects when other players are in the world around you (every player entity the client has loaded, so within render
- * range, not the tab list). On a change of that group it warns you, switches the listed modules, can send a panic
- * /pay, turns itself off and can disconnect after half a second.
- * <p>
- * Differences to the original: the Discord webhook (URL, self ping, Discord ID) is gone, the module has no HTTP code of its
- * own: the alert is handed to Discord Alarm, which forwards it to the webhook you set there when it is on. The toast
- * is the DIH notification toast. Module names for "Modules To Toggle" are matched against the DIH modules.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class PlayerDetection extends Module {
     public enum Notify { CHAT, TOAST, BOTH }
 
@@ -111,7 +102,6 @@ public class PlayerDetection extends Module {
         }
     }
 
-    /** Everything that happens when the group of players changes (not empty). */
     private void handleDetection(Set<String> players) {
         String text = (players.size() == 1 ? "Player detected: " : "Players detected: ") + PlayerDetectionLogic.shortNames(players, 3);
         switch (this.notificationMode.get()) {
@@ -142,13 +132,11 @@ public class PlayerDetection extends Module {
         }
     }
 
-    /** True when the Notifications module already prints every toast into the chat. */
     private static boolean echoesToChat() {
         NotificationsModule notes = ModuleManager.of(NotificationsModule.class);
         return notes != null && notes.isEnabled() && notes.chat.get();
     }
 
-    /** The chat-only mode shows no toast, so Discord Alarm would not hear of it: tell it directly. */
     private static void forwardToDiscord(String text) {
         try {
             DiscordAlarm.onToast("Player Detection", text, Notifications.Type.WARNING);
@@ -181,7 +169,6 @@ public class PlayerDetection extends Module {
         return this.whitelist;
     }
 
-    /** Sends /pay to the target; shows it in the chat history like a typed command. */
     private void panicPay() {
         String command = PlayerDetectionLogic.payCommand(this.panicPayTarget.get(), this.panicPayAmount.get());
         if (command == null) {
@@ -207,7 +194,6 @@ public class PlayerDetection extends Module {
         CompletableFuture.delayedExecutor(DISCONNECT_DELAY_MS, TimeUnit.MILLISECONDS, mc).execute(() -> this.disconnectFromServer(session, players));
     }
 
-    /** Only if it is still the same connection: a reconnect in the meantime must not be cut. */
     private void disconnectFromServer(class_2535 session, Set<String> players) {
         try {
             class_634 listener = mc.method_1562();

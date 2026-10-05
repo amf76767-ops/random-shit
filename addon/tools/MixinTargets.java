@@ -30,27 +30,6 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
-/**
- * Static check of what Mixin would do at game start, without starting the game. For every Mixin class it checks against the
- * real target classes (mc-int.jar, the base jar, ...):
- * <ul>
- * <li>the @Mixin targets exist and their kind (interface / class) fits the mixin kind (accessor interface, interface mixin, normal);
- * <li>@Inject/@Redirect/@ModifyVariable/@ModifyArg(s)/@ModifyConstant/@Overwrite (and MixinExtras @WrapOperation etc.): the {@code method}
- * is declared in the target class itself (Mixin does not look at super classes), the {@code @At} INVOKE/FIELD/NEW target occurs in its
- * bytecode, the handler descriptor is one Mixin accepts;
- * <li>@Shadow fields/methods and @Accessor/@Invoker targets are declared in the target class with the exact descriptor;
- * <li>smaller things Mixin rejects: wrong super class, method conflicts, non-interface mixin classes referenced from other code.
- * </ul>
- * Each problem is tagged: {@code [crash]} = Mixin throws and the game does not start, {@code [inert]} = the injection silently does
- * nothing (injectors.defaultRequire is 0), {@code [runtime]} = fails when the handler runs.
- *
- * usage: MixinTargets [-v] [--only text] [--ignore text]... mixinSource [classpath...]
- *   --only text    check only mixin classes whose name contains text
- *   --ignore text  report a problem whose line contains text as a note instead (known, accepted problems)
- *   mixinSource  directory (build/classes) or jar that holds dev/dihclient/mixin/**; also the first class path entry
- *   classpath    more directories/jars searched in order for target classes (build/override, base jar, mc-int.jar ...)
- * Exit code 1 when a problem was found.
- */
 public final class MixinTargets {
     private static final String MIXIN_PACKAGE = "dev/dihclient/mixin/";
     private static final String MX = "Lorg/spongepowered/asm/mixin/";
@@ -66,9 +45,9 @@ public final class MixinTargets {
     private final Set<String> mixinClasses = new TreeSet<>();
     private final Set<String> nonInterfaceMixins = new TreeSet<>();
     private final List<String> ignore = new ArrayList<>();
-    /** call/field site of a target method (class.method desc#insn) -> handlers that @Redirect it. */
+
     private final Map<String, List<String>> redirectSites = new LinkedHashMap<>();
-    /** target class + member -> the mixin that adds it (two mixins adding the same method clash). */
+
     private final Map<String, String> addedMembers = new HashMap<>();
     private boolean verbose;
     private int handlers;
@@ -96,9 +75,6 @@ public final class MixinTargets {
         t.run(paths.get(0), only);
     }
 
-    // ---------------------------------------------------------------------------------------------------- class path
-
-    /** Class path: directories and jars in order, then the JDK. */
     private static final class Cp {
         private final List<Object> roots = new ArrayList<>();
         private final Map<String, ClassNode> cache = new HashMap<>();
@@ -160,8 +136,6 @@ public final class MixinTargets {
             return cn;
         }
     }
-
-    // ---------------------------------------------------------------------------------------------------- driver
 
     private void run(String source, String only) throws Exception {
         List<ClassNode> all = new ArrayList<>();
@@ -248,8 +222,6 @@ public final class MixinTargets {
         }
     }
 
-    // ---------------------------------------------------------------------------------------------------- annotations
-
     private static AnnotationNode annotation(List<AnnotationNode> a, List<AnnotationNode> b, String desc) {
         for (List<AnnotationNode> list : List.of(a == null ? List.<AnnotationNode>of() : a, b == null ? List.<AnnotationNode>of() : b)) {
             for (AnnotationNode an : list) {
@@ -327,9 +299,6 @@ public final class MixinTargets {
         return v instanceof String[] e ? e[1] : def;
     }
 
-    // ---------------------------------------------------------------------------------------------------- selectors
-
-    /** A Mixin member selector: [Lowner;]name[(desc)ret | :desc]. */
     private static final class Sel {
         String owner;
         String name;
@@ -385,8 +354,6 @@ public final class MixinTargets {
         }
         return -1;
     }
-
-    // ---------------------------------------------------------------------------------------------------- mixin class
 
     private void checkMixin(ClassNode mx) {
         String where0 = shortName(mx.name);
@@ -533,8 +500,6 @@ public final class MixinTargets {
         }
     }
 
-    // ---------------------------------------------------------------------------------------------------- lookups
-
     private static MethodNode declared(ClassNode c, String name, String desc) {
         for (MethodNode m : c.methods) {
             if (m.name.equals(name) && (desc == null || m.desc.equals(desc))) {
@@ -553,7 +518,6 @@ public final class MixinTargets {
         return null;
     }
 
-    /** Where a member with this name sits in the class hierarchy of c (to explain a miss), or null. */
     private String inheritedMethod(ClassNode c, String name, String desc) {
         for (ClassNode s = c.superName == null ? null : cp.get(c.superName); s != null; s = s.superName == null ? null : cp.get(s.superName)) {
             MethodNode m = declared(s, name, desc);
@@ -592,8 +556,6 @@ public final class MixinTargets {
         }
         return sb.length() == 0 ? "no method of that name" : "declared:" + sb;
     }
-
-    // ---------------------------------------------------------------------------------------------------- @Shadow
 
     private void checkShadowField(ClassNode mx, FieldNode f, AnnotationNode shadow, ClassNode tc) {
         String where = shortName(mx.name) + "#" + f.name + " (@Shadow field)";
@@ -672,8 +634,6 @@ public final class MixinTargets {
         }
         ok(where, "@Shadow " + hit.name + hit.desc);
     }
-
-    // ---------------------------------------------------------------------------------------------------- accessors
 
     private void claim(String where, ClassNode mx, ClassNode tc, MethodNode m) {
         String key = tc.name + "." + m.name + m.desc;
@@ -775,9 +735,6 @@ public final class MixinTargets {
         problem(where, "crash", "@Overwrite " + names + m.desc + " not declared in " + tc.name + ": " + sameNameMethods(tc, m.name));
     }
 
-    // ---------------------------------------------------------------------------------------------------- injectors
-
-    /** The target methods named by {@code method = ...}; null when a selector is not understood. */
     private List<MethodNode> targetMethods(String where, AnnotationNode an, ClassNode tc) {
         List<String> sels = strings(an, "method");
         if (sels.isEmpty()) {
@@ -921,7 +878,6 @@ public final class MixinTargets {
         return annotationList(an, "at");
     }
 
-    /** Redirect, ModifyVariable, ModifyArg, ModifyArgs, ModifyConstant and the MixinExtras injectors. */
     private void checkInjector(String where, MethodNode h, AnnotationNode an, ClassNode tc, String type) {
         List<MethodNode> targets = targetMethods(where, an, tc);
         if (targets == null) {
@@ -952,7 +908,7 @@ public final class MixinTargets {
                     }
                 }
                 default -> {
-                    // MixinExtras and friends: the target must exist, the descriptor rules are theirs
+
                     for (AnnotationNode at : atList(an)) {
                         matchAt(w, tm, at, an);
                     }
@@ -966,12 +922,6 @@ public final class MixinTargets {
         }
     }
 
-    // ---------------------------------------------------------------------------------------------------- @At
-
-    /**
-     * Finds the instructions an @At selects. Reports a problem when a target is given and does not occur; returns null when the
-     * kind of @At cannot be checked statically (then nothing is reported but a note).
-     */
     private List<AbstractInsnNode> matchAt(String where, MethodNode tm, AnnotationNode at, AnnotationNode injector) {
         String value = String.valueOf(val(at, "value"));
         String target = val(at, "target") instanceof String s && !s.isEmpty() ? s : null;
@@ -1090,8 +1040,6 @@ public final class MixinTargets {
         return s.isEmpty() ? "none" : String.join(", ", s);
     }
 
-    // ---------------------------------------------------------------------------------------------------- @Redirect
-
     private void checkRedirect(String w, MethodNode h, AnnotationNode an, MethodNode tm) {
         List<AnnotationNode> ats = atList(an);
         if (ats.size() != 1) {
@@ -1130,7 +1078,7 @@ public final class MixinTargets {
                 ret = get ? ft : Type.VOID_TYPE;
                 what = (get ? "read of " : "write of ") + fi.owner + "." + fi.name + ":" + fi.desc;
             } else if (in instanceof TypeInsnNode ti && ti.getOpcode() == Opcodes.NEW) {
-                // constructor redirect: handler takes the constructor arguments and returns the new object
+
                 MethodInsnNode ctor = findCtor(tm, ti);
                 if (ctor == null) {
                     problem(w, "crash", "NEW " + ti.desc + " without a matching <init> call");
@@ -1175,7 +1123,6 @@ public final class MixinTargets {
         return null;
     }
 
-    /** Handler parameters that differ from the expected ones are allowed for @Coerce-d parameters (Mixin: canCoerce). */
     private boolean coerceMatch(MethodNode h, Type[] hp, List<Type> expect) {
         if (hp.length != expect.size()) {
             return false;
@@ -1213,7 +1160,6 @@ public final class MixinTargets {
         return sameTypes(hp, expect.toArray(new Type[0])) || extraTargetArgs(hp, expect, targetArgs);
     }
 
-    /** Handler = expected parameters followed by (a prefix of) the target method's own arguments. */
     private static boolean extraTargetArgs(Type[] hp, List<Type> expect, Type[] targetArgs) {
         if (hp.length <= expect.size() || hp.length > expect.size() + targetArgs.length) {
             return false;
@@ -1226,8 +1172,6 @@ public final class MixinTargets {
         }
         return true;
     }
-
-    // ---------------------------------------------------------------------------------------------------- @ModifyVariable
 
     private void checkModifyVariable(String w, MethodNode h, AnnotationNode an, MethodNode tm) {
         List<AnnotationNode> ats = atList(an);
@@ -1247,7 +1191,7 @@ public final class MixinTargets {
         int ordinal = intVal(an, "ordinal", -1);
         int index = intVal(an, "index", -1);
         List<String> names = strings(an, "name");
-        // after the variable Mixin accepts the first n arguments of the target method (Injector.validateParams), nothing else
+
         Type[] rest = java.util.Arrays.copyOfRange(hp, 1, hp.length);
         if (rest.length > targs.length || !startsWith(rest, List.of(java.util.Arrays.copyOf(targs, rest.length)))) {
             problem(w, "crash", "@ModifyVariable handler " + h.desc + ": parameters after the variable must be the first arguments of the target method ("
@@ -1285,8 +1229,6 @@ public final class MixinTargets {
             ok(w, "@ModifyVariable selects argument " + cands.get(0) + " (" + hr.getDescriptor() + ")");
         }
     }
-
-    // ---------------------------------------------------------------------------------------------------- @ModifyArg
 
     private void checkModifyArg(String w, MethodNode h, AnnotationNode an, MethodNode tm) {
         List<AnnotationNode> ats = atList(an);
@@ -1335,8 +1277,6 @@ public final class MixinTargets {
             }
         }
     }
-
-    // ---------------------------------------------------------------------------------------------------- @ModifyConstant
 
     private void checkModifyConstant(String w, MethodNode h, AnnotationNode an, MethodNode tm) {
         Type[] hp = Type.getArgumentTypes(h.desc);
@@ -1417,8 +1357,6 @@ public final class MixinTargets {
         }
     }
 
-    // ---------------------------------------------------------------------------------------------------- MixinExtras
-
     private void checkWrapOperation(String w, MethodNode h, AnnotationNode an, MethodNode tm) {
         Type[] hp = Type.getArgumentTypes(h.desc);
         if (hp.length == 0 || !hp[hp.length - 1].getInternalName().equals("com/llamalad7/mixinextras/injector/wrapoperation/Operation")) {
@@ -1447,9 +1385,6 @@ public final class MixinTargets {
         }
     }
 
-    // ---------------------------------------------------------------------------------------------------- references
-
-    /** Mixin refuses to load a (non-accessor) mixin class that other code refers to ("cannot be referenced directly"). */
     private void checkReferences(List<ClassNode> all) {
         for (ClassNode cn : all) {
             Set<String> refs = new TreeSet<>();

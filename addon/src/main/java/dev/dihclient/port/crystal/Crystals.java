@@ -36,10 +36,7 @@ import net.minecraft.class_1269.class_9857;
 import net.minecraft.class_1269.class_9860;
 import net.minecraft.class_1269.class_9861;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Crystal helpers: where a crystal can stand, which hotbar slot to use, how to click, and the ping window.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class Crystals {
     public static final int READY = -2;
     public static final int NO_ROUTE = -1;
@@ -270,7 +267,6 @@ public final class Crystals {
         }
     }
 
-    /** The point of the box closest to a point (the point itself when it is inside). */
     public static class_243 closestPoint(class_243 point, class_238 box) {
         return new class_243(
             Math.max(box.field_1323, Math.min(box.field_1320, point.field_1352)),

@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Tells the crystal modules about an attack of the local player (original: PlayerAttackEntityEvent). */
 @Mixin(class_1657.class)
 public abstract class CrystalAttackMixin {
     @Inject(method = "method_7324", at = @At("HEAD"))

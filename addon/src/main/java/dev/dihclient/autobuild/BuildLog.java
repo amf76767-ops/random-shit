@@ -13,11 +13,6 @@ import java.util.Deque;
 import java.util.List;
 import java.util.ArrayList;
 
-/**
- * A short story of what AutoBuild did: where it walked, why it gave up a spot, when it was stuck. Kept in memory (the last 300
- * lines, for the "Build Log" button) and appended to {@code config/dihclient/build-log.txt} (cut to the last 2000 lines at the start of
- * every game), so a problem can be explained after the fact.
- */
 public final class BuildLog {
     private static final int MEMORY = 300;
     private static final int FILE_LINES = 2000;
@@ -67,7 +62,7 @@ public final class BuildLog {
             }
             Files.writeString(f, line + "\n", StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         } catch (IOException | RuntimeException e) {
-            // the log must never disturb the build
+
         }
     }
 

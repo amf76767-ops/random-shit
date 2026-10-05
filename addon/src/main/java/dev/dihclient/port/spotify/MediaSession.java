@@ -6,13 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
 import java.util.Locale;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Reads (and controls) the Windows "System Media Transport Controls" session of the Spotify app through WinRT:
- * GlobalSystemMediaTransportControlsSessionManager -> the session whose app id contains "spotify" -> title, artist,
- * album, timeline, playback state, thumbnail. No network involved; everything stays on this PC. All calls must come
- * from one thread (the poller), which owns the COM apartment.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class MediaSession {
     private static final String MANAGER_CLASS = "Windows.Media.Control.GlobalSystemMediaTransportControlsSessionManager";
     private static final Memory IID_MANAGER_STATICS = WinRt.iid("2050C4EE-11A0-57DE-AED7-C97C70338245");

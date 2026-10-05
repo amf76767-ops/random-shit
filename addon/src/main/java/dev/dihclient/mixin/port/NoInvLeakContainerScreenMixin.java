@@ -15,10 +15,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Ported from an open-source client (GPL-3.0) (MixinNoInvLeakContainerScreen).
- * Container screens for No Inv Leak: the stack of the player's own slots, the cursor stack and the tooltip.
- */
+/** Ported from an open-source client (GPL-3.0). */
 @Mixin(class_465.class)
 public abstract class NoInvLeakContainerScreenMixin {
     @Shadow
@@ -31,7 +28,6 @@ public abstract class NoInvLeakContainerScreenMixin {
     @Shadow
     public abstract class_1703 method_17577();
 
-    /** renderSlot: every {@code slot.getItem()} of the method (it reads the stack more than once). */
     @Redirect(method = "method_2385", at = @At(value = "INVOKE", target = "Lnet/minecraft/class_1735;method_7677()Lnet/minecraft/class_1799;"))
     private class_1799 dih$slotItem(class_1735 slot) {
         class_1799 stack = slot.method_7677();
@@ -40,7 +36,6 @@ public abstract class NoInvLeakContainerScreenMixin {
                 : stack;
     }
 
-    /** renderFloatingItem(graphics, stack, x, y, text): the cursor stack. */
     @ModifyVariable(method = "method_2382", at = @At("HEAD"), argsOnly = true)
     private class_1799 dih$carried(class_1799 stack, class_332 graphics, class_1799 same, int x, int y, String text) {
         return NoInvLeakModule.carried(stack, x, y);

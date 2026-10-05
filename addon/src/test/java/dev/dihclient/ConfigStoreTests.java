@@ -19,7 +19,6 @@ public final class ConfigStoreTests {
         }
     }
 
-    /** Pretends to be DIH's profile files. */
     static final class Fake implements ConfigStore.Backend {
         final Set<Integer> files = new HashSet<>();
         int lastLoaded = -1;
@@ -101,7 +100,6 @@ public final class ConfigStoreTests {
         store.delete(pvp);
         check(!fake.exists(pvp.id) && store.byId(pvp.id) == null, "delete removes the file and the entry");
 
-        // legacy slots and files that disappeared
         Fake old = new Fake();
         old.files.add(1);
         old.files.add(3);
@@ -112,7 +110,6 @@ public final class ConfigStoreTests {
         legacy.syncLegacy();
         check(legacy.byId(1) == null && legacy.byId(3) != null, "a missing file removes its entry");
 
-        // a broken index file is not fatal
         Files.writeString(dir.resolve("bad.json"), "{ nope");
         check(new ConfigStore(dir.resolve("bad.json"), new Fake()).list().isEmpty(), "broken file gives an empty list");
 

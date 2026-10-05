@@ -23,13 +23,8 @@ import net.minecraft.class_238;
 import net.minecraft.class_2393;
 import net.minecraft.class_2680;
 
-/**
- * As in 5.6, with one change: the "Amethyst" part no longer counts visible amethyst clusters (anti-xray hides them) but takes the
- * finds of the amethyst bypass (the former Amethyst Bypass module, now inside this module: Method, Min Cells, Tracer), see
- * {@link #amethystSource}.
- */
 public class SusChunkFinder extends ChunkMarkModule {
-   /** Chunk key -> {points, finds, average y} of the amethyst bypass; set by the add-on. Null = the old cluster counting. */
+
    public static volatile java.util.function.Supplier<Map<Long, float[]>> amethystSource;
 
    public final IntSetting sensitivity = this.integer(

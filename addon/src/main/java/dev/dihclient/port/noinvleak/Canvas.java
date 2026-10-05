@@ -2,12 +2,7 @@ package dev.dihclient.port.noinvleak;
 
 import java.nio.IntBuffer;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * <p>
- * Software drawing onto an int pixel buffer (premultiplied ARGB, like the layered window wants). No Minecraft or OS types, so
- * it can be tested headless.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class Canvas implements DigitFont.Sink {
     private IntBuffer pixels;
     private int stride;
@@ -21,7 +16,6 @@ public final class Canvas implements DigitFont.Sink {
         this.height = height;
     }
 
-    /** Filled rectangle; the colour is straight ARGB and gets premultiplied here. */
     @Override
     public void rect(int x, int y, int w, int h, int argb) {
         int a = argb >>> 24;
@@ -42,7 +36,6 @@ public final class Canvas implements DigitFont.Sink {
         }
     }
 
-    /** Plain copy of a w*h block (no blending), clipped to the canvas. */
     public void copy(int[] source, int sw, int sh, int x, int y) {
         for (int sy = 0; sy < sh; sy++) {
             int py = y + sy;
@@ -56,7 +49,6 @@ public final class Canvas implements DigitFont.Sink {
         }
     }
 
-    /** Draws premultiplied pixels with "over", each source pixel becoming a scale*scale square. */
     public void blend(int[] source, int sw, int sh, int x, int y, int scale) {
         for (int sy = 0; sy < sh; sy++) {
             for (int sx = 0; sx < sw; sx++) {
@@ -84,7 +76,6 @@ public final class Canvas implements DigitFont.Sink {
         return a << 24 | (argb >>> 16 & 0xFF) * a / 255 << 16 | (argb >>> 8 & 0xFF) * a / 255 << 8 | (argb & 0xFF) * a / 255;
     }
 
-    /** Premultiplied source over premultiplied destination. */
     public static int over(int src, int dst) {
         int a = src >>> 24;
         if (a == 255) {

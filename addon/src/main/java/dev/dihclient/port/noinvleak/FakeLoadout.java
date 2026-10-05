@@ -6,12 +6,7 @@ import net.minecraft.class_1792;
 import net.minecraft.class_1799;
 import net.minecraft.class_1802;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * <p>
- * The "Random" style: a believable loadout per inventory slot (0-8 hotbar, 9-35 main, 36-39 armor feet to head, 40 offhand,
- * 41 anything else), rolled from one seed so a slot keeps its item until the module is switched on again.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class FakeLoadout {
     public static final int UNKNOWN = 41;
     private static final class_1792[] HOTBAR = new class_1792[]{

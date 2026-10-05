@@ -1,13 +1,10 @@
 package dev.dihclient.port.chunks;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * What the server sent for one sky-light section of a chunk.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public enum LightSectionStatus {
     NORMAL,
     EMPTY_MASK,
-    /** A full light array that is all zero: dark where the sky should reach, the sign of a covered, player-made space. */
+
     ZEROED_PRESENT,
     UNIFORM_MAX,
     UNKNOWN

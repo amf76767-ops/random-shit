@@ -15,11 +15,6 @@ import java.util.Locale;
 import net.minecraft.class_1657;
 import net.minecraft.class_243;
 
-/**
- * Watches the other automation modules. It pauses them when you are in danger (low health, a stranger close by),
- * starts them again once it is safe, and restarts or switches off a module that has stopped getting anything done.
- * The decisions are made by {@link SupervisorEngine}; this class only reads the game and flips the modules.
- */
 public class AutomationSupervisor extends Module {
     private static final int SAMPLE_EVERY_TICKS = 5;
 
@@ -58,11 +53,6 @@ public class AutomationSupervisor extends Module {
         instance = this;
     }
 
-    /**
-     * Creative mode: the automation presses jump by itself, and two presses within a third of a second switch creative flight on.
-     * When flight starts while an automation module runs and you did not press jump yourself, it is switched off again.
-     * Called at the start of every client tick.
-     */
     public static void creativeGuard() {
         if (mc.field_1724 == null || mc.field_1690 == null) {
             wasFlying = false;
@@ -82,7 +72,6 @@ public class AutomationSupervisor extends Module {
         wasFlying = flying;
     }
 
-    /** True while the supervisor has this module switched off because of danger and means to start it again. */
     static boolean isPaused(Module module) {
         AutomationSupervisor s = instance;
         return s != null && s.engine.pausedIds().contains(module.id());
@@ -157,7 +146,7 @@ public class AutomationSupervisor extends Module {
         String myName = SocialManager.name(mc.field_1724);
         for (class_1657 p : mc.field_1687.method_18456()) {
             if (p == mc.field_1724 || p.method_5628() < 0 || !p.method_5805() || p.method_7325()) {
-                continue; // yourself, a client-side dummy, a dead player or a spectator
+                continue;
             }
             if (myName.equals(SocialManager.name(p)) || DIHClient.social().isFriend(p)) {
                 continue;
@@ -220,7 +209,7 @@ public class AutomationSupervisor extends Module {
         if (m == null) {
             return;
         }
-        // silent: the summary warning is enough, a toast per module would only be noise
+
         m.setEnabledSilently(a.type() == SupervisorEngine.Type.ENABLE);
     }
 

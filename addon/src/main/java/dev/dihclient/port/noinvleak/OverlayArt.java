@@ -14,12 +14,7 @@ import net.minecraft.class_310;
 import net.minecraft.class_3298;
 import net.minecraft.class_5348;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * <p>
- * CPU copies of the vanilla art the overlay windows need (hotbar selection frame, tooltip panel, ascii font bitmap), read from
- * the active resource packs, so texture packs are honoured. Everything fails soft: a missing resource just draws nothing.
- */
+/** Ported from an open-source client (GPL-3.0). */
 final class OverlayArt {
     private static final int GLYPH = 8;
     private static final int SHADOW_MASK = 16579836;

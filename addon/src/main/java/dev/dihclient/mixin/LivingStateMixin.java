@@ -5,7 +5,6 @@ import dev.dihclient.glue.EmoteHolder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
-/** Gives the render state of living entities a place for the emote pose. */
 @Mixin(targets = "net.minecraft.class_10042")
 public abstract class LivingStateMixin implements EmoteHolder {
     @Unique

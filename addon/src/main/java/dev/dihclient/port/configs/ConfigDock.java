@@ -14,11 +14,6 @@ import java.util.List;
 import net.minecraft.class_310;
 import net.minecraft.class_332;
 
-/**
- * The config panel at the bottom centre of the DIH GUI: a small tab that opens upwards. It lists named configs (save,
- * load, overwrite, rename, delete), shares and imports codes, and binds a config to the servers it should load on.
- * It draws in screen pixels on top of the GUI and swallows the clicks that land on it.
- */
 public final class ConfigDock {
     private enum Input { NONE, NEW, RENAME, SERVER }
 
@@ -46,8 +41,6 @@ public final class ConfigDock {
     public static boolean typing() {
         return input != Input.NONE;
     }
-
-    // ---------------------------------------------------------------- geometry
 
     private static int panelX(int sw) {
         return (sw - W) / 2;
@@ -113,9 +106,6 @@ public final class ConfigDock {
         return s.length() <= max ? s : s.substring(0, max - 1) + "…";
     }
 
-    // ---------------------------------------------------------------- drawing
-
-    /** True while the ClickGUI style is Glass: the dock then uses see-through cards like the rest of the GUI. */
     private static boolean glass() {
         ClickGui gui = ModuleManager.of(ClickGui.class);
         return gui != null && gui.layout.get() == ClickGui.Layout.GLASS;
@@ -223,9 +213,6 @@ public final class ConfigDock {
         }
     }
 
-    // ---------------------------------------------------------------- input
-
-    /** @return true when the click belonged to the dock (the GUI must not see it) */
     public static boolean click(double mx, double my, boolean doubled, int sw, int sh) {
         if (inTab(mx, my, sw, sh)) {
             open = !open;
@@ -274,7 +261,6 @@ public final class ConfigDock {
         return true;
     }
 
-    /** The mouse button went up (or moved while held) after the dock swallowed the press. */
     public static boolean swallowRelease() {
         boolean was = swallowRelease;
         swallowRelease = false;
@@ -374,7 +360,7 @@ public final class ConfigDock {
             case SERVER -> {
                 if (e != null && !store.addServer(e, value)) {
                     Notifications.push("Configs", "That is not a server address", Notifications.Type.WARNING);
-                    return; // stays in the input so it can be corrected
+                    return;
                 }
             }
             default -> {
@@ -393,20 +379,19 @@ public final class ConfigDock {
         }
     }
 
-    /** @return true when the key was used (typing mode swallows every key) */
     public static boolean key(int code, int modifiers) {
         if (input == Input.NONE) {
             return false;
         }
-        if (code == 259) { // backspace
+        if (code == 259) {
             if (!text.isEmpty()) {
                 text = text.substring(0, text.length() - 1);
             }
-        } else if (code == 257 || code == 335) { // enter
+        } else if (code == 257 || code == 335) {
             confirm();
-        } else if (code == 256) { // escape
+        } else if (code == 256) {
             input = Input.NONE;
-        } else if (code == 86 && (modifiers & 2) != 0) { // ctrl+V
+        } else if (code == 86 && (modifiers & 2) != 0) {
             text = clipboard();
         }
         return true;

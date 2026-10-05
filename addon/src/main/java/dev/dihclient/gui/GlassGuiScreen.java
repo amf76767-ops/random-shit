@@ -36,11 +36,6 @@ import net.minecraft.class_332;
 import net.minecraft.class_3417;
 import net.minecraft.class_437;
 
-/**
- * The Glass GUI: no window, only see-through cards floating over the blurred game. Left: one card per module (name, switch, gear),
- * right: the settings of the chosen module as plain rows (grey icon, white label, rounded value field on the right).
- * Used whenever the ClickGUI theme is "Glass".
- */
 public class GlassGuiScreen extends class_437 implements TextInputScreen {
     private static final int CARD_H = 44;
     private static final int CARD_GAP = 6;
@@ -92,9 +87,6 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
         super(class_2561.method_43470("DIHClient"));
     }
 
-    // ---------------------------------------------------------------- switching between the screens
-
-    /** The ClickGUI theme or layout changed while a GUI is open: swap it for the one that fits. */
     public static void layoutChanged() {
         class_310 mc = class_310.method_1551();
         if (mc == null || !isOurs(mc.field_1755)) {
@@ -114,7 +106,6 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
         return screen instanceof ClickGuiScreen || screen instanceof MeteorGuiScreen || screen instanceof GlassGuiScreen;
     }
 
-    /** True when the GUI should be the glass one. */
     public static boolean wanted() {
         ClickGui gui = gui();
         return gui != null && gui.layout.get() == ClickGui.Layout.GLASS;
@@ -128,8 +119,6 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
         ClickGui gui = gui();
         return gui == null ? 1.0F : gui.scale.getFloat();
     }
-
-    // ---------------------------------------------------------------- small helpers
 
     private int c(int argb) {
         int a = (int) ((argb >>> 24) * this.fade);
@@ -193,7 +182,6 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
         return out;
     }
 
-    /** The cards of the left column: the chosen category, or every match while searching. */
     private List<Module> listed() {
         List<Module> out = new ArrayList<>();
         if (this.search.isEmpty()) {
@@ -233,8 +221,6 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
         DIHClient.config().save();
         super.method_25419();
     }
-
-    // ---------------------------------------------------------------- drawing
 
     public void method_25420(class_332 g, int mx, int my, float delta) {
         ClickGui gui = gui();
@@ -401,11 +387,11 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
                 this.choose(m);
                 this.binding = true;
             } else if (b == 1 || !m.isToggleable()) {
-                // right click: the settings of the module
+
                 this.choose(m);
                 this.sound();
             } else {
-                // left click: switch it on / off, like in the other GUIs
+
                 m.toggle();
                 DIHClient.config().markDirty();
             }
@@ -415,7 +401,6 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
         }
     }
 
-    /** The pill switch: a white knob that slides, on a track that lights up. */
     private void drawSwitch(class_332 g, int x, int y, float on) {
         Gfx.rect(g, x, y, 32, 16, 8, this.c(blendAlpha(0x22FFFFFF, 0x80FFFFFF, on)));
         Gfx.outline(g, x, y, 32, 16, 8, this.c(blendAlpha(0x2EFFFFFF, 0x99FFFFFF, on)));
@@ -627,7 +612,6 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
         }
     }
 
-    /** The rounded value field of the right column. */
     private void field(class_332 g, int x, int y, boolean active, String text, int color, boolean chevron) {
         Gfx.rect(g, x, y, FIELD_W, FIELD_H, 5, this.c(active ? 0x26FFFFFF : FIELD));
         Gfx.outline(g, x, y, FIELD_W, FIELD_H, 5, this.c(active ? 0x77FFFFFF : FIELD_LINE));
@@ -755,8 +739,6 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
         return out;
     }
 
-    // ---------------------------------------------------------------- colour maths
-
     private static int blendAlpha(int a, int b, float t) {
         return blendColor(a, b, t);
     }
@@ -771,8 +753,6 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
         }
         return out;
     }
-
-    // ---------------------------------------------------------------- input
 
     private Hit hitAt(double x, double y) {
         for (int i = this.hits.size() - 1; i >= 0; i--) {
@@ -909,8 +889,6 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
         return true;
     }
 
-    // ---------------------------------------------------------------- parts
-
     @FunctionalInterface
     private interface ClickAction {
         void click(double x, double y, int button);
@@ -927,7 +905,6 @@ public class GlassGuiScreen extends class_437 implements TextInputScreen {
         }
     }
 
-    /** A line of the right column: a setting, or (setting == null) the keybind / toast rows of the module itself. */
     private record Row(Setting<?> setting, String label, int height) {
     }
 }

@@ -20,7 +20,6 @@ public final class RoutePlannerTests {
         }
     }
 
-    /** A flat world: solid ground up to y = 0 (the top block), air above, optional extra solid blocks. */
     static final class Flat implements Nav.Terrain {
         final Set<Long> solid = new HashSet<>();
 
@@ -44,7 +43,7 @@ public final class RoutePlannerTests {
             for (int x = x0; x < x0 + w; x++) {
                 for (int z = z0; z < z0 + d; z++) {
                     boolean wall = x == x0 || x == x0 + w - 1 || z == z0 || z == z0 + d - 1;
-                    if (wall || y == layers - 1) { // a hollow box with a roof
+                    if (wall || y == layers - 1) {
                         layer.add(new int[]{x, 1 + y, z, 1});
                     }
                 }
@@ -72,7 +71,7 @@ public final class RoutePlannerTests {
     }
 
     public static void main(String[] args) {
-        // a 12 x 12 hollow box, 4 layers + roof, from the ground
+
         Flat world = new Flat();
         List<List<int[]>> layers = box(5, 5, 12, 12, 5);
         int total = 0;
@@ -88,14 +87,14 @@ public final class RoutePlannerTests {
         check(covered + r.unreachable == total, "every block is covered or counted unreachable: " + covered + " + " + r.unreachable + " vs " + total);
         check(r.unreachable == 0, "a 5 high box with a roof is all reachable by standing on the layers below, unreachable=" + r.unreachable);
         check(r.stops.size() < total / 4, "far fewer stops than blocks: " + r.stops.size() + " for " + total);
-        // each stop stands on something and its blocks are within reach
+
         for (RoutePlanner.Stop s : r.stops) {
             for (int[] b : s.blocks()) {
                 double dx = b[0] + 0.5 - (s.x() + 0.5), dy = b[1] + 0.5 - (s.y() + 1.62), dz = b[2] + 0.5 - (s.z() + 0.5);
                 check(dx * dx + dy * dy + dz * dz <= 4.1 * 4.1 + 1e-6, "block within reach of its stop");
             }
         }
-        // the layers are visited in order
+
         int last = -1;
         boolean ordered = true;
         for (RoutePlanner.Stop s : r.stops) {
@@ -105,7 +104,6 @@ public final class RoutePlannerTests {
         check(ordered, "stops come layer by layer");
         check(r.estimateSeconds() > 0, "an estimate exists");
 
-        // nothing is reachable far above the ground without a floor
         Flat sky = new Flat();
         List<List<int[]>> tower = new ArrayList<>();
         List<int[]> high = new ArrayList<>();
@@ -116,7 +114,6 @@ public final class RoutePlannerTests {
 
         check(t.problems.size() == 1, "the block 40 high is marked as a problem");
 
-        // a floating block 4 above the ground gets a column of supports down to the ground
         Flat field = new Flat();
         List<List<int[]>> floating = new ArrayList<>();
         List<int[]> fl = new ArrayList<>();
@@ -133,20 +130,16 @@ public final class RoutePlannerTests {
         }
         check(fc == 5 && fp.unreachable == 0, "the blocks and their supports are all covered: " + fc);
 
-        // blocks that touch the ground need no support
         RoutePlanner.Result grounded = run(new Flat(), box(5, 5, 4, 4, 1), 4.5);
         check(grounded.supportCount == 0 && grounded.problems.isEmpty(), "blocks on the ground need no supports");
 
-        // a start that is not standable fails clearly
         Flat bad = new Flat();
         RoutePlanner.Job job = new RoutePlanner.Job(bad, 0, 5, 0, box(5, 5, 4, 4, 1), List.of(0), 4.5, 1.62, 3);
         check(job.step(System.nanoTime() + 1_000_000L) && job.result().failure != null, "start in the air fails");
 
-        // empty plan
         RoutePlanner.Result empty = run(new Flat(), new ArrayList<>(), 4.5);
         check(empty.finished && empty.stops.isEmpty(), "nothing to build is a finished empty plan");
 
-        // a wall of blocks between the walker and the target on the far side still gets covered (walks around)
         Flat wall = new Flat();
         List<List<int[]>> far = new ArrayList<>();
         List<int[]> row = new ArrayList<>();

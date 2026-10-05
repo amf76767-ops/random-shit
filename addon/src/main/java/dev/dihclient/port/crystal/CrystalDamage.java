@@ -32,11 +32,7 @@ import net.minecraft.class_239.class_240;
 import net.minecraft.class_3959.class_242;
 import net.minecraft.class_3959.class_3960;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Explosion damage of an end crystal on a living entity as the game will deal it: blocks in the way (exposure),
- * armor, toughness, Resistance, Protection / Blast Protection, shield and difficulty. The numbers live in {@link CrystalMath}.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class CrystalDamage {
     public static boolean ignoreTerrain;
     private static final class_1304[] ARMOR = new class_1304[]{class_1304.field_6169, class_1304.field_6174, class_1304.field_6172, class_1304.field_6166};

@@ -7,10 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * The built-in list of DonutSMP staff accounts (hard-coded in the original too, nothing is downloaded) and small pure helpers.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class StaffNames {
     public static final List<String> DONUT_STAFF = List.of(
             "FluffyMaster07", "archivePedro", "Munkerlich", "Frenk_Btw", "Napooo_", "auzzitech", "CryptoDaveYT", "W1zox_",
@@ -18,7 +15,7 @@ public final class StaffNames {
             "u_vv", "Owen1212055", "Splaterd", "Fallerfly");
 
     private static final Set<String> KEYS = keys();
-    // Java or Bedrock style account name; a leading '.' or '*' is the Bedrock (Floodgate) prefix
+
     private static final Pattern ACCOUNT_NAME = Pattern.compile("[.*]?[A-Za-z0-9_]{1,16}");
 
     private StaffNames() {
@@ -36,12 +33,10 @@ public final class StaffNames {
         return name != null && KEYS.contains(name.toLowerCase(Locale.ROOT));
     }
 
-    /** A real account: NPCs and fake tab entries use version 2 (offline) UUIDs or odd names. */
     public static boolean isAccount(UUID id, String name) {
         return name != null && id.version() != 2 && ACCOUNT_NAME.matcher(name).matches();
     }
 
-    /** m:ss, or h:mm:ss from one hour on. */
     public static String formatAge(long ms) {
         long total = Math.max(0L, ms) / 1000L;
         long hours = total / 3600L;

@@ -6,24 +6,10 @@ import com.google.gson.JsonPrimitive;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Carries the saved settings of modules that were folded into another module over to the new place, before the config is
- * applied. Nothing that already exists in the new place is overwritten, so running it again does no harm.
- */
 public final class ConfigMigration {
     private ConfigMigration() {
     }
 
-    /**
-     * @param guest   id of the module that no longer exists on its own
-     * @param host    id of the module that took it in
-     * @param renamed old setting id → new setting id (only the ones that changed or all of them)
-     * @param enableSetting if not null: id of a switch in the host that is turned on when the guest was on
-     * @param modeSetting   if not null: id of the mode setting of the host that is set to {@code modeValue} when the guest was on
-     *                      (and the host is switched on as well)
-     * @param takeKey       the key binding of the guest becomes the one of the host when the host has none
-     * @param copyEnabled   the on / off state of the guest becomes the one of the host (a plain rename)
-     */
     public record Rule(String guest, String host, Map<String, String> renamed, String enableSetting, String modeSetting, String modeValue,
                        boolean takeKey, boolean copyEnabled) {
         public static Rule rename(String oldId, String newId) {

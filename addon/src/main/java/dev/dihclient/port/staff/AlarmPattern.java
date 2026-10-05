@@ -1,9 +1,6 @@
 package dev.dihclient.port.staff;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Timing and pitch of the alarm modes of {@link StaffAlarm}; kept apart so it needs no Minecraft classes.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class AlarmPattern {
     public static final String SIREN = "Siren";
     public static final String BEEP = "Beep";
@@ -14,7 +11,6 @@ public final class AlarmPattern {
     private AlarmPattern() {
     }
 
-    /** Ticks between two sounds. */
     public static int interval(String mode) {
         return switch (mode) {
             case BEEP -> 3;
@@ -24,7 +20,6 @@ public final class AlarmPattern {
         };
     }
 
-    /** The siren alternates between a high and a low note, the other modes keep one pitch. */
     public static float pitch(String mode, int note) {
         return switch (mode) {
             case BEEP -> 1.6F;

@@ -73,7 +73,6 @@ public final class SupervisorTests {
         check(restarts == 2, "restarted exactly maxRestarts times, got " + restarts);
         check(gaveUp > 0 && !mineOn, "then switched off");
 
-        // progress by text change or by moving prevents any action
         e = new SupervisorEngine(c);
         int actions = 0;
         for (long t = 0; t < 1000; t++) {
@@ -93,12 +92,11 @@ public final class SupervisorTests {
         }
         check(actions == 0, "benign waiting is never stuck");
 
-        // restarts are forgiven after a long stretch of progress
         e = new SupervisorEngine(c);
         boolean on = true;
         int totalRestarts = 0;
         for (long t = 0; t < 3000; t++) {
-            // stuck for 120 ticks, then progress for 600, repeating
+
             String prog = (t % 720) < 120 ? "frozen" : "run" + t;
             for (Action x : e.step(t, w(0, 20, 0), List.of(s("AutoMine", on, prog)), none)) {
                 if (x.type() == Type.DISABLE && "restart".equals(x.text())) {
@@ -113,7 +111,6 @@ public final class SupervisorTests {
         }
         check(on && totalRestarts >= 3, "occasional stalls never exhaust the restart budget (restarts=" + totalRestarts + ")");
 
-        // a module the player turns off is forgotten, not restarted
         e = new SupervisorEngine(c);
         actions = 0;
         for (long t = 0; t < 1000; t++) {
@@ -140,7 +137,6 @@ public final class SupervisorTests {
                 "resumes exactly what it paused");
         check(!e.inDanger() && e.pausedIds().isEmpty(), "state cleared");
 
-        // player nearby
         e = new SupervisorEngine(c);
         a = e.step(0, w(0, 20, 1), List.of(s("AutoMine", true, "a")), List.of());
         check(count(a, Type.DISABLE, "AutoMine") == 1 && a.get(1).text().contains("Steve"), "stranger pauses and is named");
@@ -149,7 +145,6 @@ public final class SupervisorTests {
         e.step(61, w(0, 20, 0), off, offG);
         check(count(e.step(61 + c.resumeDelayTicks, w(0, 20, 0), off, offG), Type.ENABLE, "AutoMine") == 1, "resume after the stranger left");
 
-        // the player turned a module on during danger, supervisor must not fight
         e = new SupervisorEngine(c);
         e.step(0, w(0, 20, 1), List.of(s("AutoMine", true, "a")), List.of());
         a = e.step(1, w(0, 20, 1), List.of(s("AutoMine", true, "a")), List.of());
@@ -158,7 +153,6 @@ public final class SupervisorTests {
         a = e.step(1000 + c.resumeDelayTicks, w(0, 20, 0), List.of(s("AutoMine", true, "a")), List.of());
         check(count(a, Type.ENABLE, null) == 0, "a module the player already re-enabled is not toggled again");
 
-        // flapping: danger comes back before the delay ran out
         e = new SupervisorEngine(c);
         List<Sample> on = List.of(s("AutoMine", true, "a"));
         e.step(0, w(0, 20, 1), on, List.of());
@@ -166,7 +160,6 @@ public final class SupervisorTests {
         e.step(30, w(0, 20, 1), off, offG);
         check(e.step(60, w(0, 20, 0), off, offG).isEmpty(), "the safe timer restarts when danger returns");
 
-        // pause switches
         SupervisorEngine.Config no = new SupervisorEngine.Config();
         no.pauseForPlayers = false;
         no.pauseOnLowHealth = false;

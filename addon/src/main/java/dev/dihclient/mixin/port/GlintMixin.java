@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** Lets the Shader module make tools, weapons and armor shine without enchantments. */
 @Mixin(class_1799.class)
 public abstract class GlintMixin {
     @Inject(method = "method_7958", at = @At("RETURN"), cancellable = true)

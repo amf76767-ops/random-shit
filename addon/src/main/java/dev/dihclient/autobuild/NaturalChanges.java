@@ -1,11 +1,9 @@
 package dev.dihclient.autobuild;
 
-/** Which block ids the game turns into which others by itself. No game classes, so it can be tested. */
 public final class NaturalChanges {
     private NaturalChanges() {
     }
 
-    /** True when {@code planned} may have become {@code world} without anybody mining or placing anything. */
     public static boolean accepts(String planned, String world) {
         if (planned.equals(world)) {
             return false;
@@ -13,9 +11,9 @@ public final class NaturalChanges {
         switch (planned) {
             case "dirt":
                 return world.equals("grass_block") || world.equals("podzol") || world.equals("mycelium");
-            case "farmland": // dries out and becomes dirt when nothing waters it
+            case "farmland":
                 return world.equals("dirt");
-            case "dirt_path": // turns back into dirt when something is put on top
+            case "dirt_path":
                 return world.equals("dirt");
             case "kelp":
                 return world.equals("kelp_plant");
@@ -35,10 +33,10 @@ public final class NaturalChanges {
             default:
                 break;
         }
-        if (planned.contains("coral") && !planned.startsWith("dead_")) { // coral dies out of water
+        if (planned.contains("coral") && !planned.startsWith("dead_")) {
             return world.equals("dead_" + planned);
         }
-        if (!planned.startsWith("waxed_") && planned.contains("copper") && world.contains("copper")) { // oxidises
+        if (!planned.startsWith("waxed_") && planned.contains("copper") && world.contains("copper")) {
             for (String stage : new String[]{"exposed_", "weathered_", "oxidized_"}) {
                 if (world.startsWith(stage) && !planned.startsWith(stage)) {
                     String base = world.substring(stage.length());

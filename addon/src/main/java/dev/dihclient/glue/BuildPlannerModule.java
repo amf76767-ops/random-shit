@@ -20,12 +20,6 @@ import net.minecraft.class_2680;
 import net.minecraft.class_310;
 import net.minecraft.class_746;
 
-/**
- * Plans the whole way of a build before it starts. When AutoBuild begins a build and "Plan First" is on, the build is held
- * for a moment, the route over all layers is calculated (a few milliseconds per tick, the game keeps running), a summary is
- * shown, and then the build goes on and follows the plan. The "Plan Route" button of AutoBuild does the same for the build
- * that is loaded, also while it is only a preview. Hidden and always on.
- */
 public class BuildPlannerModule extends Module {
     private static final long SLICE_NANOS = 5_000_000L;
     private static final double EYE = 1.62;
@@ -48,7 +42,6 @@ public class BuildPlannerModule extends Module {
         this.setHidden(true);
     }
 
-    /** The "Plan Route" button. */
     public void planNow() {
         BuildRuntime rt = this.build.runtime();
         if (rt.plan() == null || !rt.isRunning()) {
@@ -78,7 +71,7 @@ public class BuildPlannerModule extends Module {
             RoutePlanner.Job j = this.job;
             boolean finished = j.step(System.nanoTime() + SLICE_NANOS);
             if (++this.ticks % 10 == 0) {
-                rt.status(); // keeps the runtime's own status text alive
+                rt.status();
             }
             if (finished) {
                 this.finish(rt, j.result());
@@ -145,7 +138,7 @@ public class BuildPlannerModule extends Module {
             try {
                 solid = !state.method_26215() && !state.method_26218(mc.field_1687, pos.method_10101(b.pos())).method_1110();
             } catch (Throwable ignored) {
-                // treated as not standable
+
             }
             current.add(new int[]{b.pos().method_10263(), b.pos().method_10264(), b.pos().method_10260(), solid ? 1 : 0});
         }
@@ -190,7 +183,6 @@ public class BuildPlannerModule extends Module {
         }
     }
 
-    /** Continues the build we stopped for the planning; a pause the player made in the meantime stays. */
     private void resume(BuildRuntime rt) {
         if (this.heldByUs) {
             this.heldByUs = false;

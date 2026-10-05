@@ -24,7 +24,6 @@ for op, kind, owner, name, desc in ref.findall(txt):
         key = (name, desc)
         old = members[owner]['m'].get(key)
         members[owner]['m'][key] = static or bool(old)
-# Hinweise
 extends, enums, ifaces, generic, extra, skip = {}, set(), set(interfaces), {}, defaultdict(list), set()
 fieldhints, methodhints = [], []
 for line in Path(hints).read_text().splitlines():
@@ -78,7 +77,6 @@ for o, n, d, st in fieldhints:
     members['net/minecraft/' + o]['f'][n] = (d, st)
 for o, n, d, st in methodhints:
     members['net/minecraft/' + o]['m'][(n, d)] = st
-# ---- Gruppieren: Top-Level-Klasse (voller Name) -> {innerer Name: Mitglieder}
 def full(n):                       # Hinweis-Namen kurz (class_1) oder voll
     return n if '/' in n else 'net/minecraft/' + n
 ifaces = {full(i) for i in ifaces}

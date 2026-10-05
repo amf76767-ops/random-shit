@@ -8,49 +8,30 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-/**
- * The decision part of the automation supervisor. It knows nothing about Minecraft: the host feeds it one
- * {@link World} and a list of {@link Sample}s per tick and carries out the {@link Action}s it returns.
- *
- * <ul>
- *   <li><b>Danger:</b> low health or a stranger nearby pauses the automation modules; they are started again by
- *       themselves once it has been safe for a while. Modules the player turned on during the danger are left alone.</li>
- *   <li><b>Stuck:</b> a watched module that shows no progress (nothing changes in its status and the player does not
- *       move) is restarted, and switched off with a warning when restarting does not help.</li>
- * </ul>
- */
 public final class SupervisorEngine {
 
-    /** Tunables, all in ticks (20 per second) or plain units. */
     public static final class Config {
         public boolean pauseOnLowHealth = true;
-        /** Health points (2 per heart) under which everything is paused. */
+
         public float pauseBelowHealth = 8f;
-        /** Health points the player must be back at before things resume. */
+
         public float resumeAtHealth = 16f;
         public boolean pauseForPlayers = true;
-        /** Ticks it has to be safe before the paused modules start again. */
+
         public int resumeDelayTicks = 200;
         public boolean detectStuck = true;
         public int stuckTicks = 900;
         public int maxRestarts = 2;
         public int restartDelayTicks = 20;
-        /** Blocks the player has to move to count as progress. */
+
         public double moveEps = 1.5;
-        /** Ticks of steady progress after a restart before the restart counter is forgiven. */
+
         public int forgiveTicks = 1200;
     }
 
-    /** What the host sees of the player and its surroundings. */
     public record World(double x, double y, double z, float health, int strangersNearby, String nearestStranger, boolean dead) {
     }
 
-    /**
-     * One module.
-     *
-     * @param progress an opaque text that changes whenever the module gets something done
-     * @param benign   the module says it is idle, paused or waiting on purpose, which counts as "not stuck"
-     */
     public record Sample(String id, boolean enabled, String progress, boolean benign) {
     }
 
@@ -91,15 +72,10 @@ public final class SupervisorEngine {
         return inDanger;
     }
 
-    /** Ids of the modules this engine switched off because of danger and still wants to switch back on. */
     public Set<String> pausedIds() {
         return paused;
     }
 
-    /**
-     * @param watched modules that are checked for danger and for being stuck
-     * @param guarded modules that are only paused in danger (waiting is normal for them, for example fishing)
-     */
     public List<Action> step(long tick, World w, List<Sample> watched, List<Sample> guarded) {
         List<Action> out = new ArrayList<>();
         if (w.dead()) {
@@ -189,7 +165,7 @@ public final class SupervisorEngine {
                     t.sig = null;
                 }
             } else {
-                tracks.remove(s.id()); // switched off by the player or by the module itself
+                tracks.remove(s.id());
             }
             return;
         }

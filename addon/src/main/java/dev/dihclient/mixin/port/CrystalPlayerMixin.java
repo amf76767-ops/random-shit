@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Silent rotation of Crystal Aura: the aim is swapped in while the tick walks and while the movement packet is built. */
 @Mixin(class_746.class)
 public abstract class CrystalPlayerMixin {
     @Inject(method = "method_5773", at = @At("HEAD"))

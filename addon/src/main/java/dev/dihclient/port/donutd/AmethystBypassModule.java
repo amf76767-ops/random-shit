@@ -31,20 +31,9 @@ import net.minecraft.class_2841;
 import net.minecraft.class_638;
 import net.minecraft.class_2338.class_2339;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Shows amethyst geodes that anti-xray hides, in three ways:
- * <ul>
- *   <li>Bypass: the chunk data still lists which blocks a section holds (its palette), anti-xray only scrambles where they are;
- *       a section whose palette has an amethyst bud has a geode, marked at an open block next to the geode.</li>
- *   <li>Light: the server sends real block light; an open block with the light a bud gives (1, 2, 4 or 5), no brighter
- *       neighbour and a geode block beside it is a hidden bud.</li>
- *   <li>ANBS+ Scan: {@link GeodeGlowScan}, the glow of the geode seen in the light data.</li>
- * </ul>
- * Everything is read from what the client already received; nothing is sent. Scans are cut to 2 ms per tick.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class AmethystBypassModule extends Module {
-    /** The setting values; the label is what the GUI shows. */
+
     public enum Method {
         BYPASS("Bypass"), LIGHT("Light"), ANBS_SCAN("ANBS+ Scan");
 
@@ -125,7 +114,7 @@ public final class AmethystBypassModule extends Module {
     public void onTick() {
         class_638 level = mc.field_1687;
         if (level != this.lastWorld) {
-            // new connection or dimension: the remembered chunks belong to the old world
+
             this.restart();
             this.lastWorld = level;
         }
@@ -151,7 +140,7 @@ public final class AmethystBypassModule extends Module {
             class_1923 center = mc.field_1724.method_31476();
             int radius = mc.field_1690.method_42503().method_41753();
             if (bypass) {
-                // forget chunks that left the view or were unloaded, queue the loaded ones not scanned yet
+
                 this.bypassScanned.removeIf(key -> !DonutDLogic.inChunkRange(class_1923.method_8325(key), class_1923.method_8332(key), center.field_9181, center.field_9180, radius)
                         || !isLoaded(level, class_1923.method_8325(key), class_1923.method_8332(key)));
                 this.bypassMarkers.keySet().removeIf(key -> !this.bypassScanned.contains(key));
@@ -218,7 +207,6 @@ public final class AmethystBypassModule extends Module {
         return out;
     }
 
-    /** Game thread, after the game handled the packet: a changed chunk has to be looked at again. */
     private void onPacketApplied(net.minecraft.class_2596<?> packet) {
         if (!this.method.is(Method.BYPASS)) {
             return;
@@ -239,7 +227,6 @@ public final class AmethystBypassModule extends Module {
         }
     }
 
-    /** Bypass: the first section whose palette holds a bud gives one marker for the chunk. */
     private static void collectPaletteLeak(class_2818 chunk, Long2ObjectOpenHashMap<class_2338> out) {
         class_2826[] sections = chunk.method_12006();
         int minSectionY = chunk.method_32891();
@@ -250,7 +237,7 @@ public final class AmethystBypassModule extends Module {
                 continue;
             }
             class_2841<class_2680> states = section.method_12265();
-            // a global palette (very many block types, e.g. a scrambled section) answers true to every question: skip it
+
             if (!states.method_19526(state -> false) && states.method_19526(AmethystBypassModule::isBud)) {
                 int baseY = (minSectionY + i) * 16;
                 class_2338 marker = pickMarker(chunk, section, baseY, pos);
@@ -260,7 +247,6 @@ public final class AmethystBypassModule extends Module {
         }
     }
 
-    /** An open block in the section that touches a geode block, the same one every scan (lowest {@link DonutDLogic#scatter}). */
     private static class_2338 pickMarker(class_2818 chunk, class_2826 section, int baseY, class_1923 pos) {
         class_2339 neighbour = new class_2339();
         class_2338 best = null;
@@ -300,7 +286,6 @@ public final class AmethystBypassModule extends Module {
         return best;
     }
 
-    /** Light: open blocks with a bud's light that are the light's peak and touch a geode block. */
     private static void collectHiddenBuds(class_638 level, class_2818 chunk, LongOpenHashSet out) {
         class_2826[] sections = chunk.method_12006();
         int minSectionY = chunk.method_32891();
@@ -316,7 +301,7 @@ public final class AmethystBypassModule extends Module {
             for (int y = 0; y < 16; y++) {
                 for (int z = 0; z < 16; z++) {
                     for (int x = 0; x < 16; x++) {
-                        // light-emitting blocks (lamps, torches) would pass for buds
+
                         if (section.method_12254(x, y, z).method_26213() > 0) {
                             continue;
                         }
@@ -357,10 +342,6 @@ public final class AmethystBypassModule extends Module {
         return state.method_27852(class_2246.field_27159) || state.method_27852(class_2246.field_27160);
     }
 
-    /**
-     * The finds per chunk for Sus ChunkFinder: chunk key -> {points, finds, average y}. Bypass gives one mark per geode chunk
-     * (1 point); Light and ANBS+ Scan give a mark per hidden bud / glow cell (1/4 point each, at most 4 points per chunk).
-     */
     public java.util.Map<Long, float[]> perChunk() {
         long[] current = this.hits;
         java.util.Map<Long, float[]> out = new java.util.HashMap<>();

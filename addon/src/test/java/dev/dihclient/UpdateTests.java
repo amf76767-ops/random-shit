@@ -17,7 +17,6 @@ import java.util.HexFormat;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-/** Plain main()-style tests so no test framework has to be downloaded. */
 public final class UpdateTests {
     static int failed;
     static int passed;

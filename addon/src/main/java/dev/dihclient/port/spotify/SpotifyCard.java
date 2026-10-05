@@ -13,13 +13,7 @@ import net.minecraft.class_2960;
 import net.minecraft.class_310;
 import net.minecraft.class_332;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Draws the Spotify card (cover, title, artist, transport row, progress bar, lyrics) or the one-line note shown while
- * nothing plays. the original drew this with ImGui inside its HUD renderer; this version uses the game's own GUI drawing and the
- * DIHClient HUD style. Everything is laid out in GUI pixels at scale 1 and scaled as a whole by the Scale setting.
- * All methods run on the render thread (the cover becomes a game texture here).
- */
+/** Ported from an open-source client (GPL-3.0). */
 final class SpotifyCard {
     private static final class_2960 ART_ID = class_2960.method_60655("dihclient", "spotify/cover");
     private static final int PAD = 6;
@@ -28,7 +22,7 @@ final class SpotifyCard {
     private static final float SMALL = 0.8F;
     private static final int SMALL_ROW = 7;
     private static final int PROGRESS_H = 2;
-    /** The cover is shown when the text column keeps at least this much room. */
+
     private static final int MIN_COLUMN_WITH_ART = 70;
     private static final float MARQUEE_PAUSE = 2.4F;
     private static final float MARQUEE_SPEED = 16.0F;
@@ -45,7 +39,7 @@ final class SpotifyCard {
     private String marqueeTitle = "";
     private String marqueeArtist = "";
     private float lyricPlaying = 1.0F;
-    // cover texture: the AlbumArt it was made from, and the one that failed (not retried every frame)
+
     private AlbumArt art;
     private AlbumArt failedArt;
     private boolean artRegistered;
@@ -54,7 +48,6 @@ final class SpotifyCard {
         this.module = module;
     }
 
-    /** Frees the cover texture. */
     void release() {
         this.art = null;
         if (this.artRegistered) {
@@ -62,8 +55,6 @@ final class SpotifyCard {
             class_310.method_1551().method_1531().method_4615(ART_ID);
         }
     }
-
-    // ---- frame ----
 
     void render(class_332 g, NowPlaying now) {
         float dt = this.frameDelta();
@@ -126,8 +117,6 @@ final class SpotifyCard {
         }
     }
 
-    // ---- plans ----
-
     private static final class Plan {
         int width;
         int height;
@@ -138,7 +127,7 @@ final class SpotifyCard {
         float titleOffset;
         float artistOffset;
         boolean scroll;
-        // card
+
         boolean playing;
         boolean art;
         int header;
@@ -153,7 +142,7 @@ final class SpotifyCard {
         boolean progressBar;
         LyricView.View lyrics;
         float lyricAlpha = 1.0F;
-        // compact
+
         boolean idle;
         boolean pausedGlyph;
         boolean glyph;
@@ -174,8 +163,8 @@ final class SpotifyCard {
         p.progressBar = m.showProgress.get() && p.timeline;
 
         int y = 0;
-        y += SMALL_ROW + 1;          // "NOW PLAYING"
-        y += ROW;                    // title
+        y += SMALL_ROW + 1;
+        y += ROW;
         p.artistY = y + 1;
         if (!p.artist.isEmpty()) {
             y += 1 + SMALL_ROW;
@@ -247,7 +236,6 @@ final class SpotifyCard {
         return p;
     }
 
-    /** Scroll offsets of title and artist when they are wider than the column: wait, scroll, loop. */
     private float[] marquee(String title, String artist, float titleW, float artistW, float avail, boolean scroll, boolean advancing, float dt) {
         if (!title.equals(this.marqueeTitle) || !artist.equals(this.marqueeArtist)) {
             this.marqueeTitle = title;
@@ -275,8 +263,6 @@ final class SpotifyCard {
         }
         return new float[] {titleOffset, artistOffset};
     }
-
-    // ---- drawing ----
 
     private void drawCard(class_332 g, Plan p, NowPlaying now) {
         SpotifyHudModule m = this.module;
@@ -353,7 +339,6 @@ final class SpotifyCard {
         }
     }
 
-    /** Filled triangle from 1-px rows (the GUI has no triangle primitive): a tip on the right, or on the left. */
     static void triangle(class_332 g, int x, int y, int width, int height, boolean pointRight, int color) {
         for (int row = 0; row < height; row++) {
             float centre = (row + 0.5F) / height;
@@ -374,7 +359,7 @@ final class SpotifyCard {
             drawn = true;
         }
         if (!drawn) {
-            // no cover (yet): a dim square with three bars
+
             Gfx.rect(g, x, y, size, size, 3, 0x13FFFFFF);
             int bar = Math.max(2, Math.round(size * 0.1F));
             int gap = Math.max(2, Math.round(bar * 0.8F));
@@ -390,7 +375,6 @@ final class SpotifyCard {
         Gfx.outline(g, x, y, size, size, 3, 0x18FFFFFF);
     }
 
-    /** Turns the decoded cover into a game texture (once per cover). False when that failed. */
     private boolean ensureTexture(AlbumArt cover) {
         if (cover == this.art && this.artRegistered) {
             return true;
@@ -407,7 +391,7 @@ final class SpotifyCard {
                     image.method_61941(px, py, cover.argb(px, py));
                 }
             }
-            // the texture owns the image from here on
+
             class_310.method_1551().method_1531().method_4616(ART_ID, new class_1043(() -> "dihclient spotify cover", image));
             this.art = cover;
             this.artRegistered = true;
@@ -484,7 +468,7 @@ final class SpotifyCard {
                     if (edge >= clipRight) {
                         Gfx.text(g, item.text(), left, rowTop, litColor);
                     } else {
-                        // the sung part in the highlight colour, the rest as before
+
                         g.method_44379(clipLeft, clipTop, edge, bottom);
                         Gfx.text(g, item.text(), left, rowTop, litColor);
                         g.method_44380();
@@ -499,7 +483,6 @@ final class SpotifyCard {
         }
     }
 
-    /** Three dots for an instrumental pause; they light up one after the other until the next line. */
     private void drawBreak(class_332 g, int left, int centerY, int upcoming, int lit, float highlight, float progress, float alpha) {
         float breath = 0.5F - 0.5F * (float) Math.cos(this.lyricView.breath() * 2.0 * Math.PI);
         for (int i = 0; i < 3; i++) {
@@ -511,8 +494,6 @@ final class SpotifyCard {
         }
     }
 
-    // ---- text helpers ----
-
     private static void text(class_332 g, String text, int x, int y, int color, float scale) {
         if (scale == 1.0F) {
             Gfx.text(g, text, x, y, color);
@@ -521,7 +502,6 @@ final class SpotifyCard {
         }
     }
 
-    /** One line of text that fits the column: as it is, cut off with an ellipsis, or scrolling (a clip rectangle hides the overflow). */
     private static void marqueeLine(class_332 g, String text, int x, int y, int avail, float textW, float offset, boolean scroll, int color,
             float scale) {
         if (textW <= avail + 0.5F) {

@@ -14,7 +14,6 @@ import java.util.List;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.class_310;
 
-/** The saved logins and the ways to add one: Microsoft (code in the browser), cracked name, session token, refresh token. */
 public final class AccountManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private final List<Account> accounts = new ArrayList<>();
@@ -73,7 +72,6 @@ public final class AccountManager {
         this.save();
     }
 
-    /** Logs in a saved account again (renews its token). */
     public void login(Account account) {
         if (this.busy) {
             return;
@@ -92,7 +90,6 @@ public final class AccountManager {
         });
     }
 
-    /** Cracked login: only a name, nothing to check online. */
     public void addOffline(String name) {
         if (this.busy) {
             return;
@@ -128,7 +125,6 @@ public final class AccountManager {
         });
     }
 
-    /** Microsoft device-code login: the player enters a code on microsoft.com/link, no password goes through the game. */
     public void startMicrosoft() {
         if (this.busy) {
             return;
@@ -159,7 +155,7 @@ public final class AccountManager {
                 }
                 this.status = "Login timed out";
             } catch (InterruptedException e) {
-                // cancelled by the player, cancel() set the status
+
             } catch (Exception e) {
                 this.status = "Failed: " + e.getMessage();
             } finally {
@@ -180,7 +176,6 @@ public final class AccountManager {
         this.status = "Cancelled";
     }
 
-    /** Back to the account the game was started with. */
     public void restoreOriginal() {
         String problem = SessionApplier.restore();
         this.status = problem == null ? "Back on the original account" : problem;
@@ -228,7 +223,7 @@ public final class AccountManager {
                         try {
                             this.accounts.add(Account.fromJson(entry.getAsJsonObject()));
                         } catch (Exception ignored) {
-                            // skips an entry it cannot read
+
                         }
                     }
                 }

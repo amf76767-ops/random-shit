@@ -12,11 +12,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Decides from the tab-list texts (prefix, suffix, display name, team) whether a player is staff and which rank to show.
- * Pure text logic, no Minecraft classes.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class StaffMatcher {
     public static final String DEFAULT_RANK_WORDS = "owner, co-owner, manager, admin, administrator, developer, dev, sr-admin, sr-mod, senior-mod, moderator, mod, trial-mod, sr-helper, senior-helper, helper, trial-helper, support, staff";
     public static final String DEFAULT_MARKERS = "U+2605 U+2606 U+2726 U+2727 U+272A U+272F U+2730 U+2B50";

@@ -31,19 +31,7 @@ import net.minecraft.class_9021;
 import net.minecraft.class_9022;
 import net.minecraft.class_9025;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Shows your own name and stats on the sidebar and in the tab list. The sidebar of the server is copied into a private
- * objective of the client scoreboard (the server's own data stays untouched) and shown instead: the row with your name
- * gets the name you chose, a row with a stat (money, shards ...) gets the value you chose, and every other number is
- * scrambled so nobody can read your real balance from a screenshot. A stat left blank is scrambled, not shown.
- * <p>
- * Purely client side: the module reads the scoreboard and changes how it is drawn, it sends nothing. The tab list part
- * lives in DonutCFakeStatsTabMixin. With the BetterTablist module on, the vanilla tab list is not drawn at all (see
- * InGameHudMixin), so only the sidebar part is visible then.
- * <p>
- * Differences to the original: the texts start empty (the original showed an advert text); it is not on by default.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class FakeStats extends Module {
     private static final String OBJECTIVE = "dih_fs";
     private static final int LINES = 15;
@@ -51,7 +39,6 @@ public class FakeStats extends Module {
             .reversed()
             .thenComparing(class_9011::comp_2127, String.CASE_INSENSITIVE_ORDER);
 
-    /** The running instance for the mixins, null while the module is off. */
     private static volatile FakeStats active;
 
     public final StringSetting playerName = this.text("Name", "The name shown for you on the sidebar. Empty keeps your real name.", "", 64);
@@ -62,7 +49,6 @@ public class FakeStats extends Module {
     public final StringSetting playtime = this.text("Playtime", "Shown as your playtime. Empty scrambles the real amount.", "", 32);
     public final StringSetting team = this.text("Team", "Shown as your team. Empty scrambles the real value.", "", 32);
 
-    /** Stat settings and the words that mark them on a sidebar line (same order). */
     private final StringSetting[] statValues = {this.money, this.shards, this.kills, this.deaths, this.playtime, this.team};
     private final List<String[]> markers = List.of(
             new String[] {"money", "balance", "$"},
@@ -84,9 +70,6 @@ public class FakeStats extends Module {
         super("Fake Stats", Category.DONUT, "Shows your own name and stats on the sidebar and tab list. Blank stats get scrambled.");
     }
 
-    // ------------------------------------------------------------------ hooks (mixins)
-
-    /** Scoreboard#setDisplayObjective: swaps the server's sidebar for the fake one. @return true to cancel the original call */
     public static boolean redirect(class_269 board, class_8646 slot, class_266 objective) {
         FakeStats module = active;
         if (module == null || module.applying || slot != class_8646.field_45157) {
@@ -117,7 +100,6 @@ public class FakeStats extends Module {
         }
     }
 
-    /** Tab list name of a player: your own row gets the fake money. */
     public static class_2561 tabName(UUID player, class_2561 name) {
         FakeStats module = active;
         try {
@@ -130,7 +112,6 @@ public class FakeStats extends Module {
         }
     }
 
-    /** Tab list header and footer. */
     public static class_5348 tabText(class_5348 text) {
         FakeStats module = active;
         try {
@@ -143,7 +124,6 @@ public class FakeStats extends Module {
         }
     }
 
-    /** Score shown next to a name in the tab list (the objective some servers put there): your own gets the fake money. */
     public static class_9013 tabScore(class_9015 holder, class_9013 real) {
         FakeStats module = active;
         class_746 player = mc.field_1724;
@@ -179,8 +159,6 @@ public class FakeStats extends Module {
         };
     }
 
-    // ------------------------------------------------------------------ lifecycle
-
     @Override
     protected void onEnable() {
         this.seed = ThreadLocalRandom.current().nextLong();
@@ -201,7 +179,7 @@ public class FakeStats extends Module {
 
     @Override
     public void onWorldChange() {
-        // the old scoreboard is gone with its world, nothing to restore
+
         this.board = null;
         this.fake = null;
         this.serverSidebar = null;
@@ -223,7 +201,6 @@ public class FakeStats extends Module {
         }
     }
 
-    /** Keeps the fake objective in sync with the server's sidebar; the server may change it at any time. */
     private void refresh() {
         try {
             if (mc.field_1687 == null) {
@@ -285,7 +262,6 @@ public class FakeStats extends Module {
         return this.fake;
     }
 
-    /** Copies the visible sidebar rows (best 15) into the fake objective with name, number and title rewritten. */
     private void writeRows(class_269 current, class_266 objective, class_266 server) {
         List<class_9011> rows = new ArrayList<>();
         for (class_9011 entry : current.method_1184(server)) {
@@ -348,7 +324,7 @@ public class FakeStats extends Module {
         }
 
         if (!nameShown && !this.playerName.get().isBlank() && !this.nameReported) {
-            // helps to find out why the name does not show: the lines of this server's sidebar
+
             this.nameReported = true;
             this.reportMissingName(current, rows, format, title);
         }
@@ -364,7 +340,6 @@ public class FakeStats extends Module {
         DIHClient.LOG.info("[DIHClient] Fake Stats: no sidebar line shows the name {}\n{}", selfName(), lines);
     }
 
-    /** Puts the server's sidebar back and removes the fake objective. */
     private void restore() {
         class_269 current = this.board;
         class_266 server = this.serverSidebar;
@@ -386,8 +361,6 @@ public class FakeStats extends Module {
         }
     }
 
-    // ------------------------------------------------------------------ text
-
     private static String selfName() {
         class_746 player = mc.field_1724;
         return player != null ? player.method_7334().name() : null;
@@ -398,7 +371,6 @@ public class FakeStats extends Module {
         return self != null && self.method_5667().equals(player);
     }
 
-    /** The line with your name replaced by the chosen one; null when your name is not in it. */
     private class_2561 renamed(class_2561 line) {
         String self = selfName();
         int at = self != null ? FakeStatsLogic.markerAt(line.getString(), self) : -1;
@@ -409,7 +381,6 @@ public class FakeStats extends Module {
         return custom.isEmpty() ? line : replace(line, List.of(new int[] {at, at + self.length()}), custom);
     }
 
-    /** Money amounts in a tab text swapped for the chosen (or the sidebar's scrambled) amount. */
     private class_2561 fakeTabMoney(class_2561 line) {
         String shown = FakeStatsLogic.tabMoney(this.money.get(), this.sidebarMoney);
         if (shown != null && line.getString().indexOf('$') >= 0) {
@@ -420,7 +391,6 @@ public class FakeStats extends Module {
         return line;
     }
 
-    /** Resolves section-sign colour codes inside the text into styles, so ranges of getString() match what is drawn. */
     private static class_2561 visible(class_2561 line) {
         if (line.getString().indexOf('§') < 0) {
             return line;
@@ -443,7 +413,6 @@ public class FakeStats extends Module {
         return out;
     }
 
-    /** Replaces the given character ranges (sorted, not overlapping) of the text by {@code text}, keeping the styles. */
     private static class_5250 replace(class_2561 line, List<int[]> ranges, String text) {
         if (line.getString().isEmpty()) {
             return class_2561.method_43470(text);
@@ -479,7 +448,6 @@ public class FakeStats extends Module {
         return out;
     }
 
-    /** The text with every number scrambled (styles kept); the same text object when nothing changed. */
     private class_2561 mask(class_2561 line, int row) {
         if (line == null) {
             return class_2561.method_43473();

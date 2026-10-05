@@ -28,11 +28,6 @@ import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
-/**
- * Builds the new DIHClient jar from the old one: hooks three existing methods and adds the compiled add-on classes.
- *
- * usage: Patcher base.jar addonClassesDir out.jar newVersion [bundledPack.zip [overrideClassesDir [resourcesDir]]]
- */
 public final class Patcher {
     private static final String HOOKS = "dev/dihclient/glue/AddonHooks";
 
@@ -74,7 +69,7 @@ public final class Patcher {
                     throw new IllegalStateException("add-on class would overwrite " + e.getName());
                 }
                 if (e.getName().equals("assets/dihclient/lang/de_de.json")) {
-                    continue; // the client is English only; German players get the English key names
+                    continue;
                 }
                 byte[] data;
                 try (InputStream in = zin.getInputStream(e)) {
@@ -112,7 +107,7 @@ public final class Patcher {
                         if (withFallback.equals(cfg)) {
                             throw new IllegalStateException("KeyboardInputMixin not found in dihclient.mixins.json");
                         }
-                        // every mixin class the add-on keeps in dev/dihclient/mixin/port/ is listed automatically
+
                         StringBuilder portMixins = new StringBuilder();
                         for (String a : added) {
                             if (a.startsWith("dev/dihclient/mixin/port/") && a.endsWith("Mixin.class")) {
@@ -224,13 +219,13 @@ public final class Patcher {
         MethodNode tick = method(cn, "onEndTick", "(Lnet/minecraft/class_310;)V");
         requireFresh(init);
         requireFresh(tick);
-        // init: call the hook just before every return
+
         for (AbstractInsnNode n : init.instructions.toArray()) {
             if (n.getOpcode() == Opcodes.RETURN) {
                 init.instructions.insertBefore(n, new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS, "init", "()V", false));
             }
         }
-        // tick: call the hook first thing, with the client argument
+
         InsnList pre = new InsnList();
         pre.add(new VarInsnNode(Opcodes.ALOAD, 0));
         pre.add(new MethodInsnNode(Opcodes.INVOKESTATIC, HOOKS, "tick", "(Lnet/minecraft/class_310;)V", false));
@@ -253,7 +248,6 @@ public final class Patcher {
         return write(cn);
     }
 
-    /** Mixin annotations that Mixin only reads when they are RuntimeVisible. */
     private static final java.util.Set<String> RUNTIME_MIXIN_ANNOTATIONS = java.util.Set.of(
             "Lorg/spongepowered/asm/mixin/gen/Accessor;", "Lorg/spongepowered/asm/mixin/gen/Invoker;",
             "Lorg/spongepowered/asm/mixin/injection/Inject;", "Lorg/spongepowered/asm/mixin/injection/Redirect;",
@@ -262,12 +256,6 @@ public final class Patcher {
             "Lorg/spongepowered/asm/mixin/Overwrite;", "Lorg/spongepowered/asm/mixin/Shadow;", "Lorg/spongepowered/asm/mixin/Unique;",
             "Lorg/spongepowered/asm/mixin/Final;", "Lorg/spongepowered/asm/mixin/Mutable;");
 
-    /**
-     * 5.6 shipped ProfilerAccessor and SpawnerPieMixin with their @Accessor / @ModifyVariable annotations marked
-     * RuntimeInvisible. Mixin does not see those: it takes the accessor interface for a normal interface mixin and
-     * aborts the whole game start ("@Mixin target type mismatch: class_310 is not an interface").
-     * Moves such annotations to the visible list, which is what the compiler produces for these annotations.
-     */
     static byte[] fixMixinAnnotations(byte[] data) {
         ClassNode cn = read(data);
         boolean changed = false;
@@ -300,10 +288,6 @@ public final class Patcher {
         return cw.toByteArray();
     }
 
-    /**
-     * Cape mods (Better Capes, WaveyCapes) hook the same render-state method. Mixin applies higher priorities later, so a
-     * higher number lets the DIHClient cape be the last word when it is switched on.
-     */
     static byte[] raiseMixinPriority(byte[] data, int priority) {
         ClassNode cn = read(data);
         List<AnnotationNode> all = new ArrayList<>();
@@ -334,7 +318,6 @@ public final class Patcher {
         throw new IllegalStateException("@Mixin not found in " + cn.name);
     }
 
-    /** Replaces the module name given to super(...) in the constructor. */
     static byte[] renameModule(byte[] data, String from, String to) {
         ClassNode cn = read(data);
         int n = 0;
@@ -357,7 +340,6 @@ public final class Patcher {
         return cw.toByteArray();
     }
 
-    /** Text drawn as a bold component (module names, window titles) goes through Gfx, which draws it in the smooth font. */
     static byte[] routeComponentText(byte[] data, String name) {
         ClassNode cn = read(data);
         int n = 0;
@@ -379,7 +361,6 @@ public final class Patcher {
         return cw.toByteArray();
     }
 
-    /** The GUI click goes through GuiSounds, which plays the mod's own click sound. */
     static byte[] routeClickSound(byte[] data, String name) {
         ClassNode cn = read(data);
         int n = 0;
@@ -401,7 +382,6 @@ public final class Patcher {
         return cw.toByteArray();
     }
 
-    /** Notifications.toggle(Module) is called whenever a module is switched on or off by the player. */
     static byte[] toggleSoundInNotifications(byte[] data) {
         ClassNode cn = read(data);
         MethodNode m = method(cn, "toggle", "(Ldev/dihclient/module/Module;)V");
@@ -418,7 +398,6 @@ public final class Patcher {
     private static final String LEGAL = "dev/dihclient/glue/LegalPlace";
     private static int routed;
 
-    /** Every block click of the build code goes through LegalPlace.interact, which only lets legal clicks pass. */
     static byte[] routeInteract(byte[] data, String name) {
         ClassNode cn = read(data);
         int n = 0;
@@ -442,7 +421,6 @@ public final class Patcher {
         return cw.toByteArray();
     }
 
-    /** Before the config is applied, settings of folded modules are moved to where they live now (see Merge.migrate). */
     static byte[] hookConfig(byte[] data) {
         ClassNode cn = read(data);
         MethodNode apply = method(cn, "apply", "(Lcom/google/gson/JsonObject;)V");
@@ -460,15 +438,6 @@ public final class Patcher {
     private static final String PILOT = "dev/dihclient/autobuild/BuildPilot";
     private static final String WALK_DESC = "(Ldev/dihclient/autobuild/BuildRuntime;Lnet/minecraft/class_243;D)V";
 
-    /**
-     * The walk to the next layer (second walkTo call in tick) and the walk to a re-position spot (tickReposition) go through
-     * BuildPilot, which plans a real path and falls back to the old walkTo by itself. The walk to a restock chest and the
-     * walk out of the cleanup stay as they were.
-     */
-    /**
-     * In {@code BuildRuntime.statusOf}, before the block in the world is compared with the planned one: if the world has a
-     * block that the planned one turns into by itself (dirt to grass), the position is DONE.
-     */
     static byte[] acceptNaturalChanges(byte[] data) {
         ClassNode cn = read(data);
         int patched = 0;
@@ -476,7 +445,7 @@ public final class Patcher {
             if (!m.name.equals("statusOf") || !m.desc.startsWith("(ILdev/dihclient/autobuild/BuildRuntime$Settings;)")) {
                 continue;
             }
-            // the second "world block != planned block" comparison is the one of ordinary blocks (the first is the fluid case)
+
             int seen = 0;
             AbstractInsnNode compare = null;
             for (AbstractInsnNode in : m.instructions.toArray()) {
@@ -488,7 +457,7 @@ public final class Patcher {
             if (compare == null) {
                 throw new IllegalStateException("BuildRuntime.statusOf: block comparison not found");
             }
-            // walk back to the ALOAD of the world state that starts the comparison: aload w; getBlock; aload p; getBlock; if_acmpne
+
             AbstractInsnNode start = compare;
             for (int back = 0; back < 4; back++) {
                 start = start.getPrevious();
@@ -507,7 +476,7 @@ public final class Patcher {
             add.add(new FieldInsnNode(Opcodes.GETSTATIC, "dev/dihclient/autobuild/BuildRuntime$Status", "DONE", "Ldev/dihclient/autobuild/BuildRuntime$Status;"));
             add.add(new InsnNode(Opcodes.ARETURN));
             add.add(cont);
-            // a branch target needs a stack map frame: the locals are the same as at the target before (empty stack)
+
             add.add(new FrameNode(Opcodes.F_SAME, 0, null, 0, null));
             m.instructions.insertBefore(start, add);
             patched++;
@@ -552,7 +521,6 @@ public final class Patcher {
         return cw.toByteArray();
     }
 
-    /** AutoBuild takes back its illegal options right before the build runtime ticks. */
     static byte[] enforceBeforeTick(byte[] data) {
         ClassNode cn = read(data);
         int n = 0;
@@ -562,7 +530,7 @@ public final class Patcher {
                         && mi.owner.equals("dev/dihclient/autobuild/BuildRuntime") && mi.name.equals("tick")
                         && mi.desc.equals("(Ldev/dihclient/autobuild/BuildRuntime$Settings;)V")) {
                     InsnList call = new InsnList();
-                    call.add(new InsnNode(Opcodes.DUP));   // stack: runtime, settings -> runtime, settings, settings
+                    call.add(new InsnNode(Opcodes.DUP));
                     call.add(new MethodInsnNode(Opcodes.INVOKESTATIC, LEGAL, "enforce", "(Ldev/dihclient/autobuild/BuildRuntime$Settings;)V", false));
                     m.instructions.insertBefore(mi, call);
                     n++;
@@ -601,10 +569,6 @@ public final class Patcher {
         return cn;
     }
 
-    /**
-     * The JVM refuses a class whose branch target has no stack map frame ("Expecting a stackmap frame at branch target").
-     * COMPUTE_MAXS does not make frames, so every branch the patches add has to bring its own; this stops the build otherwise.
-     */
     static void requireFrames(ClassNode cn) {
         if ((cn.version & 0xFFFF) < Opcodes.V1_7) {
             return;
@@ -639,7 +603,7 @@ public final class Patcher {
 
     private static byte[] write(ClassNode cn) {
         requireFrames(cn);
-        // the inserted code has no branches, so existing frames stay valid and only the stack size has to be recomputed
+
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         cn.accept(cw);
         return cw.toByteArray();

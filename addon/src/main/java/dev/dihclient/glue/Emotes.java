@@ -29,13 +29,6 @@ import net.minecraft.class_1657;
 import net.minecraft.class_4587;
 import org.joml.Quaternionf;
 
-/**
- * Emotes for you and for everyone who has DIHClient: bind a key to the module, press it and your body dances, spins,
- * flips, bows ... Other DIHClient users on the same server see it too, because the emote is passed on through the
- * free relay ntfy.sh (sent: your player name, the emote, and a hash of the server address as the "room").
- * Players with a custom 3D model show the emote on the model, everyone else on the normal body.
- * Switch Share / Show Others off to keep it all on your own screen.
- */
 public class Emotes extends Module {
     private static final String RELAY = "https://ntfy.sh/";
     private static final String TAG = "DIH1";
@@ -131,8 +124,6 @@ public class Emotes extends Module {
         }
     }
 
-    // ---- who is doing what
-
     static String serverAddress() {
         var info = mc.method_1558();
         if (info == null || info.field_3761 == null || info.field_3761.isBlank()) {
@@ -150,7 +141,6 @@ public class Emotes extends Module {
         }
     }
 
-    /** The pose of this player right now (the show ends when the player starts to walk). */
     public static EmotePose poseOf(class_1297 e) {
         if (ACTIVE.isEmpty() || !(e instanceof class_1657 p)) {
             return null;
@@ -169,16 +159,14 @@ public class Emotes extends Module {
         return a.emote.at(t);
     }
 
-    /** Called for every living entity when its render state is filled in. */
     public static void capture(class_1309 entity, class_10042 state) {
         try {
             ((EmoteHolder) (Object) state).dih$setPose(poseOf(entity));
         } catch (Throwable ignored) {
-            // the render state has no holder (mixin not applied): no emotes on the plain body, nothing breaks
+
         }
     }
 
-    /** Called at the end of the body set-up of the entity renderer. */
     public static void transform(class_10042 state, class_4587 matrices) {
         EmotePose pose;
         try {
@@ -195,8 +183,6 @@ public class Emotes extends Module {
                 .rotateX((float) Math.toRadians(-pose.pitch())).rotateZ((float) Math.toRadians(pose.roll())));
         matrices.method_22904(0.0, -PIVOT, 0.0);
     }
-
-    // ---- the relay
 
     private void startNet(String topic) {
         this.stopNet();
@@ -235,7 +221,7 @@ public class Emotes extends Module {
                     }
                 }
             } catch (IOException | RuntimeException e) {
-                // offline, timeout or closed by us: try again below
+
             }
             if (this.netRun && topic.equals(this.netTopic)) {
                 try {
@@ -266,7 +252,6 @@ public class Emotes extends Module {
         }
     }
 
-    /** One line from the relay. Anything that does not look exactly right is dropped. */
     private void incoming(String line) {
         if (line.length() > 64 || !line.startsWith(TAG + "|")) {
             return;
@@ -286,7 +271,7 @@ public class Emotes extends Module {
             }
             String key = name.toLowerCase(Locale.ROOT);
             if (key.equals(mc.field_1724.method_7334().name().toLowerCase(Locale.ROOT))) {
-                return; // our own message coming back
+                return;
             }
             long now = System.currentTimeMillis();
             Long last = LAST_REMOTE.get(key);

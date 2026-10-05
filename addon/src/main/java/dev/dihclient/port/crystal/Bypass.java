@@ -2,10 +2,7 @@ package dev.dihclient.port.crystal;
 
 import java.util.function.LongSupplier;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Limits of the anti-cheat profiles (Grim-Aldenz keeps to what Grim accepts). Pure logic, no game access.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class Bypass {
     public static final String OFF = "Off";
     public static final String GRIM_ALDENZ = "Grim-Aldenz";

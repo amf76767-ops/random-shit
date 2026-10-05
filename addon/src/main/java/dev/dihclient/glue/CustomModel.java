@@ -44,14 +44,6 @@ import net.minecraft.class_5498;
 import net.minecraft.class_761;
 import net.minecraft.class_4587.class_4665;
 
-/**
- * Shows your own 3D models (made in Blender, exported as glTF/.glb or .obj) in the game instead of the player model:
- * only on you, on everyone near you, or as statues. Models with animations play "idle" when standing and "walk" when moving.
- * Everything is drawn on the client; the server and other players see nothing.
- *
- * The vanilla player is hidden by shrinking it (see CustomModelMixin) and the model is drawn in the world render pass
- * with the same textured entity layer the Pet module uses for its picture.
- */
 public class CustomModel extends Module {
     public enum Target { SELF, EVERYONE, NOBODY }
 
@@ -96,7 +88,6 @@ public class CustomModel extends Module {
     private long lastClean;
     private float[] animPos = new float[0], animNrm = new float[0], outPos = new float[0], outNrm = new float[0], globals = new float[0];
 
-    /** Animation clocks of one entity. */
     private static final class Clock {
         double idle, walk;
         long last;
@@ -126,11 +117,11 @@ public class CustomModel extends Module {
                 copy("/assets/dihclient/models/" + EXAMPLE, dir.resolve(EXAMPLE));
                 copy("/assets/dihclient/models/README.txt", dir.resolve("README.txt"));
             }
-            for (String f : DEFAULT_FILES) { // the default model is always there, also in folders made by older versions
+            for (String f : DEFAULT_FILES) {
                 copy("/assets/dihclient/models/" + f, dir.resolve(f));
             }
         } catch (IOException ignored) {
-            // the folder is only a convenience; loading reports what is missing
+
         }
         return dir;
     }
@@ -148,7 +139,7 @@ public class CustomModel extends Module {
         try (Stream<Path> s = Files.list(modelDir())) {
             s.filter(p -> Files.isRegularFile(p) && ModelLoader.supported(p)).sorted().forEach(out::add);
         } catch (IOException ignored) {
-            // empty list
+
         }
         return out;
     }
@@ -273,7 +264,6 @@ public class CustomModel extends Module {
         DIHClient.LOG.warn("[DIHClient] model failed: " + f, e);
     }
 
-    /** Asks the texture for linear filtering if this Minecraft version offers it; otherwise it stays pixelated. */
     private static void smooth(class_2960 id) {
         try {
             Object tex = null;
@@ -292,7 +282,7 @@ public class CustomModel extends Module {
                 }
             }
         } catch (Throwable ignored) {
-            // pixelated is fine
+
         }
     }
 
@@ -326,13 +316,10 @@ public class CustomModel extends Module {
         this.walkAnim = walk;
     }
 
-    // ---- who gets the model
-
     private static boolean thirdPerson() {
         return mc.field_1690.method_31044() != class_5498.field_26664 || Freecam.active() != null;
     }
 
-    /** True for the entities that are drawn as the model; the vanilla body is hidden for exactly these. */
     public static boolean replaces(class_1297 e) {
         if (!showing || model == null || mc.field_1724 == null || mc.field_1687 == null || !(e instanceof class_1657 p)) {
             return false;
@@ -351,7 +338,6 @@ public class CustomModel extends Module {
         return p.method_5858(mc.field_1724) <= r * r && mc.field_1687.method_18456().contains(p);
     }
 
-    /** Called by the mixin for every living entity that is about to be drawn. */
     public static boolean hides(class_1309 e) {
         try {
             return replaces(e);
@@ -359,8 +345,6 @@ public class CustomModel extends Module {
             return false;
         }
     }
-
-    // ---- drawing
 
     @Override
     public void onTick() {
@@ -481,7 +465,7 @@ public class CustomModel extends Module {
             int o = v * 3;
             float px = p[o] * scale, py = p[o + 1] * sy, pz = p[o + 2] * scale;
             float nx0 = nr[o], ny0 = nr[o + 1], nz0 = nr[o + 2];
-            if (tilt) { // emote: roll around Z, then pitch around X, both around the middle of the body
+            if (tilt) {
                 float ly = py - centre;
                 float x1 = px * cr - ly * sr, y1 = px * sr + ly * cr;
                 float y2 = y1 * cp - pz * sp, z2 = y1 * sp + pz * cp;

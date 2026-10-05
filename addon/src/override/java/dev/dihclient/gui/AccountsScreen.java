@@ -18,10 +18,6 @@ import net.minecraft.class_310;
 import net.minecraft.class_332;
 import net.minecraft.class_437;
 
-/**
- * The account menu behind the title screen button. A list of saved logins, and "Add account" opens the choice of login
- * types: Microsoft (code in the browser), Cracked (just a name), Session token, Refresh token.
- */
 public class AccountsScreen extends class_437 implements TextInputScreen {
     private enum View { LIST, CHOOSE, INPUT, MICROSOFT }
 
@@ -77,8 +73,6 @@ public class AccountsScreen extends class_437 implements TextInputScreen {
         return this.selected >= 0 && this.selected < this.manager.accounts().size();
     }
 
-    // ---------------------------------------------------------------- layout (one place for drawing and clicking)
-
     private List<Btn> buttons() {
         List<Btn> out = new ArrayList<>();
         int x = this.panelX();
@@ -122,8 +116,6 @@ public class AccountsScreen extends class_437 implements TextInputScreen {
         return out;
     }
 
-    // ---------------------------------------------------------------- drawing
-
     public void method_25394(class_332 g, int mx, int my, float delta) {
         super.method_25394(g, mx, my, delta);
         int accent = HudManager.accent();
@@ -141,7 +133,7 @@ public class AccountsScreen extends class_437 implements TextInputScreen {
         }
         for (Btn b : this.buttons()) {
             if (this.view == View.CHOOSE && !b.id().equals("back")) {
-                continue; // the cards draw themselves
+                continue;
             }
             this.drawButton(g, mx, my, b);
         }
@@ -254,8 +246,6 @@ public class AccountsScreen extends class_437 implements TextInputScreen {
         return n <= 14 ? value.substring(0, Math.min(6, n)) + "…" : value.substring(0, 8) + "…(" + n + " chars)…" + value.substring(n - 4);
     }
 
-    // ---------------------------------------------------------------- clicks
-
     public boolean method_25402(class_11909 click, boolean doubled) {
         int mx = (int) click.comp_4798();
         int my = (int) click.comp_4799();
@@ -362,7 +352,7 @@ public class AccountsScreen extends class_437 implements TextInputScreen {
             try {
                 class_156.method_668().method_670(code.url());
             } catch (Throwable ignored) {
-                // the address is on the screen anyway
+
             }
         }
     }
@@ -374,11 +364,9 @@ public class AccountsScreen extends class_437 implements TextInputScreen {
                 this.input = text.trim();
             }
         } catch (Throwable ignored) {
-            // no clipboard
+
         }
     }
-
-    // ---------------------------------------------------------------- keys
 
     public boolean method_25401(double x, double y, double horizontal, double vertical) {
         int count = this.manager.accounts().size();
@@ -389,19 +377,19 @@ public class AccountsScreen extends class_437 implements TextInputScreen {
     public boolean method_25404(class_11908 key) {
         int code = key.comp_4795();
         if (this.view == View.INPUT) {
-            if (code == 259 && !this.input.isEmpty()) { // backspace
+            if (code == 259 && !this.input.isEmpty()) {
                 this.input = this.input.substring(0, this.input.length() - 1);
                 return true;
             }
-            if (code == 257 || code == 335) { // enter
+            if (code == 257 || code == 335) {
                 this.confirm();
                 return true;
             }
-            if (code == 256) { // escape
+            if (code == 256) {
                 this.press("cancel");
                 return true;
             }
-            if (code == 86 && (key.comp_4797() & 2) != 0) { // ctrl+V
+            if (code == 86 && (key.comp_4797() & 2) != 0) {
                 this.paste();
                 return true;
             }

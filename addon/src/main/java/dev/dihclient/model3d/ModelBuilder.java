@@ -10,15 +10,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/** Collects the geometry of a model from a loader and turns it into a {@link Model}: texture atlas, normals, bounds, rest pose. */
 final class ModelBuilder {
-    /** A material: colour (ARGB) and an optional picture. */
+
     static final class Mat {
         int color = 0xFFFFFFFF;
         BufferedImage image;
     }
 
-    /** One piece of geometry. Arrays are per vertex; optional ones may be null. */
     static final class Prim {
         float[] pos;
         float[] nrm;
@@ -28,7 +26,7 @@ final class ModelBuilder {
         float[] weights;
         int[] idx;
         int material = -1;
-        /** node a static primitive hangs on */
+
         int node = -1;
     }
 
@@ -102,7 +100,6 @@ final class ModelBuilder {
         indices += p.idx.length - p.idx.length % 3;
     }
 
-    /** Drops triangles that point outside the vertex list (broken files must not crash the renderer). */
     private static int[] validTriangles(int[] idx, int vertexCount) {
         int[] out = new int[idx.length - idx.length % 3];
         int k = 0;
@@ -146,7 +143,6 @@ final class ModelBuilder {
         return al << 24 | r << 16 | g << 8 | bl;
     }
 
-    /** Skeleton data comes from the loader; plain static models get one root node. */
     void skeleton(int count, int[] parent, float[] t, float[] r, float[] s) {
         model.nodeCount = count;
         model.parent = parent;
@@ -198,7 +194,7 @@ final class ModelBuilder {
                 }
             }
         }
-        if (k < n) { // a loop in the file: whatever is left hangs on the root
+        if (k < n) {
             for (int i = 0; i < n; i++) {
                 if (!done[i]) {
                     parent[i] = -1;
@@ -212,7 +208,6 @@ final class ModelBuilder {
     private record Key(int x, int y, int z) {
     }
 
-    /** Normals from the file where there are any, smooth ones (welded by position) for the rest. */
     private float[] normals() {
         float[] out = Arrays.copyOf(nrm, vertices * 3);
         boolean missing = false;
@@ -271,7 +266,6 @@ final class ModelBuilder {
         return new Key(Float.floatToIntBits(pos[v * 3]), Float.floatToIntBits(pos[v * 3 + 1]), Float.floatToIntBits(pos[v * 3 + 2]));
     }
 
-    /** All pictures side by side in one texture, plus a small white patch for everything that has only a colour. */
     private void buildAtlas() {
         List<BufferedImage> pics = new ArrayList<>();
         int[] picOf = new int[mats.size()];

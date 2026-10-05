@@ -40,14 +40,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.Flow.Subscription;
 import net.fabricmc.loader.api.FabricLoader;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Finds lyrics for the playing track. This is the only network code of the Spotify HUD: HTTPS GET requests to
- * {@code https://lrclib.net/api/get} and {@code /api/search} (LRCLIB, an open lyrics database) with the query string
- * track_name, artist_name, album_name and duration (seconds) of the playing track. Nothing else is sent (no account,
- * no identifiers, no IP-bound token; the User-Agent is "DIHClient/&lt;version&gt; (Spotify HUD)"). Answers are cached in memory
- * and as JSON files in {@code config/dihclient/lyrics-cache}. Switched off completely by the "Lyrics Online" setting.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class LyricsService implements AutoCloseable {
     private static final URI LRCLIB = URI.create("https://lrclib.net/");
     private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(8L);

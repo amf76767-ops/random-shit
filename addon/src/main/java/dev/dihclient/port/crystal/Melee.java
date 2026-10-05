@@ -26,17 +26,13 @@ import net.minecraft.class_5134;
 import net.minecraft.class_746;
 import net.minecraft.class_9334;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * The few melee helpers (MeleeAttacks) the crystal modules need; friends come from the DIH social list.
- */
+/** Ported from an open-source client (GPL-3.0). */
 final class Melee {
     private static final double LINE_EPSILON_SQ = 0.001;
 
     private Melee() {
     }
 
-    /** Same gate as the original modules: no screen, not eating, not in Freecam. */
     static boolean canAct(class_310 mc) {
         if (mc.field_1724 == null || mc.field_1687 == null || mc.field_1761 == null || mc.field_1755 != null) {
             return false;
@@ -44,7 +40,6 @@ final class Melee {
         return !eating() && !ModuleManager.on(Freecam.class);
     }
 
-    /** Auto Eat is holding food right now: do not touch the hand. */
     static boolean eating() {
         try {
             AutoEat eat = ModuleManager.of(AutoEat.class);
@@ -68,7 +63,6 @@ final class Melee {
         return block.method_17783() == class_240.field_1333 || block.method_17784().method_1025(from) >= from.method_1025(to) - LINE_EPSILON_SQ;
     }
 
-    /** A plain left click on the entity, with the reach and cooldown checks of the game. */
     static boolean attack(class_310 mc, class_3966 hit) {
         class_746 player = mc.field_1724;
         if (player == null || mc.field_1687 == null || mc.field_1761 == null) {
@@ -102,7 +96,6 @@ final class Melee {
         }
     }
 
-    /** A living thing we may hurt: no armor stands, spectators or creative players. */
     static boolean isHittable(class_746 self, class_1297 entity) {
         if (!(entity instanceof class_1309 living && entity != self && !(entity instanceof class_1531))) {
             return false;
@@ -112,7 +105,6 @@ final class Melee {
                 : false;
     }
 
-    /** Base attack damage the item adds in the main hand. */
     static double attackDamage(class_1799 stack) {
         double[] total = new double[]{0.0};
         stack.method_57354(class_1304.field_6173, (attribute, modifier) -> {

@@ -9,12 +9,7 @@ import net.minecraft.class_1799;
 import net.minecraft.class_310;
 import net.minecraft.class_811;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * <p>
- * An item render state that also records what the model is made of ({@link #identity}): two stacks with the same identity look
- * the same in the GUI, so one rendered icon can serve both.
- */
+/** Ported from an open-source client (GPL-3.0). */
 final class ItemLook extends class_10444 {
     final List<Object> identity = new ArrayList<>();
     private final List<class_10446> layers = new ArrayList<>();

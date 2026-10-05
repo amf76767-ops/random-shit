@@ -32,7 +32,7 @@ public class AutoMLG extends Module {
    public final BoolSetting pickUp = this.bool("Pick Up", "Takes the water / powder snow back with the bucket after landing.", true);
    public final BoolSetting restoreSlot = this.bool("Restore Slot", "Returns to the slot you had selected.", true);
    public final BoolSetting notify = this.bool("Notify", "Shows a message when it saved you.", false);
-   private static final double REACH_FEET = 4.2;   // bucket reach is 4.5; a fall of 3.9 blocks per tick must not jump over the window
+   private static final double REACH_FEET = 4.2;
    private AutoMLG.Stage stage = AutoMLG.Stage.IDLE;
    private int stageTicks;
    private int restore = -1;
@@ -206,7 +206,7 @@ public class AutoMLG extends Module {
                Notifications.info("AutoMLG", "Clutch: " + var1.substring(var1.indexOf(58) + 1).replace('_', ' '));
             }
          } else {
-            this.cooldown = 1;   // try again at once, the next tick may already be too late
+            this.cooldown = 1;
             this.restoreIn = 1;
          }
       }

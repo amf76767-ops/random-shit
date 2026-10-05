@@ -20,7 +20,6 @@ public final class NavTests {
         }
     }
 
-    /** A flat floor at y=-1 (so the feet stand at y=0) with solid blocks added by the test. */
     static final class Grid implements Nav.Terrain {
         final Set<Long> solid = new HashSet<>();
         final Set<Long> hazard = new HashSet<>();
@@ -66,7 +65,7 @@ public final class NavTests {
 
         Grid wall1 = new Grid(12);
         for (int z = -12; z <= 12; z++) {
-            wall1.block(3, 0, z); // a wall one block high across the whole floor
+            wall1.block(3, 0, z);
         }
         r = Nav.explore(wall1, 0, 0, 0, o);
         check(r.get(3, 1, 0) != null && r.get(6, 0, 0) != null, "one block high wall: climbed by a jump and left on the other side");
@@ -92,7 +91,6 @@ public final class NavTests {
         check(detour, "the path goes around the end of the wall");
         check(path.stream().noneMatch(c -> c.x == 3 && Math.abs(c.z) <= 3), "the path never goes through the wall");
 
-        // stairs of blocks 1,2 -> reachable by jumps
         Grid stairs = new Grid(12);
         stairs.block(3, 0, 0);
         stairs.block(4, 0, 0);
@@ -103,12 +101,11 @@ public final class NavTests {
         r = Nav.explore(stairs, 0, 0, 0, o);
         check(r.get(5, 3, 0) != null, "a staircase of blocks is climbed to the top");
 
-        // drop
         Grid pit = new Grid(12);
         for (int x = 2; x <= 6; x++) {
             for (int z = -12; z <= 12; z++) {
                 pit.solid.remove(Nav.key(x, -1, z));
-                pit.block(x, -3, z); // 2 blocks lower
+                pit.block(x, -3, z);
             }
         }
         r = Nav.explore(pit, 0, 0, 0, o);
@@ -118,14 +115,12 @@ public final class NavTests {
         check(r.get(4, -2, 0) == null, "a drop of 2 blocks is refused when maxFall is 1");
         o.maxFall = 3;
 
-        // hazards
         Grid lava = new Grid(12);
         lava.hazard.add(Nav.key(2, 0, 0));
         r = Nav.explore(lava, 0, 0, 0, o);
         check(r.get(2, 0, 0) == null, "a hazard cell is not entered");
         check(r.get(3, 0, 0) != null, "but it is walked around");
 
-        // planner: blocks on a ring around (0,0), the best stop is in the middle
         Grid site = new Grid(14);
         List<int[]> open = new ArrayList<>();
         for (int x = -3; x <= 3; x++) {
@@ -140,7 +135,6 @@ public final class NavTests {
         check(c != null && c.covered() >= open.size() - 4, "planner finds a spot that covers (almost) the whole ring: " + (c == null ? 0 : c.covered()) + "/" + open.size());
         check(c != null && Math.abs(c.cell().x - 10) <= 1 && Math.abs(c.cell().z) <= 1, "that spot is in the middle of the ring");
 
-        // planner prefers the near spot when coverage is equal
         List<int[]> two = new ArrayList<>();
         two.add(new int[]{1, 0, 3});
         two.add(new int[]{11, 0, 3});
@@ -148,7 +142,6 @@ public final class NavTests {
         c = StandPlanner.best(r, two, site, 4.4, 1.62, 0.1, null);
         check(c != null && c.covered() >= 1, "planner returns something for two far apart blocks");
 
-        // hidden block: a thick wall between the spot and the block is not 'seen'
         Grid hidden = new Grid(14);
         for (int y = 0; y < 4; y++) {
             for (int z = -6; z <= 6; z++) {
@@ -164,7 +157,6 @@ public final class NavTests {
         StandPlanner.Choice none = StandPlanner.best(r, single, hidden, 4.4, 1.62, 0.1, cell -> cell.x > 1);
         check(none == null || none.cell().x <= 1 && none.covered() == 0, "a block behind a thick wall is not counted (" + (none == null ? "none" : none.covered()) + ")");
 
-        // forbidden cells are skipped
         r = Nav.explore(site, 0, 0, 0, o);
         c = StandPlanner.best(r, open, site, 4.4, 1.62, 0.1, cell -> true);
         check(c == null, "nothing is chosen when every cell is forbidden");

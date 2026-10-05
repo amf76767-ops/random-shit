@@ -1,11 +1,6 @@
 package dev.dihclient.port.noinvleak;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * <p>
- * The stack count and the durability bar of an item slot, drawn with plain rectangles (a 5x7 digit font) so the overlay does not
- * need the game's font renderer. Pure Java, tested headless.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class DigitFont {
     private static final byte[][] DIGITS = {
         {14, 17, 19, 21, 25, 17, 14},
@@ -26,15 +21,10 @@ public final class DigitFont {
     private DigitFont() {
     }
 
-    /** Receives the rectangles; coordinates are in target pixels, colour is straight ARGB. */
     public interface Sink {
         void rect(int x, int y, int w, int h, int argb);
     }
 
-    /**
-     * Slot decorations at the slot's top-left corner (ox, oy): the durability bar when {@code barVisible}, then the count when
-     * it is not 1. {@code barStep} is 0..13 (vanilla's bar width), {@code barRgb} its colour.
-     */
     public static void decorations(Sink sink, boolean barVisible, int barStep, int barRgb, int count, int ox, int oy, int scale) {
         if (barVisible) {
             sink.rect(ox + 2 * scale, oy + 13 * scale, 13 * scale, 2 * scale, BLACK);
@@ -59,7 +49,6 @@ public final class DigitFont {
         }
     }
 
-    /** Horizontal runs of set bits, one rectangle per run. */
     private static void glyph(Sink sink, byte[] rows, int x, int y, int scale, int argb) {
         for (int r = 0; r < rows.length; r++) {
             int c = 0;

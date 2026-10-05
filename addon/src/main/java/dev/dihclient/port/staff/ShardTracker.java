@@ -6,11 +6,7 @@ import net.minecraft.class_634;
 import net.minecraft.class_638;
 import net.minecraft.class_746;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Notices that you changed shard: other world, respawned as a new player object, crossed into another goliath of the
- * overworld, or the server brand changed. Staff you proved to be "in your region" earlier are not any more.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class ShardTracker {
     private static final int OFF_MAP = Integer.MIN_VALUE;
 
@@ -19,7 +15,6 @@ public final class ShardTracker {
     private String brand;
     private int goliath = OFF_MAP;
 
-    /** @return true when the shard changed since the last call */
     public boolean moved(class_310 mc) {
         class_638 nowLevel = mc.field_1687;
         class_746 nowSelf = mc.field_1724;

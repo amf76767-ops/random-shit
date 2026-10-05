@@ -18,12 +18,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/**
- * Donut Speed Mine: the game adds the break progress of a block once per tick in updateBlockBreakingProgress; the
- * module scales that gain, and may zero the wait between two blocks before it is checked. (The original wraps the
- * calcBlockBreakingDelta call with MixinExtras; DIH does not ship MixinExtras, and redirecting the field write instead
- * of the call keeps the target visible to the static mixin check.)
- */
 @Mixin(class_636.class)
 public abstract class DonutASpeedMineMixin {
     @Shadow
@@ -53,7 +47,7 @@ public abstract class DonutASpeedMineMixin {
 
     @Redirect(method = "method_2902", at = @At(value = "FIELD", target = "Lnet/minecraft/class_636;field_3715:F", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void dih$donutASpeedMineProgress(class_636 self, float value) {
-        // value = old progress + this tick's gain; only the gain is scaled
+
         float old = this.field_3715;
         float result = value;
         try {
@@ -61,7 +55,7 @@ public abstract class DonutASpeedMineMixin {
             if (level != null && this.field_3714 != null) {
                 float gain = value - old;
                 float scaled = DonutSpeedMine.scaleProgress(level.method_8320(this.field_3714), gain);
-                if (scaled != gain) { // untouched blocks keep the exact vanilla value
+                if (scaled != gain) {
                     result = old + scaled;
                 }
             }

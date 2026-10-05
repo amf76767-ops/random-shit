@@ -16,7 +16,6 @@ public class LagTests {
         }
     }
 
-    /** Walks along a line, one sample per second at 4 blocks per second; the server loses TPS within 90 blocks of (sx, sz). */
     private static void walk(LagMap map, double fromX, double toX, double z, double sx, double sz, double radius, double slow) {
         double step = 4.0 * Math.signum(toX - fromX);
         for (double x = fromX; step > 0 ? x <= toX : x >= toX; x += step) {
@@ -48,17 +47,17 @@ public class LagTests {
         LagMap spike = new LagMap();
         walk(spike, 200, 300, 0, 99999, 99999, 1, 20);
         for (int i = 0; i < 7; i++) {
-            spike.add(40, 0, 8); // a short lag spike in one cell
+            spike.add(40, 0, 8);
         }
         check(spike.zones(3.0, 5).isEmpty(), "one lonely cell with few samples is not a zone");
         for (int i = 0; i < 6; i++) {
-            spike.add(40, 0, 8); // standing there for a long time
+            spike.add(40, 0, 8);
         }
         check(spike.zones(3.0, 5).size() == 1, "a lonely cell with many samples is a zone (standing in a slow place)");
 
         LagMap global = new LagMap();
         for (double x = 0; x < 800; x += 4) {
-            global.add(x, 0, 12.0); // the whole server is slow everywhere
+            global.add(x, 0, 12.0);
         }
         check(global.zones(3.0, 5).isEmpty(), "the same low TPS everywhere is no zone");
 

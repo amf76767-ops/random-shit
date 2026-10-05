@@ -9,10 +9,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Picks the LRCLIB search result that really is the playing track (title, artist, duration, synced > plain).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class LyricsMatcher {
     static final double DURATION_TOLERANCE_SECONDS = 3.0;
     private static final int TITLE_EXACT = 40;

@@ -22,13 +22,7 @@ import net.minecraft.class_6880;
 import net.minecraft.class_746;
 import net.minecraft.class_9334;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Swaps to your best Lunge spear, lunges and swaps back. The module's own key (the keybind in the GUI) is the lunge key.
- * The module has no switch: it is always ready and only reacts to its key (before, it had to be switched on as well, so the key did
- * nothing on a fresh install). A spear without Lunge is used too unless "Lunge Only" is on, and when the key cannot do anything it
- * says why instead of staying silent.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class SpearSwap extends Module {
     private static final int BUFFER_TICKS = 10;
 
@@ -47,7 +41,7 @@ public class SpearSwap extends Module {
     private int returnSlot = -1;
     private int returnTick;
     private class_746 owner;
-    /** Why the last press could not lunge (shown when the press runs out), or null. */
+
     private String blocked;
 
     public SpearSwap() {
@@ -93,7 +87,6 @@ public class SpearSwap extends Module {
         this.owner = null;
     }
 
-    /** The lunge key was pressed. */
     @Override
     public void onAction() {
         if (mc.field_1755 == null && mc.field_1724 != null && mc.field_1687 != null && !this.returning && !this.pending && this.ticks >= this.readyTick) {
@@ -124,7 +117,7 @@ public class SpearSwap extends Module {
 
     private void followReturn(class_746 player) {
         if (player.method_31548().method_67532() != this.spearSlot) {
-            this.finishReturn(false); // the player changed slot themselves
+            this.finishReturn(false);
         } else if (this.ticks >= this.returnTick && mc.field_1755 == null) {
             this.finishReturn(true);
         }
@@ -142,7 +135,7 @@ public class SpearSwap extends Module {
 
     private void tryLunge(class_746 player) {
         if (++this.pendingTicks > BUFFER_TICKS) {
-            this.pending = false; // could not lunge in time, the press is forgotten
+            this.pending = false;
             if (this.blocked != null) {
                 Notifications.warn(this.name(), this.blocked);
             }
@@ -208,7 +201,7 @@ public class SpearSwap extends Module {
             class_1799 stack = inventory.method_5438(slot);
             if (stack.method_57826(class_9334.field_63631) && !stack.method_63692()) {
                 int lunge = lungeLevel(stack);
-                // a Lunge spear beats a plain one (level 1), which is used only when "Lunge Only" is off
+
                 levels[slot] = lunge > 0 ? lunge + 1 : (this.lungeOnly.get() ? 0 : 1);
             }
         }

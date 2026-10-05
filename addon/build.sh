@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Builds dist/dihclient-v<version>+mc1.21.11.jar from base/dihclient-v5.6.jar plus the code in addon/src/main.
-# Needs: JDK 21, curl. Downloads gson, slf4j-api and ASM from Maven Central into addon/.cache on first run.
 set -euo pipefail
 cd "$(dirname "$0")"
 VERSION="${1:-5.7.0}"
@@ -19,7 +17,6 @@ SLF4J=$(mvn_get org.slf4j slf4j-api 2.0.13)
 MIXIN=$(mvn_get net.fabricmc sponge-mixin "0.17.3+mixin.0.8.7")
 ASM=$(mvn_get org.ow2.asm asm 9.7):$(mvn_get org.ow2.asm asm-tree 9.7)
 BASE=../base/dihclient-v5.6.jar
-# libraries that Minecraft itself ships; only needed so javac can read the real game classes (never packed into the jar)
 EXTRA=""
 for coord in io.netty:netty-transport:4.1.118.Final io.netty:netty-buffer:4.1.118.Final io.netty:netty-common:4.1.118.Final \
   io.netty:netty-codec:4.1.118.Final io.netty:netty-handler:4.1.118.Final com.google.guava:guava:33.3.1-jre it.unimi.dsi:fastutil:8.5.15 \
@@ -28,8 +25,6 @@ for coord in io.netty:netty-transport:4.1.118.Final io.netty:netty-buffer:4.1.11
   IFS=: read -r g a v <<<"$coord"
   EXTRA="$EXTRA:$(mvn_get "$g" "$a" "$v")"
 done
-# Optional: the real Minecraft 1.21.11 in intermediary names (vanilla client jar remapped with FabricMC/intermediary, see
-# tools/README-mc-int.txt). When it is there, the add-on is compiled against it, so new code can use every Minecraft method.
 MC_INT="${MC_INT:-/tmp/mc-int.jar}"
 [ -s "$MC_INT" ] || MC_INT=""
 MCP="${MC_INT:+$MC_INT:}"
@@ -37,17 +32,13 @@ MCP="${MC_INT:+$MC_INT:}"
 rm -rf "$BUILD/stubs" "$BUILD/gen" "$BUILD/classes" "$BUILD/override" "$BUILD/tools" "$BUILD/test"
 mkdir -p "$BUILD/stubs" "$BUILD/gen" "$BUILD/classes" "$BUILD/override" "$BUILD/tools" "$BUILD/test"
 
-# 1. stand-ins for the Minecraft classes the old jar uses (generated from its bytecode) and for Fabric (never shipped)
 JOML=$(mvn_get org.joml joml 1.10.8)
 python3 tools/GenStubs.py "$BASE" tools/stubs-hints.txt "$BUILD/gen"
 javac -nowarn -cp "$JOML" -d "$BUILD/stubs" $(find stubs "$BUILD/gen" -name '*.java')
-# 1b. rewritten modules: same class names as in the old jar, they replace the old classes
 if [ -d src/override ]; then
   javac -proc:none -nowarn -Xlint:none -d "$BUILD/override" -cp "$MCP$BASE:$BUILD/stubs:$GSON:$SLF4J:$MIXIN:$ASM:$JOML$EXTRA" $(find src/override -name '*.java')
 fi
-# 2. the add-on itself, compiled against the old jar
 javac -proc:none -nowarn -Xlint:none -d "$BUILD/classes" -cp "$BUILD/override:$MCP$BASE:$BUILD/stubs:$GSON:$SLF4J:$MIXIN:$ASM:$JOML$EXTRA" $(find src/main -name '*.java')
-# 3. tests that need no Minecraft
 javac -nowarn -d "$BUILD/test" -cp "$BUILD/classes:$GSON:$CACHE/fastutil-8.5.15.jar:$SLF4J" $(find src/test -name '*.java')
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.UpdateTests
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.SupervisorTests
@@ -64,17 +55,12 @@ for t in StaffListTests ToolsTests VanishTests CrystalAuraTests ChunksTests NoIn
 done
 python3 ../resourcepack/build.py >/dev/null
 java -cp "$BUILD/test:$BUILD/classes:$GSON" dev.dihclient.PackTests
-# 4. patch + pack
 javac -nowarn -d "$BUILD/tools" -cp "$ASM" tools/Patcher.java tools/MixinCheck.java
 OUT="../dist/dihclient-v${VERSION}+mc${MC}.jar"
 python3 ../resourcepack/build.py >/dev/null
 java -cp "$BUILD/tools:$ASM" Patcher "$BASE" "$BUILD/classes" "$OUT" "${VERSION}+mc${MC}" ../dist/DIH-Visuals-1.21.11.zip "$BUILD/override" src/resources
-# 5. the base jar must show the known problem, the new jar must not have any
 if java -cp "$BUILD/tools:$ASM" MixinCheck "$BASE" >/dev/null; then echo "note: base jar has no mixin problem any more"; fi
 java -cp "$BUILD/tools:$ASM" MixinCheck "$OUT"
-# every mixin of the add-on must find its target in the real game (a failing mixin would stop the game from starting)
-# TridentRiptideMixin: /tmp/mc-int.jar leaves two inherited calls unremapped, so the check cannot see them (the names come from the working original client)
 [ -n "$MC_INT" ] && java -cp "$ASM" tools/MixinTargets.java --ignore 'TridentRiptideMixin#dih$tridentWet' --ignore 'TridentRiptideMixin#dih$tridentPush' "$BUILD/classes" "$BUILD/override" "$BASE" "$MC_INT"
-# the JVM verifies every class of the jar the way it does at game start: a patched class without a stack map frame would crash the start
 [ -n "$MC_INT" ] && java tools/VerifyClasses.java "$OUT" "$MC_INT:$BUILD/stubs:$(ls $CACHE/*.jar | tr '\n' ':')"
 echo "built $OUT"

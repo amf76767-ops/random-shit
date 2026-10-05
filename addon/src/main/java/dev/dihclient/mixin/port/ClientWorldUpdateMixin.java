@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Tells {@link BlockUpdates} about every block change of the client world, with the old state (Prime Chunk Finder). */
 @Mixin(class_638.class)
 public abstract class ClientWorldUpdateMixin {
     @Inject(method = "method_8413", at = @At("HEAD"))

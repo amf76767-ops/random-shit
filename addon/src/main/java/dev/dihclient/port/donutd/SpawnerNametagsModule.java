@@ -21,12 +21,7 @@ import net.minecraft.class_2636;
 import net.minecraft.class_2818;
 import net.minecraft.class_638;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Shows each spawner's mob and activation range over the block: a label with the mob, the distance and the range, and a ring on
- * the ground-plane of the spawner at that range (brighter while you are inside it). The spawners are found in the block entities
- * of the loaded chunks; the mob and the range come from the spawner data the server sent. Only what the client already has is read.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class SpawnerNametagsModule extends Module {
     private static final int MAX_LABELS = 48;
     private static final int RING_SEGMENTS = 64;
@@ -71,10 +66,9 @@ public final class SpawnerNametagsModule extends Module {
 
     private void clear() {
         this.spawners.clear();
-        this.tick = SCAN_TICKS; // scan at once
+        this.tick = SCAN_TICKS;
     }
 
-    /** The mob a spawner makes next, as the player reads it ("Zombie"); null when the server did not say. */
     public static String mobName(class_2636 spawner) {
         class_1952 data = ((DonutDSpawnerAccessorMixin) spawner.method_11390()).dih$donutdNextSpawnData();
         if (data == null) {
@@ -111,7 +105,6 @@ public final class SpawnerNametagsModule extends Module {
         }
     }
 
-    /** Spawners are block entities, so the block entity maps of the chunks around the player are enough (no block scan). */
     private void scan(class_638 level) {
         this.spawners.clear();
         class_1923 center = mc.field_1724.method_31476();
@@ -124,7 +117,7 @@ public final class SpawnerNametagsModule extends Module {
                 class_2818 chunk = level.method_8497(x, z);
                 for (class_2586 entity : chunk.method_12214().values()) {
                     if (entity instanceof class_2636) {
-                        this.spawners.add(entity.method_11016().method_10062()); // immutable copy
+                        this.spawners.add(entity.method_11016().method_10062());
                     }
                 }
             }
@@ -163,7 +156,7 @@ public final class SpawnerNametagsModule extends Module {
             int rgb = this.color.get() & 0xFFFFFF;
             double limit = this.range.get();
             List<Shown> shown = this.inRange();
-            // far ones first, so the labels of the near ones are drawn on top
+
             for (int i = shown.size() - 1; i >= 0; i--) {
                 Shown spawner = shown.get(i);
                 float fade = DonutDLogic.fade(spawner.distance(), limit);
@@ -184,7 +177,7 @@ public final class SpawnerNametagsModule extends Module {
     private void drawLabel(Render3D r, Shown spawner, boolean showRange, float fade, int rgb) {
         int alpha = Math.round(fade * 255.0F);
         if (alpha < 4) {
-            return; // the font draws alpha under 4 as opaque
+            return;
         }
         float scale = DonutDLogic.textScale(spawner.distance());
         class_2338 pos = spawner.pos();
@@ -192,7 +185,7 @@ public final class SpawnerNametagsModule extends Module {
         double z = pos.method_10260() + 0.5;
         double y = pos.method_10264() + LABEL_HEIGHT;
         boolean accent = showRange && spawner.range() > 0 && spawner.inside();
-        // the text hangs down from its anchor: the detail line is the lower one
+
         r.text(DonutDLogic.title(spawner.mob()), new class_243(x, y + 0.25 * scale, z), DonutDLogic.withAlpha(TITLE_COLOR, alpha), scale);
         r.text(DonutDLogic.detail(spawner.distance(), spawner.range(), showRange), new class_243(x, y, z),
                 DonutDLogic.withAlpha(accent ? rgb : DETAIL_COLOR, alpha), scale);

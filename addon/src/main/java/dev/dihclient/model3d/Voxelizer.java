@@ -5,11 +5,6 @@ import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Turns a model into a grid of coloured blocks: every triangle is sampled densely, each block the surface touches gets
- * the average colour of the samples (texture × material colour). Optionally the inside is filled with the colour of the
- * nearest surface block.
- */
 public final class Voxelizer {
     private Voxelizer() {
     }
@@ -18,7 +13,7 @@ public final class Voxelizer {
         public final int sx;
         public final int sy;
         public final int sz;
-        /** 0 = empty, otherwise 0xFF000000 | rgb; index = (y * sz + z) * sx + x */
+
         public final int[] rgb;
         public int count;
 
@@ -34,10 +29,6 @@ public final class Voxelizer {
         }
     }
 
-    /**
-     * @param height  wanted height in blocks (the model is scaled to it), capped so no side is longer than {@code maxSide}
-     * @param solid   fill the inside as well
-     */
     public static Grid voxelize(Model m, int height, boolean solid, int maxSide) {
         float ex = m.maxX - m.minX, ey = m.maxY - m.minY, ez = m.maxZ - m.minZ;
         double scale = (double) height / Math.max((double) ey, 1e-6);
@@ -71,7 +62,7 @@ public final class Voxelizer {
                     int vc = blend(m.color[i0], m.color[i1], m.color[i2], w, u, v);
                     int col = mul(texel, vc);
                     if ((col >>> 24) < 40) {
-                        continue; // see-through part
+                        continue;
                     }
                     long[] s = acc.computeIfAbsent(g.index(vx, vy, vz), k -> new long[4]);
                     s[0] += col >> 16 & 255;
@@ -133,7 +124,6 @@ public final class Voxelizer {
 
     private static final int[][] DIRS = {{1, 0, 0}, {-1, 0, 0}, {0, 1, 0}, {0, -1, 0}, {0, 0, 1}, {0, 0, -1}};
 
-    /** Everything that cannot be reached from outside without crossing the surface is inside; it takes the colour of the nearest surface block. */
     private static void fill(Grid g) {
         int px = g.sx + 2, py = g.sy + 2, pz = g.sz + 2;
         boolean[] outside = new boolean[px * py * pz];
@@ -159,7 +149,7 @@ public final class Voxelizer {
                 }
             }
         }
-        // inside = not outside and empty; grow the surface colours into it
+
         ArrayDeque<int[]> grow = new ArrayDeque<>();
         for (int x = 0; x < g.sx; x++) {
             for (int y = 0; y < g.sy; y++) {

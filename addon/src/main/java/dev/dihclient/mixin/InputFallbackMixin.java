@@ -15,12 +15,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * The automation modules walk by pressing the movement keys in software ({@code KeyBinding.setPressed}).
- * Some input mods (Snappy Tappy and similar) build the player input from the physical keyboard and ignore that,
- * so the player stands still while everything else works. This puts the key presses of DIHClient's own modules (noted by
- * KeyBindingSoftMixin in SoftKeys) back into the input. Real key presses are left alone, so those mods keep working.
- */
 @Mixin({class_743.class})
 public abstract class InputFallbackMixin extends class_744 {
     private static int dih$debugTicks;
@@ -35,7 +29,7 @@ public abstract class InputFallbackMixin extends class_744 {
             return;
         }
         if (o.field_1894.method_1434() && ++dih$debugTicks % 40 == 0) {
-            // one line every 2 seconds while "forward" is held (real or by a module): shows where the chain breaks
+
             class_310 mc = class_310.method_1551();
             DIHClient.LOG.info("[DIH-Debug] forward: keyboard={} software={} input={} player={} screen={}",
                 KeyUtil.isPhysicallyDown(o.field_1894), soft(o.field_1894), this.field_54155,
@@ -61,7 +55,6 @@ public abstract class InputFallbackMixin extends class_744 {
         this.field_55868 = new class_241(side, ahead);
     }
 
-    /** Pressed by a DIHClient module, whatever other mods did to the key state meanwhile. */
     private static boolean soft(class_304 key) {
         return SoftKeys.active(key);
     }

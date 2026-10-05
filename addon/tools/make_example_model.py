@@ -94,7 +94,6 @@ def main(out):
     head = mesh([(((0, 0.17, 0), (0.34, 0.34, 0.32)), 1), (((0, 0.19, 0.165), (0.26, 0.08, 0.02)), 2), (((0, 0.4, 0), (0.03, 0.12, 0.03)), 3)])
     arm = mesh([(((0, -0.27, 0), (0.14, 0.6, 0.14)), 3), (((0, -0.6, 0), (0.16, 0.08, 0.16)), 4)])
     leg = mesh([(((0, -0.37, 0), (0.2, 0.74, 0.2)), 4), (((0, -0.77, 0.03), (0.22, 0.06, 0.28)), 1)])
-    # body mesh was modelled in world coordinates (hips at y 0.8), so its node sits at the origin
     nodes = [
         {'name': 'Robot', 'children': [1, 2, 3, 4, 5, 6]},
         {'name': 'Body', 'mesh': body},

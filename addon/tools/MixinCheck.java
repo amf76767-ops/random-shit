@@ -7,13 +7,6 @@ import org.objectweb.asm.tree.AnnotationNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.MethodNode;
 
-/**
- * Fails the build when a mixin class would make Mixin reject the whole mod at game start.
- * Checks what Mixin's own MixinInfo.getVariant / ClassInfo.Method.isAccessor look at:
- * an interface mixin is only an accessor if every method carries a RuntimeVisible @Accessor or @Invoker.
- *
- * usage: MixinCheck some.jar
- */
 public final class MixinCheck {
     public static void main(String[] args) throws Exception {
         int problems = 0;

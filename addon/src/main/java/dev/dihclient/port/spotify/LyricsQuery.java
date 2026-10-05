@@ -6,10 +6,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 import java.util.Locale;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * What is asked from the lyrics service: title, artist, album and duration of the playing track.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public record LyricsQuery(String title, String artist, String album, int durationSeconds) {
     static final int MAX_DURATION_SECONDS = 3600;
 

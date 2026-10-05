@@ -6,11 +6,6 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * A DIHClient version such as {@code 5.7.0+mc1.21.11}, {@code v5.7.0} or {@code 5.7.0-beta.1+mc1.21.11}.
- * Compared by the numeric core, then by pre-release (a pre-release is lower than the release).
- * The Minecraft part is kept separately and never takes part in the ordering.
- */
 public final class Version implements Comparable<Version> {
     private static final Pattern MC = Pattern.compile("(?i)\\+?mc[-_]?(\\d+(?:\\.\\d+){1,2})");
 
@@ -26,7 +21,6 @@ public final class Version implements Comparable<Version> {
         this.raw = raw;
     }
 
-    /** Returns null when the text has no usable version number. */
     public static Version parse(String text) {
         if (text == null) {
             return null;
@@ -62,7 +56,6 @@ public final class Version implements Comparable<Version> {
         return new Version(nums, pre, mc, text.trim());
     }
 
-    /** The Minecraft version this build is for, or null when the text does not say. */
     public String minecraft() {
         return mc;
     }
@@ -75,7 +68,6 @@ public final class Version implements Comparable<Version> {
         return raw;
     }
 
-    /** {@code 5.7.0} or {@code 5.7.0-beta.1}, without the Minecraft part. */
     public String display() {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < nums.length; i++) {

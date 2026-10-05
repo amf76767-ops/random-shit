@@ -7,12 +7,6 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-/**
- * Lets the JVM itself verify the classes of the finished jar, the way it does when the game starts (a patched class with a
- * missing stack map frame crashes the start otherwise, and nothing else in the build would notice).
- * usage: java VerifyClasses.java <jar> <classpath entries ...>      Exit code 1 when a class fails verification.
- * A class that cannot be checked because a library is missing (NoClassDefFoundError) is only counted, not a failure.
- */
 public final class VerifyClasses {
     public static void main(String[] args) throws Exception {
         File jar = new File(args[0]);
@@ -35,12 +29,12 @@ public final class VerifyClasses {
                 String cls = name.substring(0, name.length() - 6).replace('/', '.');
                 try {
                     Class<?> c = Class.forName(cls, false, loader);
-                    c.getDeclaredMethods(); // links the class: that is where the verifier runs
+                    c.getDeclaredMethods();
                     checked++;
                 } catch (VerifyError | ClassFormatError e) {
                     failed++;
                     System.out.println("VERIFY FAILED " + cls + ": " + e.getMessage().split("\n")[0]);
-                } catch (LinkageError e) { // a missing library or class
+                } catch (LinkageError e) {
                     unchecked++;
                     if (System.getProperty("verbose") != null) {
                         System.out.println("not checked: " + cls + " (" + e + ")");

@@ -2,16 +2,12 @@ package dev.dihclient.port.staff;
 
 import java.util.Arrays;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Which "goliath" (DonutSMP region block) a position of the overworld belongs to. Only used to notice that you moved to
- * another region, because the staff you saw there is not your neighbour any more.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class GoliathMap {
     private static final int GRID = 36;
     private static final double CELL_SIZE = 12500.0;
     private static final double MAP_OFFSET = 225000.0;
-    // rects per region: {col, row, width, height} in grid cells
+
     private static final int[][][] GOLIATHS = new int[][][]{
         {
                 {4, 0, 2, 4},
@@ -234,7 +230,6 @@ public final class GoliathMap {
     private GoliathMap() {
     }
 
-    /** @return the goliath id of the position, or -1 when it is outside of every goliath */
     public static int goliathAt(double x, double z) {
         int col = (int) Math.floor((x + MAP_OFFSET) / CELL_SIZE);
         int row = (int) Math.floor((z + MAP_OFFSET) / CELL_SIZE);

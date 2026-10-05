@@ -9,7 +9,6 @@ import net.minecraft.class_2678;
 import net.minecraft.class_310;
 import net.minecraft.class_642;
 
-/** The one {@link ConfigStore} of the game, wired to DIH's profile files, and the "load on this server" step at join. */
 public final class Configs {
     private static ConfigStore store;
     private static boolean installed;
@@ -49,7 +48,6 @@ public final class Configs {
         return store;
     }
 
-    /** The address of the multiplayer server the player is on, or null (single player, main menu). */
     public static String currentServer() {
         class_310 mc = class_310.method_1551();
         if (mc.method_1496()) {
@@ -59,7 +57,6 @@ public final class Configs {
         return info == null ? null : info.field_3761;
     }
 
-    /** Listens for the join packet and loads the config that belongs to the server. Called once at start. */
     public static synchronized void install() {
         if (installed) {
             return;

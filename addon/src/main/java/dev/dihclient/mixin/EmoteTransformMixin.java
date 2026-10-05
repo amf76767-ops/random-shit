@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Moves and tilts the vanilla body of a player who is doing an emote (the model path does its own). */
 @Mixin(targets = "net.minecraft.class_922")
 public abstract class EmoteTransformMixin {
     @Inject(

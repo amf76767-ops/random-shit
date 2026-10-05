@@ -16,26 +16,12 @@ import net.minecraft.class_243;
 import net.minecraft.class_310;
 import net.minecraft.class_746;
 
-/**
- * The walking of AutoBuild. The old code walked in a straight line to the nearest open block and jumped whenever it
- * bumped into something, so it ran into walls two blocks high and stayed there. This one
- * <ol>
- *   <li>looks at the open blocks of the current layer and picks the spot from which the most of them can be placed
- *       (reach and line of sight), with a small penalty for the way there;</li>
- *   <li>walks there on a path that was searched on the real world: steps up by one block, drops, around walls;</li>
- *   <li>when no spot sees a block, walks to the reachable cell closest to it and pillars up from there (the old code
- *       does that), and skips spots that did not work out.</li>
- * </ol>
- * {@link #walkLayer} replaces the "walk to the next layer / the next open block" call of BuildRuntime.tick,
- * {@link #walkPoint} the walk to a given point (re-positioning). Anything unexpected hands over to the old walking.
- */
 public final class BuildPilot {
     private static final class_310 mc = class_310.method_1551();
     private static final McTerrain TERRAIN = new McTerrain();
     private static final double EYE = 1.62;
     private static final int REPLAN_AFTER = 160;
 
-    /** Switched by the "Smart Path" setting of AutoBuild. */
     public static volatile boolean enabled = true;
 
     private static final class Trip {
@@ -59,17 +45,16 @@ public final class BuildPilot {
     private static Trip trip;
     private static int failures;
     private static int pausedUntil;
-    /** After the normal search found no way, the next ones look much further (until this tick). */
+
     private static int bigUntil;
     private static int lastGaveUp = -1000;
     private static int noPlanUntil;
     private static int lastSnapshot;
 
-    // ---- stalls: too long at one spot -> park the blocks around it for a while, work elsewhere, come back later
     private static final int STALL_SPOT_TICKS = 140;
     private static final int STALL_DONE_TICKS = 900;
     private static final double PARK_RADIUS = 6.0;
-    /** Index of a plan block -> tick until which the pilot leaves it alone. */
+
     private static final Map<Integer, Integer> PARKED = new java.util.HashMap<>();
     private static Object parkedPlan;
     private static int parkRounds;
@@ -106,7 +91,7 @@ public final class BuildPilot {
             try {
                 handled = drive(rt, target, reach, layer);
             } catch (Throwable t) {
-                // not for the rest of the session: the next try is in 10 seconds, and after 5 failures in a row the old walking stays
+
                 failures++;
                 pausedUntil = failures >= 5 ? Integer.MAX_VALUE : now + 200;
                 trip = null;
@@ -123,7 +108,7 @@ public final class BuildPilot {
                         mc.field_1724.method_23317(), mc.field_1724.method_23318(), mc.field_1724.method_23321(), Priv.LAYER.getInt(rt) + 1,
                         Priv.DONECOUNT.getInt(rt), PARKED.size(), handled ? "walking" : "not used"));
             } catch (ReflectiveOperationException ignored) {
-                // no snapshot
+
             }
         }
         if (!handled) {
@@ -135,7 +120,6 @@ public final class BuildPilot {
         }
     }
 
-    /** While blocks are parked, even the old walking aims at the nearest block that is not. */
     private static class_243 unparkedTarget(BuildRuntime rt, class_243 target) {
         if (PARKED.isEmpty() || mc.field_1724 == null) {
             return target;
@@ -157,11 +141,6 @@ public final class BuildPilot {
         }
     }
 
-    /**
-     * Called every tick the build wants to walk. Staying around one spot for several seconds without getting a block done (jumping at a
-     * wall, a block that cannot be placed from anywhere reachable) parks the open blocks around that spot; the pilot then works on the
-     * rest of the layer and comes back to the parked ones later.
-     */
     private static void stallCheck(BuildRuntime rt, class_243 target, int now) throws ReflectiveOperationException {
         class_746 p = mc.field_1724;
         if (p == null) {
@@ -237,8 +216,6 @@ public final class BuildPilot {
                 + (int) center.field_1350 + " for " + (until - now) / 20 + " s, round " + parkRounds);
     }
 
-    // ---- reflection into the private parts of BuildRuntime
-
     private static final class Priv {
         static final Field PLAN = f("plan"), DONE = f("done"), ATTEMPTS = f("attempts"), LAYER = f("layer"), START = f("layerStart"),
                 END = f("layerEnd"), DEFERRED = f("lastDeferred"), SETTINGS = f("lastSettings"), WALKING = f("walking"), STATUS = f("status"),
@@ -271,9 +248,7 @@ public final class BuildPilot {
 
     private static void oldWalk(BuildRuntime rt, class_243 target, double reach) {
         try {
-            // in front of a wall two blocks high it never jumps: jumping cannot get over it. With "Pillar" on, the old walking may
-            // pillar up next to the wall (it walks into the wall and then builds a tower); otherwise, or when that does not start
-            // within two seconds, it stands still and says why
+
             BuildRuntime.Settings cfg = (BuildRuntime.Settings) Priv.SETTINGS.get(rt);
             boolean wall = wallAhead(target);
             boolean canPillar = cfg != null && cfg.pillar && Priv.STUCK.getInt(rt) <= 40;
@@ -289,7 +264,7 @@ public final class BuildPilot {
                 return;
             }
             if (wall) {
-                // the old walking would run into it and jump against it for ever: stand still and say why
+
                 Priv.RELEASE.invoke(rt);
                 Priv.STATUS.set(rt, "Blocked by a wall: no way around found");
                 int tick = mc.field_1724.field_6012;
@@ -310,7 +285,6 @@ public final class BuildPilot {
         }
     }
 
-    /** True when the next block on the way to the target is a wall the player cannot jump over (feet and head cell both blocked). */
     private static boolean wallAhead(class_243 target) {
         class_746 p = mc.field_1724;
         if (p == null || mc.field_1687 == null) {
@@ -332,19 +306,15 @@ public final class BuildPilot {
         return false;
     }
 
-    /** The cells of the route that is being walked (for the path preview), or null. */
     public static List<Nav.Cell> routeForPreview() {
         Trip t = trip;
         return t == null || t.path == null || t.index > t.path.size() ? null : t.path.subList(Math.max(0, t.index - 1), t.path.size());
     }
 
-    /** True when the route ends at a spot that sees open blocks, false when it only leads as close as possible. */
     public static boolean routeCovers() {
         Trip t = trip;
         return t != null && t.covers;
     }
-
-    // ---- the pilot
 
     private static boolean drive(BuildRuntime rt, class_243 target, double reach, boolean layerMode) throws ReflectiveOperationException {
         class_746 p = mc.field_1724;
@@ -353,11 +323,11 @@ public final class BuildPilot {
             return false;
         }
         if (p.method_5799() && !p.method_24828()) {
-            return false; // swimming: the old code knows how to get out of the water
+            return false;
         }
         int tick = p.field_6012;
         if (tick < noPlanUntil && trip == null) {
-            return false; // nothing was found a moment ago; searching again every tick would only cost frames
+            return false;
         }
         Trip t = trip;
         if (t == null || t.layerMode != layerMode || tick - t.plannedAt > REPLAN_AFTER || !onPath(t, p) || blockedAhead(t)) {
@@ -391,7 +361,6 @@ public final class BuildPilot {
         return false;
     }
 
-    /** The next few cells of the path must still be places to stand (a block was placed there, or the world changed). */
     private static boolean blockedAhead(Trip t) {
         TERRAIN.reset();
         for (int k = t.index; k < Math.min(t.path.size(), t.index + 3); k++) {
@@ -419,7 +388,7 @@ public final class BuildPilot {
         }
         Nav.Options o = new Nav.Options();
         o.maxFall = Math.max(1, Math.min(4, s.maxFall > 0 ? s.maxFall : 1));
-        if (tick < bigUntil) { // the normal search found no way before: look much further around walls
+        if (tick < bigUntil) {
             o.radius = 64;
             o.maxNodes = 45000;
         }
@@ -445,7 +414,7 @@ public final class BuildPilot {
             List<int[]> open = openBlocks(rt);
             if (!open.isEmpty()) {
                 if (!PARKED.isEmpty()) {
-                    // BuildRuntime's own target may be a parked block: aim at the nearest block that is not
+
                     double best = Double.MAX_VALUE;
                     for (int[] b : open) {
                         double d = p.method_5707(new class_243(b[0] + 0.5, b[1] + 0.5, b[2] + 0.5));
@@ -459,7 +428,7 @@ public final class BuildPilot {
                 for (int[] b : open) {
                     openKeys.add(Nav.key(b[0], b[1], b[2]));
                 }
-                // the planned route first (see BuildPlannerModule), the own choice for what it does not cover
+
                 goal = RoutePlans.nextStop((BuildPlan) Priv.PLAN.get(rt), Priv.LAYER.getInt(rt), openKeys, region, n.avoid);
                 if (goal != null) {
                     n.covers = true;
@@ -489,7 +458,6 @@ public final class BuildPilot {
         return n;
     }
 
-    /** The reachable cell that is nearest to the target (within {@code within} horizontally counts as arrived). */
     private static Nav.Cell closest(Nav.Region region, class_243 target, double within, Set<Long> avoid) {
         Nav.Cell best = null;
         double bestScore = Double.MAX_VALUE;
@@ -508,7 +476,6 @@ public final class BuildPilot {
         return best;
     }
 
-    /** The open blocks of the current layer that can be placed with what is in the inventory. */
     private static List<int[]> openBlocks(BuildRuntime rt) throws ReflectiveOperationException {
         BuildPlan plan = (BuildPlan) Priv.PLAN.get(rt);
         boolean[] done = (boolean[]) Priv.DONE.get(rt);
@@ -547,7 +514,7 @@ public final class BuildPilot {
             out.add(new int[]{b.pos().method_10263(), b.pos().method_10264(), b.pos().method_10260(), i});
         }
         if (out.isEmpty() && skippedParked) {
-            // nothing else is left: try the parked ones again, for longer each time
+
             PARKED.clear();
             parkRounds++;
             return openBlocks(rt);
@@ -583,7 +550,6 @@ public final class BuildPilot {
             p.method_36457(RotationUtil.approachAngle(p.method_36455(), 12.0F, 5.0F));
         }
 
-        // no progress for a while: jump once, then give up on this spot
         if (tick - t.sampleTick >= 10) {
             double moved = Math.hypot(p.method_23317() - t.sampleX, p.method_23321() - t.sampleZ);
             t.stuck = moved < 0.25 && p.method_24828() ? t.stuck + 1 : 0;
@@ -600,17 +566,17 @@ public final class BuildPilot {
                 if (t.replans >= 6) {
                     t.replans = 0;
                     if (tick >= bigUntil) {
-                        bigUntil = tick + 1200; // first look further around; that costs a moment, so only for a minute
+                        bigUntil = tick + 1200;
                         return true;
                     }
-                    return false; // even the wide search had nothing: the old walking (which will not run into a wall) takes over
+                    return false;
                 }
                 return true;
             }
         }
         boolean up = next.y > p.method_23318() + 0.4;
         boolean ahead = Math.hypot(dx, dz) < 1.6;
-        // a wall two blocks high is never jumped at; the path should not lead into one, so the spot is given up right away
+
         boolean wall = wallAhead(new class_243(next.x + 0.5, next.y, next.z + 0.5));
         if (wall && t.stuck >= 1) {
             BuildLog.add(String.format("wall two blocks high ahead at %d %d %d: not jumping, giving the spot up", next.x, next.y, next.z));
@@ -633,7 +599,7 @@ public final class BuildPilot {
         Priv.RELEASE.invoke(rt);
         t.arrived++;
         if (t.covers) {
-            // the blocks should be placeable from here; if the build code still finds nothing, this spot does not work
+
             if (t.arrived > 12) {
                 BuildLog.add("arrived at the spot but nothing could be placed from there: avoiding it");
                 t.avoid.add(t.goalKey);
@@ -642,7 +608,7 @@ public final class BuildPilot {
             }
             return true;
         }
-        // nothing sees a block from the closest reachable cell: pillar up if it is allowed, the build code does the rest
+
         Priv.STATUS.set(rt, "No spot reaches the next blocks");
         if (t.arrived == 6 && s.pillar && p.method_24828() && Priv.TOWER.get(rt) == null && t.towered < 12
                 && ((Map<?, ?>) Priv.MISSING.get(rt)).isEmpty()) {

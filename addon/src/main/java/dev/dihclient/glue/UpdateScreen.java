@@ -12,7 +12,6 @@ import net.minecraft.class_2561;
 import net.minecraft.class_332;
 import net.minecraft.class_437;
 
-/** Asks the player whether DIHClient should update itself. */
 public class UpdateScreen extends class_437 {
     private static final int W = 340;
     private static final int BTN_H = 20;
@@ -58,7 +57,6 @@ public class UpdateScreen extends class_437 {
         return out;
     }
 
-    /** The button captions: the first one opens the release page on GitHub (nothing is downloaded by the game). */
     private List<String> buttons() {
         List<String> b = new ArrayList<>();
         if (UpdateManager.state() == UpdateManager.State.AVAILABLE) {
@@ -138,7 +136,6 @@ public class UpdateScreen extends class_437 {
         }
     }
 
-    /** Opens the release page in the browser, only if it is an address on github.com. */
     private static void openRelease() {
         GithubReleases.Release r = UpdateManager.release();
         if (r == null || r.pageUrl() == null || !r.pageUrl().startsWith("https://github.com/")) {
@@ -147,7 +144,7 @@ public class UpdateScreen extends class_437 {
         try {
             net.minecraft.class_156.method_668().method_673(java.net.URI.create(r.pageUrl()));
         } catch (RuntimeException ignored) {
-            // no browser: the player can find the page himself
+
         }
     }
 

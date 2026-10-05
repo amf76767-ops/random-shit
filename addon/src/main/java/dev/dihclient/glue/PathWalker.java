@@ -11,10 +11,6 @@ import java.util.Set;
 import net.minecraft.class_310;
 import net.minecraft.class_746;
 
-/**
- * Walks the player to the best stand spot for a set of blocks (see {@link StandPlanner}) on a searched path, with the
- * keys of the game. The same ideas as the AutoBuild pilot, for modules that are not part of AutoBuild.
- */
 final class PathWalker {
     private static final class_310 mc = class_310.method_1551();
     private static final double EYE = 1.62;
@@ -32,7 +28,6 @@ final class PathWalker {
     private final Set<Long> avoid = new HashSet<>();
     private int failures;
 
-    /** What happened in a call. */
     enum State { WALKING, ARRIVED, NO_ROUTE }
 
     void reset() {
@@ -47,7 +42,6 @@ final class PathWalker {
         return this.arrived;
     }
 
-    /** Marks the current goal as useless (nothing could be done there); the next call picks another one. */
     void giveUpGoal() {
         if (this.path != null) {
             this.avoid.add(this.goalKey);
@@ -55,11 +49,6 @@ final class PathWalker {
         this.path = null;
     }
 
-    /**
-     * @param open   block coordinates {x, y, z} the player wants to be able to reach
-     * @param reach  reach in blocks (a margin is taken off)
-     * @param maxFall how deep a drop on the way may be
-     */
     State walk(List<int[]> open, double reach, int maxFall) {
         class_746 p = mc.field_1724;
         if (p == null || mc.field_1687 == null) {
@@ -174,7 +163,6 @@ final class PathWalker {
         return State.WALKING;
     }
 
-    /** Gives the movement keys back to the real keyboard. */
     void release() {
         if (mc.field_1690 != null) {
             mc.field_1690.field_1894.method_23481(KeyUtil.isPhysicallyDown(mc.field_1690.field_1894));

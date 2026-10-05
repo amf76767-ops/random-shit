@@ -6,18 +6,13 @@ import net.minecraft.class_310;
 import net.minecraft.class_3532;
 import net.minecraft.class_746;
 
-/**
- * Turns the head towards a target the way a hand on a mouse does: it starts gently, speeds up, and slows down before the
- * target instead of snapping there. The speed limit of the caller is still respected (the real limit is a bit lower).
- * Rewritten for 6.4.0: the old version moved a fixed share of the way every tick, which looked like snapping.
- */
 public final class HumanAim {
     private static final class_310 mc = class_310.method_1551();
     private static final Random RNG = new Random();
     private static final float STEP = 0.15F;
-    /** share of the caller's speed limit that is really used */
+
     private static final float SPEED_SHARE = 0.6F;
-    /** how much the turn speed may change from one tick to the next, share of the speed limit */
+
     private static final float ACCEL_SHARE = 0.3F;
 
     private static float velYaw;
@@ -50,9 +45,9 @@ public final class HumanAim {
         int tick = p.field_6012;
         if (tick - lastTick > 3 || tick < lastTick) {
             velYaw = 0.0F;
-            velPitch = 0.0F; // a new movement starts from standstill
+            velPitch = 0.0F;
         }
-        boolean again = tick == lastTick; // a second call in the same tick must not speed up twice
+        boolean again = tick == lastTick;
         lastTick = tick;
 
         targetPitch = class_3532.method_15363(targetPitch, -90.0F, 90.0F);
@@ -88,7 +83,7 @@ public final class HumanAim {
         }
         float sy = velYaw;
         float sp = velPitch;
-        // never run past the target
+
         if (Math.abs(sy) > Math.abs(dy) && sy * dy > 0) {
             sy = dy;
         }

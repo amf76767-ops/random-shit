@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** While the silent rotation turns the body, the keys are remapped so you still walk where you meant to. */
 @Mixin(class_743.class)
 public abstract class CrystalKeyboardInputMixin {
     @Inject(method = "method_3129", at = @At("TAIL"))

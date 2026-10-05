@@ -8,10 +8,6 @@ import dev.dihclient.setting.BoolSetting;
 import dev.dihclient.setting.EnumSetting;
 import dev.dihclient.util.Notifications;
 
-/**
- * One switch for the whole mood of the game: sky, clouds, light colour (VisualPack), time of day (Fake Time) and
- * weather (Fake Weather). Only on your screen.
- */
 public class Scenes extends Module {
     public enum Scene {
         VANILLA("Vanilla", null, null, Look.NONE, true),
@@ -32,7 +28,7 @@ public class Scenes extends Module {
         final Integer time;
         final FakeWeather.Weather weather;
         final Look look;
-        /** whether the light is full bright in this mood */
+
         final boolean fullbright;
 
         Scene(String title, Integer time, FakeWeather.Weather weather, Look look, boolean fullbright) {
@@ -89,7 +85,6 @@ public class Scenes extends Module {
         this.dirty = true;
     }
 
-    /** Gives back what the scene had changed. */
     private void release() {
         VisualPack pack = VisualPack.instance();
         if (pack != null) {

@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Hands every received packet to {@link PacketBus} (network thread, before the game handles it). */
 @Mixin(class_2535.class)
 public abstract class NetHandlerMixin {
     @Unique

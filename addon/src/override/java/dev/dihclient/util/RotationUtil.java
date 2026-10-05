@@ -52,7 +52,6 @@ public final class RotationUtil {
       mc.field_1724.method_36457(class_3532.method_15363(var4 + var6 * (float)var1, -90.0F, 90.0F));
    }
 
-   /** Moves an angle towards a target by at most maxStep. It slows down near the target instead of moving in fixed jumps. */
    public static float approachAngle(float var0, float var1, float var2) {
       float var3 = class_3532.method_15393(var1 - var0);
       float var4 = class_3532.method_15363(var3 * 0.35F, -var2, var2);

@@ -4,10 +4,6 @@ import dev.dihclient.util.Notifications;
 import net.minecraft.class_310;
 import net.minecraft.class_3417;
 
-/**
- * Replaces the original challenge toast for the two chunk modules: a DIH warning toast (which Discord Alarm forwards) and,
- * if wanted, the same bell sound the original toast played. Game thread only.
- */
 final class ChunkAlerts {
     private ChunkAlerts() {
     }

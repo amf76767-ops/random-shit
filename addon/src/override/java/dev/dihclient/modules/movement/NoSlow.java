@@ -10,11 +10,6 @@ import net.minecraft.class_238;
 import net.minecraft.class_243;
 import net.minecraft.class_2338;
 
-/**
- * No slowdown while eating, blocking or drawing a bow (the Multiplier, applied by a mixin), and now also in cobwebs and
- * on soul sand. The slowdown of those two is applied by the game inside the move itself, so it is made up for right after
- * it: soul sand by giving the speed back, cobwebs by moving on by the part of the step that was swallowed.
- */
 public class NoSlow extends Module {
     public final DoubleSetting multiplier = this.dbl(
             "Multiplier", "Movement multiplier while using items (vanilla 0.2, 1.0 = no slowdown).", 1.0, 0.2, 1.0, 0.01)

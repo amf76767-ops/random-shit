@@ -18,13 +18,7 @@ import net.minecraft.class_642;
 import net.minecraft.class_7134;
 import net.minecraft.class_746;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Relogs once when you go down to deepslate level: leaves the multiplayer server through the normal quit path, waits
- * "Delay" seconds on the server list and joins the same server again. Sends no command and no packet of its own.
- * Runs on the server list too ({@link ModuleManager.MenuTicking}), that is where the rejoin timer ticks.
- * It only arms after the player has been 4+ blocks above the line for two seconds, so it fires once per descent.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class AutoRelog extends Module implements ModuleManager.MenuTicking {
     public final IntSetting yLevel = this.integer("Y Level", "Relog when you go below this height (0 = deepslate level).", 0, -60, 16);
     public final DoubleSetting delay = this.dbl("Delay", "Seconds to wait on the server list before joining again.", 3.0, 1.0, 30.0, 0.5);
@@ -93,7 +87,7 @@ public class AutoRelog extends Module implements ModuleManager.MenuTicking {
     private void relog(class_310 game, double y) {
         class_642 server = game.method_1542() ? null : game.method_1558();
         if (server == null || server.method_52811()) {
-            return; // singleplayer and realms cannot be rejoined by address
+            return;
         }
         DIHClient.LOG.info("[DIHClient] Auto Relog: reached Y {}, relogging", (int) Math.floor(y));
         this.rejoin = server;
@@ -117,7 +111,7 @@ public class AutoRelog extends Module implements ModuleManager.MenuTicking {
             return;
         }
         if (game.field_1687 != null || !(game.field_1755 instanceof class_500)) {
-            this.rejoin = null; // the game went somewhere else (title screen, another world): do not interfere
+            this.rejoin = null;
             return;
         }
         if (--this.rejoinTicks > 0) {

@@ -2,20 +2,9 @@ package dev.dihclient.port.discord;
 
 import com.google.gson.JsonObject;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * What the Discord status shows, and the pure rules that build it (what may be shown, text clean-up, the JSON).
- * Everything that leaves the game is built in {@link #activity}; there is no other field.
- *
- * @param details     first line
- * @param state       second line, or null
- * @param startedAt   unix seconds for the "elapsed" counter, or 0 for none
- * @param appId       Discord application id the status belongs to
- * @param largeImage  asset key uploaded to that application, or null for none
- * @param largeText   hover text of the image, or null
- */
+/** Ported from an open-source client (GPL-3.0). */
 public record DiscordCard(String details, String state, long startedAt, String appId, String largeImage, String largeText) {
-    /** Discord rejects details/state shorter than 2 or longer than 128 characters. */
+
     static final int MIN_TEXT = 2;
     static final int MAX_TEXT = 128;
 
@@ -24,10 +13,6 @@ public record DiscordCard(String details, String state, long startedAt, String a
     public static final String PLAYING = "Playing Minecraft";
     public static final String IN_MENU = "In Main Menu";
 
-    /**
-     * The first line. A server address is only ever returned for a normal multiplayer server and only when the player
-     * switched "Show Server Address" on; LAN worlds and Realms never show an address.
-     */
     public static String details(Place place, String address, boolean showAddress) {
         switch (place) {
             case MENU:
@@ -44,7 +29,6 @@ public record DiscordCard(String details, String state, long startedAt, String a
         }
     }
 
-    /** Removes control characters, trims, caps at 128 code points; null when nothing usable is left (Discord needs 2+). */
     public static String clip(String text) {
         if (text == null) {
             return null;
@@ -64,7 +48,6 @@ public record DiscordCard(String details, String state, long startedAt, String a
         return s.codePointCount(0, s.length()) >= MIN_TEXT ? s : null;
     }
 
-    /** A Discord application id is a snowflake: digits only, 17 to 20 of them. */
     public static boolean validAppId(String id) {
         if (id == null) {
             return false;
@@ -81,7 +64,6 @@ public record DiscordCard(String details, String state, long startedAt, String a
         return true;
     }
 
-    /** Asset keys are plain names; anything with whitespace or control characters is dropped. */
     public static String assetKey(String key) {
         if (key == null) {
             return null;
@@ -98,7 +80,6 @@ public record DiscordCard(String details, String state, long startedAt, String a
         return s;
     }
 
-    /** The {@code activity} object of SET_ACTIVITY. */
     public JsonObject activity() {
         return activity(this);
     }

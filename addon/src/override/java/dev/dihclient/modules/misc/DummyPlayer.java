@@ -17,11 +17,6 @@ import net.minecraft.class_3966;
 import net.minecraft.class_745;
 import net.minecraft.class_1297.class_5529;
 
-/**
- * A client-side copy of you to test combat on. It now falls and lands (gravity), slides to a stop, and when you hit it
- * with the crosshair it takes damage (by the weapon in your hand, criticals count) and is knocked back. It exists only on
- * your screen: no server, no other player sees it.
- */
 public class DummyPlayer extends Module {
     private static final int ENTITY_ID = -4200042;
     private static final float MAX_HEALTH = 20.0F;
@@ -72,7 +67,6 @@ public class DummyPlayer extends Module {
         return !state.method_26218(mc.field_1687, pos).method_1110();
     }
 
-    /** Gravity, friction and simple block collisions for the copy (it is a client-side entity, the game does not move it). */
     @Override
     public void onTick() {
         if (this.dummy == null) {
@@ -105,14 +99,14 @@ public class DummyPlayer extends Module {
         }
         double ny = y + vy;
         if (vy < 0.0 && this.solid(nx, ny, nz)) {
-            ny = Math.floor(ny) + 1.0;          // stand on top of the block
+            ny = Math.floor(ny) + 1.0;
             vy = 0.0;
         } else if (vy > 0.0 && this.solid(nx, ny + 1.8, nz)) {
-            vy = 0.0;                           // bumped the head
+            vy = 0.0;
             ny = y;
         }
         if (ny < -128.0) {
-            ny = mc.field_1724.method_23318() + 2.0;   // fell out of the world: come back
+            ny = mc.field_1724.method_23318() + 2.0;
             vy = 0.0;
         }
 
@@ -121,7 +115,6 @@ public class DummyPlayer extends Module {
         this.dummy.method_24830(ground);
     }
 
-    /** Called when you swing (left click) from a mixin. */
     public static void onSwing() {
         DummyPlayer d = ModuleManager.of(DummyPlayer.class);
         if (d != null && d.isEnabled() && d.dummy != null && inGame()) {
@@ -160,7 +153,7 @@ public class DummyPlayer extends Module {
             damage *= 1.5;
         }
         this.health -= (float) damage;
-        this.dummy.field_6235 = 10;     // red hurt flash
+        this.dummy.field_6235 = 10;
 
         double dx = this.dummy.method_23317() - mc.field_1724.method_23317();
         double dz = this.dummy.method_23321() - mc.field_1724.method_23321();

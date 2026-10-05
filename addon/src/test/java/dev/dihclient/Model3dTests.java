@@ -38,25 +38,24 @@ public final class Model3dTests {
         System.exit(failed == 0 ? 0 : 1);
     }
 
-    /** A triangle with two joints, the second one slides up between t=0 and t=1. Also tests missing normals. */
     static void skinned(Path tmp) throws Exception {
         ByteArrayOutputStream bin = new ByteArrayOutputStream();
         int[] off = new int[8];
         off[0] = bin.size();
-        put(bin, 0, 0, 0, 1, 0, 0, 0, 2, 0); // positions
+        put(bin, 0, 0, 0, 1, 0, 0, 0, 2, 0);
         off[1] = bin.size();
-        bin.write(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0}); // joints (ubyte vec4 x3)
+        bin.write(new byte[]{0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0});
         off[2] = bin.size();
-        put(bin, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0); // weights: every vertex fully on its first joint
+        put(bin, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0);
         off[3] = bin.size();
-        bin.write(new byte[]{0, 0, 1, 0, 2, 0, 0, 0}); // indices ushort x3 + pad
+        bin.write(new byte[]{0, 0, 1, 0, 2, 0, 0, 0});
         off[4] = bin.size();
         put(bin, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-        put(bin, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, -1, 0, 1); // joint 1 inverse bind: translate(0,-1,0)
+        put(bin, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, -1, 0, 1);
         off[5] = bin.size();
-        put(bin, 0, 1); // times
+        put(bin, 0, 1);
         off[6] = bin.size();
-        put(bin, 0, 1, 0, 0, 3, 0); // translation keys
+        put(bin, 0, 1, 0, 0, 3, 0);
         String json = "{\"asset\":{\"version\":\"2.0\"},\"scene\":0,\"scenes\":[{\"nodes\":[0,2]}],"
                 + "\"nodes\":[{\"name\":\"root\",\"children\":[1]},{\"name\":\"child\",\"translation\":[0,1,0]},{\"mesh\":0,\"skin\":0}],"
                 + "\"meshes\":[{\"primitives\":[{\"attributes\":{\"POSITION\":0,\"JOINTS_0\":1,\"WEIGHTS_0\":2},\"indices\":3}]}],"
@@ -86,14 +85,13 @@ public final class Model3dTests {
         Rig.pose(m, m.animations.get(0), 0.5, g);
         Rig.skin(m, g, p, n);
         check(near(p[7], 3f) && near(p[3], 1f) && near(p[1], 0f), "at t=0.5 the top vertex rose to y=3, got " + p[7]);
-        Rig.pose(m, m.animations.get(0), 1.5, g); // loops: same as 0.5
+        Rig.pose(m, m.animations.get(0), 1.5, g);
         Rig.skin(m, g, p, n);
         check(near(p[7], 3f), "animation loops");
         check(m.texture != null && m.texture.getWidth() >= 2, "a white fallback texture exists");
         check(near(m.height(), 2f), "height 2");
     }
 
-    /** A quad with negative indices, a material colour and a picture; UVs are flipped to the top-left origin. */
     static void obj(Path tmp) throws Exception {
         java.awt.image.BufferedImage img = new java.awt.image.BufferedImage(4, 4, java.awt.image.BufferedImage.TYPE_INT_ARGB);
         for (int y = 0; y < 4; y++) {
@@ -115,7 +113,6 @@ public final class Model3dTests {
         check(vTop >= 0f && vTop <= 1f, "uv in range");
     }
 
-    /** The example that ships with the client loads, has animations and a sensible size. */
     static void sample() throws Exception {
         Path f = Path.of("src/resources/assets/dihclient/models/example_robot.glb");
         check(Files.isRegularFile(f), "example model exists");
@@ -140,7 +137,6 @@ public final class Model3dTests {
         check(moved, "walk animation moves vertices");
     }
 
-    /** A white cube becomes a cube of white blocks; solid or hollow. */
     static void voxels(Path tmp) throws Exception {
         Files.writeString(tmp.resolve("cube.mtl"), "newmtl w\nKd 1 1 1\n");
         StringBuilder o = new StringBuilder("mtllib cube.mtl\nusemtl w\n");

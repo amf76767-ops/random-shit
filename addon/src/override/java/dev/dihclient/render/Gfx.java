@@ -16,10 +16,6 @@ import net.minecraft.class_310;
 import net.minecraft.class_327;
 import net.minecraft.class_332;
 
-/**
- * Drawing helpers of the GUI and the HUD. Compared with 5.6: rounded corners are anti-aliased (the old ones were stepped, which looked
- * pixelated) and text is drawn with a smooth font (Inter, assets/dihclient/font) unless "Smooth Font" in ClickGUI is off.
- */
 public final class Gfx {
     public static final int BG = -233959403;
     public static final int BG_SOFT = -15328992;
@@ -49,9 +45,6 @@ public final class Gfx {
         textShadow = on;
     }
 
-    // ---------------------------------------------------------------- anti-aliased corners
-
-    /** Coverage of the pixels of one rounded corner (the square of side r in the top left), for the filled shape and for a 1 px outline. */
     private static final class Corner {
         final float[][] fill;
         final float[][] ring;
@@ -101,7 +94,6 @@ public final class Gfx {
         return c;
     }
 
-    // ---- the cheap stepped corners of the 5.6 client: used for shadows, when "Smooth Corners" is off and when a frame has used up its budget
     private static final int[][] INSETS = new int[65][];
 
     private static int inset(int r, int row) {
@@ -163,7 +155,6 @@ public final class Gfx {
         }
     }
 
-    /** Smooth corners cost many small fills; each pass (one GuiGraphics) may spend this many, then the cheap corners are used. */
     private static final int AA_BUDGET = 3000;
     private static class_332 pass;
     private static int budget;
@@ -289,7 +280,7 @@ public final class Gfx {
         for (int i = size; i > 0; i--) {
             int a = (int) (strength * 60.0F * (1.0F - (float) i / (size + 1)) / size * 2.0F);
             if (a > 0) {
-                // a soft translucent layer needs no smooth edge
+
                 int rr = Math.max(0, Math.min(r + i, Math.min(w + i * 2, h + i * 2) / 2));
                 int rows = rr == 0 ? 0 : stepRows(g, x - i, y - i + 1, w + i * 2, h + i * 2, rr, a << 24, true);
                 g.method_25294(x - i, y - i + 1 + rows, x + w + i, y - i + 1 + h + i * 2 - rows, a << 24);
@@ -352,8 +343,6 @@ public final class Gfx {
         }
     }
 
-    // ---------------------------------------------------------------- text
-
     private static boolean smooth() {
         ClickGui g = gui;
         if (g == null) {
@@ -370,7 +359,6 @@ public final class Gfx {
         return g == null || g.smoothCorners.get();
     }
 
-    /** A string ready to draw in the smooth font (a leading "\u00a7l" means the bold cut), with its width. */
     private record Line(class_5481 text, int width) {
     }
 
@@ -399,7 +387,6 @@ public final class Gfx {
         }
     }
 
-    /** Replaces the direct {@code drawString(font, component, ...)} calls of the old GUI classes (see Patcher.routeComponentText). */
     public static void drawComponent(class_332 g, class_327 font, class_2561 text, int x, int y, int color, boolean shadow) {
         if (smooth() && text.method_10855().isEmpty()) {
             String plain = text.getString();

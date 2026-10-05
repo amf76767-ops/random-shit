@@ -7,24 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 
-/**
- * Finds where a walking player can go: a Dijkstra search over "standing cells" (the cell of the feet). It knows
- * flat steps, steps up by one block (a jump), diagonal steps and drops of up to {@code maxFall} blocks, and nothing
- * else: a wall two blocks high is a wall. It knows nothing about Minecraft; the host describes the world.
- */
 public final class Nav {
     private Nav() {
     }
 
-    /** The world, as seen by the search. Coordinates are block coordinates. */
     public interface Terrain {
-        /** The body (feet and head cell) may be in this cell: no collision, nothing that hurts. */
+
         boolean passable(int x, int y, int z);
 
-        /** A player can stand on top of this cell (it has a collision box). */
         boolean support(int x, int y, int z);
 
-        /** Standing next to or on it hurts (lava, fire, cactus, magma ...). */
         boolean hazard(int x, int y, int z);
     }
 
@@ -58,7 +50,6 @@ public final class Nav {
             return this.cells.get(key(x, y, z));
         }
 
-        /** Cells from the start to {@code goal}, the start first. */
         public List<Cell> path(Cell goal) {
             List<Cell> out = new ArrayList<>();
             for (Cell c = goal; c != null; c = c.parent) {
@@ -80,7 +71,6 @@ public final class Nav {
     private static final int[][] CARDINAL = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
     private static final int[][] DIAGONAL = {{1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
 
-    /** Every cell the player can reach from (sx, sy, sz) with the cheapest way to it. */
     public static Region explore(Terrain t, int sx, int sy, int sz, Options o) {
         Region r = new Region();
         Cell start = new Cell(sx, sy, sz);
@@ -104,7 +94,7 @@ public final class Nav {
                 if (standable(t, nx, c.y, nz)) {
                     relax(r, open, c, nx, c.y, nz, 1.0f);
                 } else if (t.passable(c.x, c.y + 2, c.z) && standable(t, nx, c.y + 1, nz) && Math.abs(c.y + 1 - sy) <= 24) {
-                    relax(r, open, c, nx, c.y + 1, nz, 1.7f); // a jump
+                    relax(r, open, c, nx, c.y + 1, nz, 1.7f);
                 } else if (t.passable(nx, c.y, nz) && t.passable(nx, c.y + 1, nz)) {
                     for (int k = 1; k <= o.maxFall; k++) {
                         if (!t.passable(nx, c.y - k, nz)) {
@@ -123,7 +113,7 @@ public final class Nav {
                     if (Math.abs(nx - sx) > o.radius || Math.abs(nz - sz) > o.radius) {
                         continue;
                     }
-                    // both neighbours of the corner must be free, or the player gets stuck on the edge
+
                     if (standable(t, nx, c.y, nz) && t.passable(c.x + d[0], c.y, c.z) && t.passable(c.x + d[0], c.y + 1, c.z)
                             && t.passable(c.x, c.y, c.z + d[1]) && t.passable(c.x, c.y + 1, c.z + d[1])) {
                         relax(r, open, c, nx, c.y, nz, 1.42f);

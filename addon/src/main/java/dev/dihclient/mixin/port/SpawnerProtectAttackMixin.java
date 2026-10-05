@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** While Spawner Protect works, the attack button of the player does nothing (the module breaks blocks itself). */
 @Mixin(class_310.class)
 public abstract class SpawnerProtectAttackMixin {
     @Inject(method = "method_1590", at = @At("HEAD"), cancellable = true)

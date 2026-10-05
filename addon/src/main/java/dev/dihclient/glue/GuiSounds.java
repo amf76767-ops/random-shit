@@ -15,11 +15,6 @@ import net.minecraft.class_310;
 import net.minecraft.class_3414;
 import net.minecraft.class_6880;
 
-/**
- * The GUI's own sounds (a tap, a rising and a falling pair for switching a module on and off; two sets, Glass and Soft, chosen in
- * ClickGUI), played instead of the vanilla button click. They are ordinary sound events of the mod's resource pack (assets/dihclient/sounds.json).
- * Minecraft calls are found by their signature; if anything is missing the vanilla sound is used.
- */
 public final class GuiSounds {
     private static final Map<String, class_6880> ENTRIES = new HashMap<>();
     private static Method soundOf;
@@ -29,13 +24,11 @@ public final class GuiSounds {
     private GuiSounds() {
     }
 
-    /** Replaces {@code PositionedSoundInstance.master(vanillaSound, pitch)} in the click code of both GUIs. */
     public static class_1109 click(class_6880 vanilla, float pitch) {
         class_6880 own = entry(event("click"));
         return class_1109.method_47978(own != null ? own : vanilla, pitch);
     }
 
-    /** Called when a module is switched on or off. */
     public static void toggle(Module module) {
         try {
             ClickGui gui = ModuleManager.of(ClickGui.class);
@@ -51,7 +44,6 @@ public final class GuiSounds {
         }
     }
 
-    /** The sound event of the chosen sound set: kind is "click", "on" or "off". */
     private static String event(String kind) {
         try {
             ClickGui gui = ModuleManager.of(ClickGui.class);
@@ -59,7 +51,7 @@ public final class GuiSounds {
                 return "ui.glass_" + kind;
             }
         } catch (Throwable ignored) {
-            // the new set is the default
+
         }
         return switch (kind) {
             case "on" -> "ui.toggle_on";

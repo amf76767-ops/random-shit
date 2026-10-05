@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-# Compile-check files of the add-on against the real game classes WITHOUT touching build/ (safe to run in parallel).
-# usage: tools/quick.sh file.java [more.java ...]      (needs one earlier ./build.sh run: it leaves build/classes and build/stubs)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 C=.cache

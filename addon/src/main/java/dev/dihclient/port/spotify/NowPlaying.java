@@ -1,10 +1,6 @@
 package dev.dihclient.port.spotify;
 
-
-/**
- * Ported from an open-source client (GPL-3.0).
- * What Spotify is doing right now (from the Windows media session, or from the title of its window as fallback).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public record NowPlaying(
     NowPlaying.Status status,
     String title,

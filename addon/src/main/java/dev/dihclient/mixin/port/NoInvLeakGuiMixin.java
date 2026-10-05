@@ -19,10 +19,7 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Ported from an open-source client (GPL-3.0) (MixinNoInvLeakGui).
- * Hotbar for No Inv Leak: the stack of every hotbar/offhand slot, the held item name and the selection frame.
- */
+/** Ported from an open-source client (GPL-3.0). */
 @Mixin(class_329.class)
 public abstract class NoInvLeakGuiMixin {
     @Unique
@@ -33,14 +30,12 @@ public abstract class NoInvLeakGuiMixin {
     @Shadow
     private class_1799 field_2031;
 
-    /** Gui#renderSlot(graphics, x, y, deltaTracker, player, stack, seed): the handler also gets the target's arguments. */
     @ModifyVariable(method = "method_1762", at = @At("HEAD"), argsOnly = true)
     private class_1799 dih$hotbar(class_1799 stack, class_332 graphics, int x, int y, class_9779 tracker, class_1657 player,
             class_1799 same, int seed) {
         return NoInvLeakModule.hotbar(stack, x, y, seed);
     }
 
-    /** The name of the held item above the hotbar. */
     @Inject(method = "method_1749", at = @At("HEAD"), cancellable = true)
     private void dih$itemName(class_332 graphics, CallbackInfo ci) {
         if (NoInvLeakModule.hidesItemName()) {
@@ -56,7 +51,6 @@ public abstract class NoInvLeakGuiMixin {
         }
     }
 
-    /** Hotbar drawing: skips the selection frame (it tells which slot you hold), everything else is drawn as usual. */
     @Redirect(method = "method_1759", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/class_332;method_52706(Lcom/mojang/blaze3d/pipeline/RenderPipeline;Lnet/minecraft/class_2960;IIII)V"))
     private void dih$selection(class_332 graphics, RenderPipeline pipeline, class_2960 sprite, int x, int y, int width, int height) {

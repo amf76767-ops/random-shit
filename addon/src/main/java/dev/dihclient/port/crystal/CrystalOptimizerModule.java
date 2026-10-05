@@ -32,11 +32,7 @@ import net.minecraft.class_9723;
 import net.minecraft.class_1297.class_5529;
 import net.minecraft.class_2824.class_5908;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Removes a crystal on your screen as soon as your own hit is sure to break it, so the next crystal can be placed
- * without waiting for the server. It only does so when the hit really deals damage (weapon, enchants, effects, recent hand swaps).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class CrystalOptimizerModule extends Module {
     private static final int SAMPLE_CAPACITY = 64;
     private final class_1799[] heldSamples = new class_1799[SAMPLE_CAPACITY];
@@ -49,7 +45,7 @@ public class CrystalOptimizerModule extends Module {
     private class_638 trackedLevel;
     private boolean attackSent;
     private final AttackProbe attackProbe = new AttackProbe();
-    /** one listener object, so it can be removed again */
+
     private final AttackHooks.Listener attackListener = this::onAttack;
 
     public CrystalOptimizerModule() {
@@ -109,7 +105,6 @@ public class CrystalOptimizerModule extends Module {
         return false;
     }
 
-    /** Runs when the game starts handling an attack of the local player (after the attack packet has been sent). */
     private void onAttack(class_1297 target) {
         boolean sent = this.attackSent;
         this.attackSent = false;

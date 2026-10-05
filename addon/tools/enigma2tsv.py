@@ -23,7 +23,6 @@ def parse(path):
                 stack.append((indent, full_i, full_n))
                 out.write('CLASS\t%s\t%s\n' % (full_i, full_n)); n['c'] += 1
             elif kind in ('FIELD', 'METHOD') and stack:
-                # FIELD inter named desc / METHOD inter named desc  (named may be missing)
                 inter = t[1]
                 rest = [x for x in t[2:] if not x.startswith('acc:')]
                 if len(rest) == 2:

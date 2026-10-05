@@ -8,14 +8,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * The state machine of Player Bypass: which chunks carry the "dark light section" signal, which ones were already
- * reported, and which ones are held back while the player is underground (their own base lights up chunks around them).
- * It was a part of {@code PlayerBypassLightTracker}; split off so it runs without the game.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class ChunkFlagTracker {
-    /** Decides whether a chunk may be flagged at all (the protected chunks may not). */
+
     public interface Protection {
         boolean flagAllowed(long chunk, boolean alreadyFlagged);
     }
@@ -64,7 +59,6 @@ public final class ChunkFlagTracker {
         return this.isFlagged(chunkKey) || this.held.containsKey(chunkKey);
     }
 
-    /** Normal case: the packet counts at once. */
     public void ingest(int chunkX, int chunkZ, BitSet skyMask, BitSet skyEmpty, List<byte[]> skyNibbles, int sectionCount, int bottomSectionY) {
         long key = ProtectedChunkStore.key(chunkX, chunkZ);
         if (this.held.containsKey(key)) {
@@ -95,7 +89,6 @@ public final class ChunkFlagTracker {
         }
     }
 
-    /** The player is below Y 0: the packet is only kept aside and used when the player is back up (see {@link #ingest}). */
     public void hold(int chunkX, int chunkZ, BitSet skyMask, BitSet skyEmpty, List<byte[]> skyNibbles, int sectionCount, int bottomSectionY) {
         long key = ProtectedChunkStore.key(chunkX, chunkZ);
         ChunkLightSnapshot snapshot = this.held.get(key);

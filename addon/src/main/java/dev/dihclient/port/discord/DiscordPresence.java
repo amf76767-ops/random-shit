@@ -13,14 +13,9 @@ import net.minecraft.class_634;
 import net.minecraft.class_642;
 import net.minecraft.class_8732;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Shows DIHClient (and, if you allow it, the server you are on) in your Discord status. It talks only to the local Discord
- * app over its IPC pipe / unix socket (see {@link DiscordIpc}); no web request is made. By default no server address is sent.
- * Runs in the main menu too ({@link ModuleManager.MenuTicking}), so leaving a world is noticed.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class DiscordPresence extends Module implements ModuleManager.MenuTicking {
-    /** The id of your own Discord application: its name shows as the game name in Discord. */
+
     static final String DEFAULT_APP_ID = "";
     static final String DEFAULT_IMAGE = "";
     private static final String LARGE_TEXT = "DIHClient";
@@ -73,7 +68,7 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
     @Override
     public void onTick() {
         try {
-            // a config-enabled module gets onEnable late (first world), but ticks in the menu already
+
             this.ensureLink();
             this.refresh();
         } catch (Throwable t) {
@@ -99,7 +94,6 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
         this.session = null;
     }
 
-    /** Builds the wanted status on the game thread and hands it over; the link thread does the IO. */
     private void refresh() {
         DiscordLink l = this.link;
         if (l == null) {
@@ -144,7 +138,7 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
             startedAt = this.joinedAt;
         } else {
             if (this.session != null && this.session.method_10758() && this.session.method_10744() instanceof class_8732) {
-                // server switch (reconfiguration): keep what is shown instead of flickering through the menu
+
                 DiscordLink l = this.link;
                 return l == null ? null : l.current();
             }
@@ -160,7 +154,6 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
                 DiscordCard.assetKey(this.imageAsset.get()), LARGE_TEXT);
     }
 
-    /** Custom state text, or the default; cleaned once per change, not per tick. */
     private String state() {
         String in = this.stateText.get();
         if (!java.util.Objects.equals(in, this.stateIn)) {
@@ -170,7 +163,6 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
         return this.stateOut != null ? this.stateOut : "DIHClient " + version();
     }
 
-    /** Game close: give the link a moment to remove the status. */
     private static synchronized void installHook() {
         if (hookInstalled) {
             return;
@@ -190,7 +182,7 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
     }
 
     private static String version() {
-        try { // by reflection: the compile-time stand-in for Fabric does not know the mod container
+        try {
             Object loader = Class.forName("net.fabricmc.loader.api.FabricLoader").getMethod("getInstance").invoke(null);
             java.util.Optional<?> container = (java.util.Optional<?>) Class.forName("net.fabricmc.loader.api.FabricLoader").getMethod("getModContainer", String.class).invoke(loader, "dihclient");
             if (container.isPresent()) {
@@ -199,7 +191,7 @@ public class DiscordPresence extends Module implements ModuleManager.MenuTicking
                 return String.valueOf(Class.forName("net.fabricmc.loader.api.Version").getMethod("getFriendlyString").invoke(version)).replaceAll("\\+.*", "");
             }
         } catch (Throwable ignored) {
-            // no version in the text
+
         }
         return "";
     }

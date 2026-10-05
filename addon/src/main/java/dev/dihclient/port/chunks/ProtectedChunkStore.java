@@ -28,12 +28,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * The chunks that must never be flagged (the ones around where you have been), per server and dimension, kept in
- * {@code config/dihclient/playerbypass-protected}. Files from the old folder are picked up once when no new file exists.
- * Game thread only; the files are written on a background thread from a copy.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class ProtectedChunkStore implements ChunkFlagTracker.Protection {
     public static final int RADIUS = 2;
     static final int CONFIG_VERSION = 1;
@@ -42,7 +37,7 @@ public final class ProtectedChunkStore implements ChunkFlagTracker.Protection {
     private static final String DEFAULT_PORT_SUFFIX = ":25565";
     private static final int NAME_PART_LENGTH = 40;
     private static final long NOT_AN_INT = Long.MIN_VALUE;
-    // not DIHClient.LOG: the class stays loadable without the game (unit tests)
+
     private static final Logger LOGGER = LoggerFactory.getLogger("DIHClient");
     private static final ProtectedChunkStore INSTANCE = new ProtectedChunkStore(
             () -> FabricLoader.getInstance().getConfigDir().resolve("dihclient").resolve("playerbypass-protected"),
@@ -63,7 +58,6 @@ public final class ProtectedChunkStore implements ChunkFlagTracker.Protection {
     private boolean dirty;
     private long dirtySince;
 
-    /** @param legacyDirectory folder of the old files, or null */
     public ProtectedChunkStore(Supplier<Path> directory, Supplier<Path> legacyDirectory) {
         this.directory = directory;
         this.legacyDirectory = legacyDirectory;
@@ -133,7 +127,7 @@ public final class ProtectedChunkStore implements ChunkFlagTracker.Protection {
             }
             load(bucket, source);
             if (source != bucket.file && !bucket.readOnly && !bucket.chunks.isEmpty()) {
-                this.changed(bucket); // copy the old file to the new place
+                this.changed(bucket);
             }
             this.buckets.put(name, bucket);
         }
@@ -215,7 +209,7 @@ public final class ProtectedChunkStore implements ChunkFlagTracker.Protection {
     }
 
     private void save(Bucket bucket) {
-        // a newer snapshot replaces one that is still waiting; only the first call starts a write
+
         if (this.queued.put(bucket.file, bucket.chunks.toLongArray()) == null) {
             this.lastWrite = CompletableFuture.runAsync(() -> this.writeQueued(bucket), this.writer);
         }
@@ -257,7 +251,6 @@ public final class ProtectedChunkStore implements ChunkFlagTracker.Protection {
         }
     }
 
-    /** A file that cannot be read stays untouched on disk: the bucket turns read-only so it is never overwritten. */
     private static void load(Bucket bucket, Path source) {
         if (!Files.isRegularFile(source)) {
             return;

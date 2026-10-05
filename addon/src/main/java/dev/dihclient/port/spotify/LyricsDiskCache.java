@@ -18,10 +18,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Small on-disk cache of LRCLIB answers (one JSON file per track, pruned by count and size).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class LyricsDiskCache {
     private static final int FORMAT = 1;
     private static final String SUFFIX = ".json";

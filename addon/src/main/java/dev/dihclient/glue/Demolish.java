@@ -31,13 +31,6 @@ import net.minecraft.class_2338;
 import net.minecraft.class_2350;
 import net.minecraft.class_2680;
 
-/**
- * Takes down a build: every block of the loaded AutoBuild plan that is still there (same block as planned) is mined,
- * from the top down. It walks to the spots from which the most blocks are in reach (same path search as the AutoBuild
- * walking), aims at each block like a player would, uses the best tool in the hotbar and finally collects the drops.
- * Only blocks of the plan are touched. The module asks once before it starts; switching it off pauses, the AutoSupervisor
- * pauses and resumes it like the other automation.
- */
 public class Demolish extends Module {
     public final BoolSetting confirm = this.bool("Confirm", "Ask once (switch the module on a second time) before it takes the build down.", true);
     public final BoolSetting collect = this.bool("Collect Drops", "Walk over the dropped items at the end.", true);
@@ -78,7 +71,7 @@ public class Demolish extends Module {
     @Override
     protected void onEnable() {
         if (this.phase == Phase.CLEARING || this.phase == Phase.COLLECTING) {
-            return; // resumed (the supervisor paused it)
+            return;
         }
         if (!inGame()) {
             this.setEnabledSilently(false);
@@ -213,7 +206,7 @@ public class Demolish extends Module {
             this.tickMining();
             return;
         }
-        // drop what is gone
+
         this.remaining.removeIf(k -> {
             class_2338 pos = this.byKey.get(k);
             return pos == null || !this.stillThere(pos);
@@ -232,7 +225,7 @@ public class Demolish extends Module {
             this.aimed = false;
             return;
         }
-        // walk to the spot that reaches most of the top layer
+
         int top = Integer.MIN_VALUE;
         for (long k : this.remaining) {
             if (!this.skipped.contains(k)) {
@@ -253,7 +246,7 @@ public class Demolish extends Module {
         PathWalker.State st = this.walker.walk(open, this.reach.get(), this.maxFall.get());
         this.status = "Walking to the next spot (" + (this.total - this.remaining.size()) + "/" + this.total + ")";
         if (st == PathWalker.State.NO_ROUTE) {
-            // nothing reaches the rest: skip the highest ones, they are probably out of reach
+
             for (long k : new ArrayList<>(this.remaining)) {
                 class_2338 p = this.byKey.get(k);
                 if (p.method_10264() >= top - 3) {
@@ -262,11 +255,10 @@ public class Demolish extends Module {
             }
             this.walker.reset();
         } else if (st == PathWalker.State.ARRIVED && this.walker.arrivedTicks() > 15) {
-            this.walker.giveUpGoal(); // we are there and still see nothing to mine: another spot
+            this.walker.giveUpGoal();
         }
     }
 
-    /** The highest block of the plan that is in reach and in line of sight, or null. */
     private class_2338 pickReachable() {
         class_243 eye = mc.field_1724.method_33571();
         double r = this.reach.get() - 0.3;
@@ -299,7 +291,6 @@ public class Demolish extends Module {
         return best;
     }
 
-    /** No full block between the eyes and the block, except right next to it. */
     private static boolean seen(McTerrain world, class_243 eye, class_2338 b) {
         double tx = b.method_10263() + 0.5, ty = b.method_10264() + 0.5, tz = b.method_10260() + 0.5;
         double dx = tx - eye.field_1352, dy = ty - eye.field_1351, dz = tz - eye.field_1350;
@@ -389,7 +380,7 @@ public class Demolish extends Module {
             return;
         }
         this.status = "Collecting " + drops.size() + " drops";
-        // pick up reach: items are collected from about one block away
+
         PathWalker.State st = this.walker.walk(drops, 1.6, this.maxFall.get());
         if (st == PathWalker.State.NO_ROUTE || (st == PathWalker.State.ARRIVED && this.walker.arrivedTicks() > 20)) {
             this.walker.giveUpGoal();

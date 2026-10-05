@@ -13,9 +13,8 @@ import java.time.Duration;
 import java.util.Locale;
 import java.util.regex.Pattern;
 
-/** Reads the releases of a GitHub repository and picks the newest DIHClient build for this Minecraft version. */
 public final class GithubReleases {
-    /** One downloadable release. */
+
     public record Release(Version version, String tag, String title, String notes, String pageUrl,
                           String assetName, String assetUrl, long assetSize, String sha256) {
     }
@@ -23,13 +22,11 @@ public final class GithubReleases {
     private static final Pattern ASSET_NAME = Pattern.compile("(?i)dihclient[\\w.+-]*\\.jar");
     private static final Pattern BAD_ASSET = Pattern.compile("(?i)(sources|javadoc|dev|api)\\.jar$");
 
-    /** Set by the tests only, so a local server can stand in for GitHub. */
     public static boolean allowLoopbackForTests;
 
     private GithubReleases() {
     }
 
-    /** Only these hosts may serve an update, whatever the release page says. */
     public static boolean trustedHost(String host) {
         if (host == null) {
             return false;
@@ -51,13 +48,6 @@ public final class GithubReleases {
         }
     }
 
-    /**
-     * @param json              the body of {@code GET /repos/{repo}/releases}
-     * @param current           the running version
-     * @param minecraft         Minecraft version of the running client, or null to accept any
-     * @param allowPrereleases  whether pre-releases may be offered
-     * @return the newest release that is strictly newer than {@code current}, or null
-     */
     public static Release pickNewer(String json, Version current, String minecraft, boolean allowPrereleases) {
         JsonElement root = JsonParser.parseString(json);
         if (!root.isJsonArray()) {
@@ -109,7 +99,7 @@ public final class GithubReleases {
                 if (!trustedUrl(str(a, "browser_download_url"))) {
                     continue;
                 }
-                // prefer the file that names our Minecraft version
+
                 boolean fits = minecraft != null && name.contains(minecraft);
                 if (asset == null || fits) {
                     asset = a;
@@ -126,7 +116,7 @@ public final class GithubReleases {
             mc = fromName == null ? null : fromName.minecraft();
         }
         if (minecraft != null && mc != null && !mc.equals(minecraft)) {
-            return null; // a build for another Minecraft version would crash the game
+            return null;
         }
         String digest = str(asset, "digest");
         String sha = digest.toLowerCase(Locale.ROOT).startsWith("sha256:") ? digest.substring(7).toLowerCase(Locale.ROOT) : "";

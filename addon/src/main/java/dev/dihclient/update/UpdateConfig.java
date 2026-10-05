@@ -8,18 +8,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-/** Settings of the update check, stored in {@code config/dihclient/update.json}. */
 public final class UpdateConfig {
     public static final String DEFAULT_REPO = "amf76767-ops/random-shit";
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    /** GitHub repository as {@code owner/name} whose releases are checked. */
     public String repo = DEFAULT_REPO;
     public boolean checkForUpdates = true;
     public boolean includePrereleases = false;
-    /** A version the player chose "Skip this version" for. */
+
     public String skippedVersion = "";
-    /** Hours between two checks while the game keeps running. */
+
     public int checkEveryHours = 6;
 
     public static UpdateConfig load(Path file) {
@@ -32,7 +30,7 @@ public final class UpdateConfig {
                 }
             }
         } catch (Exception ignored) {
-            // a broken file falls back to the defaults and is rewritten below
+
         }
         UpdateConfig c = new UpdateConfig();
         c.save(file);
@@ -46,7 +44,7 @@ public final class UpdateConfig {
             Files.writeString(tmp, GSON.toJson(this), StandardCharsets.UTF_8);
             Files.move(tmp, file, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException ignored) {
-            // not being able to save must never break the game
+
         }
     }
 

@@ -11,10 +11,6 @@ import net.minecraft.class_1588;
 import net.minecraft.class_1657;
 import net.minecraft.class_332;
 
-/**
- * Round radar: dark disc with range rings, a slowly turning sweep, the view cone, compass letters, players with outline
- * (at the rim, dimmed, when they are farther away than the range), arrows for things far above or below you.
- */
 public class RadarElement extends HudElement {
    private static final int SIZE = 92;
 
@@ -68,7 +64,6 @@ public class RadarElement extends HudElement {
       g.method_25294(cx, cy - radius, cx + 1, cy + radius + 1, 0x16FFFFFF);
       g.method_25294(cx - radius, cy, cx + radius + 1, cy + 1, 0x16FFFFFF);
 
-      // view cone (straight up is where you look)
       for (int s = -1; s <= 1; s += 2) {
          double a = s * Math.toRadians(35.0);
          for (int t = 6; t < radius; t += 3) {
@@ -78,7 +73,6 @@ public class RadarElement extends HudElement {
          }
       }
 
-      // sweep with a fading tail
       double sweep = System.currentTimeMillis() % 3200L / 3200.0 * Math.PI * 2.0;
       for (int k = 0; k < 14; k++) {
          double a = sweep - k * 0.07;
@@ -92,7 +86,6 @@ public class RadarElement extends HudElement {
          }
       }
 
-      // compass letters turn with your view: N sits where north is
       String[] letters = {"N", "E", "S", "W"};
       double[][] dir = {{sin, cos}, {-cos, sin}, {-sin, -cos}, {cos, -sin}};
       for (int i = 0; i < 4; i++) {
@@ -144,7 +137,7 @@ public class RadarElement extends HudElement {
             size = 1;
          }
          g.method_25294(x - size, y - size, x + size + 1, y + size + 1, color);
-         if (!edge && Math.abs(dy) > 4.0) { // far above / below: a small arrow next to it
+         if (!edge && Math.abs(dy) > 4.0) {
             int ax = x + size + 3;
             int dir2 = dy > 0 ? -1 : 1;
             g.method_25294(ax, y, ax + 1, y + 1, color);
@@ -153,7 +146,6 @@ public class RadarElement extends HudElement {
          }
       }
 
-      // you: a small arrow pointing up
       g.method_25294(cx, cy - 4, cx + 1, cy - 3, accent);
       g.method_25294(cx - 1, cy - 3, cx + 2, cy - 2, accent);
       g.method_25294(cx - 2, cy - 2, cx + 3, cy, accent);

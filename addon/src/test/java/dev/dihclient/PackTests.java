@@ -61,7 +61,7 @@ public final class PackTests {
             none = PackFilter.copy(in, n -> !n.equals("pack.mcmeta"));
         }
         check(names(none).equals(Set.of("pack.mcmeta")), "everything off leaves a valid empty pack");
-        // a look rewrites the shader constants
+
         dev.dihclient.glue.Look look = new dev.dihclient.glue.Look("t", dev.dihclient.glue.Look.rgb(0.5f, 0.6f, 0.7f), dev.dihclient.glue.Look.rgb(1, 1, 1),
                 dev.dihclient.glue.Look.rgb(1, 1, 1), dev.dihclient.glue.Look.rgb(0.62f, 0.05f, 0.72f), dev.dihclient.glue.Look.rgb(0, 0, 0),
                 dev.dihclient.glue.Look.rgb(2, 2, 2), dev.dihclient.glue.Look.rgb(0.1f, 0.2f, 0.3f));

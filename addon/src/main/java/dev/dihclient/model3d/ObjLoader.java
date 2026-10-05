@@ -14,18 +14,12 @@ import java.util.Locale;
 import java.util.Map;
 import javax.imageio.ImageIO;
 
-/**
- * Reads Wavefront .obj files with their .mtl: positions, texture coordinates, normals, vertex colours (v x y z r g b),
- * polygons (split into triangles), material colour (Kd, d) and picture (map_Kd). No animation.
- *
- * Blender's OBJ export looks along -Z by default while glTF and Minecraft look along +Z, so the model is turned by 180°.
- */
 public final class ObjLoader {
     private ObjLoader() {
     }
 
     private static final class Group {
-        final List<int[]> corners = new ArrayList<>(); // per face corner: v, vt, vn (0 = none, else index + 1)
+        final List<int[]> corners = new ArrayList<>();
         final List<Integer> faceSizes = new ArrayList<>();
     }
 
@@ -84,7 +78,6 @@ public final class ObjLoader {
             }
         }
 
-        // a picture next to the model with the same name is used when the .mtl names none
         BufferedImage fallback = null;
         boolean anyPicture = mtl.values().stream().anyMatch(m -> m.image != null);
         if (!anyPicture) {
@@ -127,7 +120,7 @@ public final class ObjLoader {
                             id = -1;
                         } else {
                             float[] p = vs.get(c[0] - 1);
-                            pos.add(new float[]{-p[0], p[1], -p[2]}); // turn 180° around Y
+                            pos.add(new float[]{-p[0], p[1], -p[2]});
                             if (c[2] > 0) {
                                 float[] n = vns.get(c[2] - 1);
                                 nrm.add(new float[]{-n[0], n[1], -n[2]});
@@ -233,7 +226,7 @@ public final class ObjLoader {
                 cur.color = GltfLoader.pack(kd[0], kd[1], kd[2], alpha);
             }
         } catch (IOException | RuntimeException ignored) {
-            // a missing or broken .mtl only costs the colours
+
         }
     }
 
@@ -245,7 +238,6 @@ public final class ObjLoader {
         }
     }
 
-    /** OBJ indices count from 1, negative ones from the end. Returns 0 for "none", else index + 1. */
     private static int ref(String s, int size) {
         if (s.isEmpty()) {
             return 0;

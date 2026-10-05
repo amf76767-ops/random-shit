@@ -19,12 +19,6 @@ import net.minecraft.class_239.class_240;
 import net.minecraft.class_3959.class_242;
 import net.minecraft.class_3959.class_3960;
 
-/**
- * AutoBuild only places what a player really could place. The patcher routes every block click of the build code
- * through {@link #interact}: the click is sent only when a ray along the player's actual view hits exactly the block
- * face that is being clicked, first, within reach. Placements behind or through blocks, from the back of a face or out
- * of reach never leave the client. {@link #enforce} switches off the AutoBuild options that allowed such placements.
- */
 public final class LegalPlace {
     private static long lastNote;
     private static int refused;
@@ -33,7 +27,6 @@ public final class LegalPlace {
     private LegalPlace() {
     }
 
-    /** Replaces {@code interactionManager.interactBlock(player, hand, hit)} in the build code. */
     public static class_1269 interact(class_636 manager, class_746 player, class_1268 hand, class_3965 hit) {
         if (!legal(player, hit)) {
             refused++;
@@ -66,7 +59,6 @@ public final class LegalPlace {
             && LegalPlaceMath.inReach(at.field_1352 - eye.field_1352, at.field_1351 - eye.field_1351, at.field_1350 - eye.field_1350);
     }
 
-    /** Any result that is not "accepted", found by looking at the constants instead of guessing their names. */
     private static class_1269 refusedResult() {
         if (refusedResult == null) {
             for (Field f : class_1269.class.getFields()) {
@@ -79,12 +71,12 @@ public final class LegalPlace {
                         }
                     }
                 } catch (ReflectiveOperationException ignored) {
-                    // try the next constant
+
                 }
             }
         }
         if (refusedResult == null) {
-            // better to stop the build than to send a click that is not legal
+
             throw new IllegalStateException("no 'not accepted' constant found in class_1269");
         }
         return refusedResult;
@@ -98,18 +90,16 @@ public final class LegalPlace {
         }
     }
 
-    /** Called right before the build runtime ticks: takes back every setting that could allow an illegal placement. */
     public static void enforce(BuildRuntime.Settings s) {
         s.strict = true;
         s.airPlace = false;
         s.anyFace = false;
         s.legitFallback = false;
-        s.giveCommand = false; // /give is gone for good (it needs OP and is not something a player does)
+        s.giveCommand = false;
         s.reach = Math.min(s.reach, LegalPlaceMath.REACH);
         PlacementSolver.visibleOnly = true;
     }
 
-    /** Called once when the modules are created: hides the options that are fixed now and limits the reach slider. */
     public static void prepare(AutoBuild build) throws ReflectiveOperationException {
         build.airPlace.visibleWhen(() -> false);
         build.legitFallback.visibleWhen(() -> false);
@@ -122,7 +112,6 @@ public final class LegalPlace {
         max.setDouble(reach, LegalPlaceMath.REACH);
         reach.set(Math.min(reach.get(), LegalPlaceMath.REACH));
 
-        // path planning of the build walk (stand spots with the most blocks in reach, real paths instead of running into walls)
         dev.dihclient.setting.BoolSetting smart = new dev.dihclient.setting.BoolSetting("Smart Path",
                 "Plans where to stand so the most blocks are in reach and walks there on a real path (around walls, steps, drops).", true);
         smart.onChange(() -> dev.dihclient.autobuild.BuildPilot.enabled = smart.get());

@@ -8,10 +8,7 @@ import com.google.gson.JsonPrimitive;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * One track record of the LRCLIB lyrics service (JSON in and out; the same JSON is what the disk cache stores).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public record LrclibTrack(
     long id, String trackName, String artistName, String albumName, double duration, boolean instrumental, String plainLyrics, String syncedLyrics
 ) {

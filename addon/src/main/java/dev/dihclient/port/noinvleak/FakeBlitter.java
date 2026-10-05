@@ -6,14 +6,6 @@ import java.nio.ByteOrder;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL11;
 
-/**
- * Not in the original: replaces its ImGui pass. Puts the fake slot pictures on the window's back buffer right before the buffers are
- * swapped, i.e. after the real background of the slots was read back and after the game drew the frame without any item in
- * those slots. The capture-excluded overlay windows then cover them for the player, a screen capture sees only these.
- * <p>
- * Plain GL blit from a small texture; every GL state that is touched goes through {@link GlStateManager} (or is read back and
- * restored), so the game's own state cache stays right.
- */
 final class FakeBlitter {
     private static final int READ = 36008;
     private static final int DRAW = 36009;
@@ -37,7 +29,6 @@ final class FakeBlitter {
     private boolean scissorWasOn;
     private boolean open;
 
-    /** Binds everything for a run of {@link #draw} calls with pictures of {@code px} x {@code px}. */
     void begin(int px) {
         this.previousRead = GlStateManager.getFrameBuffer(READ);
         this.previousDraw = GlStateManager.getFrameBuffer(DRAW);
@@ -66,9 +57,6 @@ final class FakeBlitter {
         this.open = true;
     }
 
-    /**
-     * One picture (opaque ARGB, top row first) with its top-left corner at (x, yTop) counted from the window's top edge.
-     */
     void draw(int[] argb, int x, int yTop, int windowHeight) {
         int px = this.side;
         this.upload.clear();
@@ -76,7 +64,7 @@ final class FakeBlitter {
         this.upload.limit(px * px * 4);
         GlStateManager._texSubImage2D(TEXTURE_2D, 0, 0, 0, px, px, BGRA, UNSIGNED_INT_8_8_8_8_REV, this.upload);
         int bottom = windowHeight - yTop - px;
-        // source rows are flipped (y1 < y0): GL's origin is the bottom-left, the picture's top row comes first
+
         GlStateManager._glBlitFrameBuffer(0, px, px, 0, x, bottom, x + px, bottom + px, COLOR_BUFFER_BIT, NEAREST);
     }
 

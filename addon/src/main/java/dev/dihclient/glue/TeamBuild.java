@@ -24,14 +24,6 @@ import net.minecraft.class_2338;
 import net.minecraft.class_2415;
 import net.minecraft.class_2470;
 
-/**
- * Team codes for AutoBuild. "Create Team" turns the build that is loaded into a team and gives a code; every other game on
- * this computer (the alt accounts) types the code under "Team Code" and presses "Join Team": it builds the same schematic at
- * the same place. The work is cut into strips (one for each member, along the longer side of the build, see
- * {@link TeamSlices}); a member that has finished its strip builds the leftovers of the whole schematic. Members come and go
- * while it runs: the strips are cut again when the number changes. Nothing is sent over the network, the games find each other
- * through a folder in the user's home directory ({@link TeamStore}).
- */
 public class TeamBuild extends Module {
     private static final long STALE_MILLIS = 15_000L;
     private static final int POLL_TICKS = 40;
@@ -62,13 +54,10 @@ public class TeamBuild extends Module {
         try {
             this.store.cleanup(System.currentTimeMillis(), 24L * 3600_000L);
         } catch (RuntimeException ignored) {
-            // cleaning is optional
+
         }
     }
 
-    // ---------------------------------------------------------------- the three buttons
-
-    /** Makes a team of the build that is loaded and shows the code. */
     public void create() {
         try {
             BuildRuntime rt = this.build.runtime();
@@ -77,7 +66,7 @@ public class TeamBuild extends Module {
                 return;
             }
             if (rt.phase() == BuildRuntime.Phase.PREVIEW) {
-                rt.confirm(); // the place is fixed when the build starts
+                rt.confirm();
             }
             BuildPlan plan = rt.plan();
             if (plan == null || (rt.phase() != BuildRuntime.Phase.BUILDING && rt.phase() != BuildRuntime.Phase.PAUSED)) {
@@ -109,7 +98,6 @@ public class TeamBuild extends Module {
         }
     }
 
-    /** Joins the team whose code is in the Team Code field (or in the clipboard when the field is empty). */
     public void join() {
         try {
             String typed = this.codeField.get();
@@ -174,8 +162,6 @@ public class TeamBuild extends Module {
         this.currentPlan = null;
     }
 
-    // ---------------------------------------------------------------- running
-
     @Override
     public void onWorldChange() {
         this.leave(false);
@@ -189,7 +175,7 @@ public class TeamBuild extends Module {
         try {
             BuildRuntime rt = this.build.runtime();
             if (this.currentPlan != null && rt.plan() != this.currentPlan) {
-                this.leave(true); // another build was started: the team is over for this game
+                this.leave(true);
                 return;
             }
             if (this.currentPlan != null && rt.phase() == BuildRuntime.Phase.FINISHED) {
@@ -204,7 +190,6 @@ public class TeamBuild extends Module {
         }
     }
 
-    /** My part is finished: build what is left of the whole schematic. */
     private void finished() {
         if (this.curCount > 1 && !this.helping) {
             this.helping = true;
@@ -216,7 +201,6 @@ public class TeamBuild extends Module {
         }
     }
 
-    /** Looks at who is in the team and cuts the work again when the number of members changed. */
     private void poll(boolean first) {
         if (this.helping || this.spec == null) {
             return;
@@ -240,7 +224,7 @@ public class TeamBuild extends Module {
             this.pendCount = count;
             this.stable = 0;
         }
-        // the first start is at once; changes later need to be seen twice, so a short hiccup does not restart anybody
+
         if (first || this.curIdx < 0 || this.stable >= 1) {
             this.start(count <= 1 ? this.fullPlan() : this.slicePlan(idx, count), idx, count);
         }
@@ -261,15 +245,12 @@ public class TeamBuild extends Module {
         this.curIdx = idx;
         this.curCount = count;
         this.stable = 0;
-        this.build.startBuild(plan); // enables AutoBuild when needed
+        this.build.startBuild(plan);
         if (count > 1) {
             Notifications.info("Team", "Building part " + (idx + 1) + " of " + count + ".");
         }
     }
 
-    // ---------------------------------------------------------------- helpers
-
-    /** The schematic file of the team: where the host had it, or a file of the same name in this game's schematics folder. */
     private static Path findSchematic(TeamStore.Spec s) throws IOException {
         Path[] candidates = {Path.of(s.schematicPath()), AutoBuild.schematicDir().resolve(Path.of(s.schematicPath()).getFileName().toString())};
         for (Path p : candidates) {

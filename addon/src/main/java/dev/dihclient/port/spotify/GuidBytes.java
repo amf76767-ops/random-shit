@@ -1,10 +1,6 @@
 package dev.dihclient.port.spotify;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Memory layout of a Windows GUID: the first three groups little-endian, the last two as written. Kept apart from the
- * JNA code so it can be tested without native libraries (the original used jna-platform's GUID class, which we do not rely on).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class GuidBytes {
     private GuidBytes() {
     }
@@ -19,7 +15,7 @@ public final class GuidBytes {
             plain[i] = (byte) Integer.parseInt(hex.substring(i * 2, i * 2 + 2), 16);
         }
         byte[] out = new byte[16];
-        // Data1 (4 bytes), Data2 (2), Data3 (2) are stored little-endian
+
         for (int i = 0; i < 4; i++) {
             out[i] = plain[3 - i];
         }

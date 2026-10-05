@@ -4,10 +4,6 @@ import com.google.gson.JsonObject;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
-/**
- * One saved login. Microsoft and Refresh keep a refresh token, Session keeps a Minecraft access token, Offline keeps
- * only the name (a "cracked" account: it works on offline-mode servers and in single player, not on online-mode servers).
- */
 public final class Account {
     public enum Kind { MICROSOFT, REFRESH, SESSION, OFFLINE }
 
@@ -31,7 +27,6 @@ public final class Account {
         return account;
     }
 
-    /** The same UUID a vanilla offline-mode server gives this name. */
     public static UUID offlineUuid(String name) {
         return UUID.nameUUIDFromBytes(("OfflinePlayer:" + name).getBytes(StandardCharsets.UTF_8));
     }
@@ -90,7 +85,7 @@ public final class Account {
         try {
             account.uuid = UUID.fromString(json.get("uuid").getAsString());
         } catch (Exception ignored) {
-            // keeps the random one
+
         }
         account.secret = json.has("secret") ? json.get("secret").getAsString() : "";
         account.xuid = json.has("xuid") ? json.get("xuid").getAsString() : null;

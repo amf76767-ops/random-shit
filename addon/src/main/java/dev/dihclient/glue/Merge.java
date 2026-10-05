@@ -16,14 +16,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 
-/**
- * Folds modules into other modules without touching their code. A folded module (the "guest") leaves the module list,
- * so it is no longer in the GUI, the config or the key bindings, but it stays alive: its settings move to the module that
- * took it in (the "host", renamed when the names clash), and the {@link MergeBus} keeps ticking and drawing it while it is on.
- * Whether the guest is on follows the host through a {@link Link}.
- */
 public final class Merge {
-    /** The guest runs while the host is on and {@code want} is true. Only changes are acted on, so a pause by the supervisor holds. */
+
     private static final class Link {
         final Module host;
         final BooleanSupplier want;
@@ -51,7 +45,6 @@ public final class Merge {
         return GUESTS;
     }
 
-    /** Takes the module out of the module list; its name and id still find it. */
     @SuppressWarnings("unchecked")
     static void hide(ModuleManager manager, Module guest) throws ReflectiveOperationException {
         Field f = ModuleManager.class.getDeclaredField("modules");
@@ -62,7 +55,6 @@ public final class Merge {
         }
     }
 
-    /** Lets a name or id find this module as well (for the old name of a renamed module). */
     @SuppressWarnings("unchecked")
     static void alias(ModuleManager manager, String name, Module module) throws ReflectiveOperationException {
         Field f = ModuleManager.class.getDeclaredField("byName");
@@ -78,7 +70,6 @@ public final class Merge {
         LINKS.add(new Link(host, want, guest, follow));
     }
 
-    /** Called before the config is applied (see Patcher.hookConfig). */
     public static void migrate(JsonObject root) {
         try {
             ConfigMigration.apply(root, RULES);
@@ -88,7 +79,6 @@ public final class Merge {
         }
     }
 
-    /** The ClickGUI had a Layout and a Theme setting; now there is one Style (Modern, Meteor, Glass). A saved Glass theme becomes the Glass style. */
     private static void styleMigration(JsonObject root) {
         if (root == null || !root.has("modules") || !root.get("modules").isJsonObject()) {
             return;
@@ -116,10 +106,6 @@ public final class Merge {
         settings.remove("layout");
     }
 
-    /**
-     * Moves all settings of the guest into the host, shown only while {@code gate} is true. A setting whose name is taken is
-     * renamed to "label name". Returns old setting id → new id for the config migration.
-     */
     static Map<String, String> absorb(Module host, Module guest, String label, BooleanSupplier gate) throws ReflectiveOperationException {
         Method add = Module.class.getDeclaredMethod("add", Setting.class);
         add.setAccessible(true);
@@ -146,7 +132,6 @@ public final class Merge {
         return renamed;
     }
 
-    /** Every setting of the module is shown only while {@code gate} is true. */
     static void gateAll(Module module, BooleanSupplier gate) throws ReflectiveOperationException {
         Field visibility = Setting.class.getDeclaredField("visibility");
         visibility.setAccessible(true);
@@ -175,8 +160,7 @@ public final class Merge {
                     l.guest.setEnabledSilently(w);
                 }
             } else if (l.follow && w && !l.guest.isEnabled() && !AutomationSupervisor.isPaused(l.guest)) {
-                // a restart by the supervisor takes about a second; longer than that, the part has finished by itself and
-                // the module it lives in goes off with it
+
                 if (++l.offTicks >= 60) {
                     l.offTicks = 0;
                     l.last = false;

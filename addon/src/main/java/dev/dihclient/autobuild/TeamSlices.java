@@ -4,7 +4,6 @@ import dev.dihclient.team.Partition;
 import java.util.ArrayList;
 import java.util.List;
 
-/** The part of a schematic that one member of a team builds: a strip along the longer horizontal side, all layers. */
 public final class TeamSlices {
     private TeamSlices() {
     }

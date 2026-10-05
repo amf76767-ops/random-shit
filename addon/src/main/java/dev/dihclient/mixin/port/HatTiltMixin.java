@@ -11,14 +11,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/**
- * The hat follows the body when the player lies down: flying with an elytra, swimming or crawling. Minecraft tips the whole player
- * model forward around the feet (by up to 90 degrees plus the look pitch); the hat is tipped the same way, so it stays on the head
- * instead of floating above the short hit box. Standing, nothing changes.
- */
 @Mixin(Hats.class)
 public abstract class HatTiltMixin {
-    /** Height of the head top of a standing player above the feet. */
+
     private static final double STAND_HEIGHT = 1.8;
 
     @Shadow
@@ -54,7 +49,7 @@ public abstract class HatTiltMixin {
         this.dih$feetX = class_3532.method_16436(delta, player.field_6038, player.method_23317());
         this.dih$feetY = class_3532.method_16436(delta, player.field_5971, player.method_23318());
         this.dih$feetZ = class_3532.method_16436(delta, player.field_5989, player.method_23321());
-        // drawFor puts the pivot on top of the (now short) hit box; the tipped model is measured from a standing body
+
         this.dih$lift = STAND_HEIGHT - player.method_17682();
     }
 
@@ -63,19 +58,19 @@ public abstract class HatTiltMixin {
         if (this.dih$tilt == 0.0 || this.pivot == null) {
             return;
         }
-        // the point as the hat draws it without head pitch (the head looks along the body when lying)
+
         double lx = x * this.scale;
         double ly = (y - 0.45) * this.scale + 0.45;
         double lz = z * this.scale;
         double sin = Math.sin(this.yawRad);
         double cos = Math.cos(this.yawRad);
         double up = this.pivot.field_1351 - this.dih$feetY + this.dih$lift + ly;
-        double forward = lz; // local +z is the look direction
+        double forward = lz;
         double side = lx;
         double t = this.dih$tilt;
         double up2 = up * Math.cos(t) - forward * Math.sin(t);
         double forward2 = up * Math.sin(t) + forward * Math.cos(t);
-        // forward = (-sin yaw, 0, cos yaw), side = (cos yaw, 0, sin yaw), like the hat's own yaw rotation
+
         double wx = this.dih$feetX + side * cos - forward2 * sin;
         double wz = this.dih$feetZ + side * sin + forward2 * cos;
         cir.setReturnValue(new class_243(wx, this.dih$feetY + up2, wz));

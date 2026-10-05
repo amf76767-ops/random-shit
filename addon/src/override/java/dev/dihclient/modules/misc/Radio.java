@@ -485,7 +485,7 @@ public class Radio extends Module {
          return true;
       } else {
          try {
-            // the MP3 decoder (JLayer, javazoom.jl) is part of this mod's jar: no download, no second jar, no extra class loader
+
             ClassLoader var9 = Radio.class.getClassLoader();
             Class var10 = var9.loadClass("javazoom.jl.decoder.Bitstream");
             Class var11 = var9.loadClass("javazoom.jl.decoder.Header");

@@ -14,10 +14,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** Puts the {@link ConfigDock} on top of the DIH GUI and gives it the clicks, keys and scrolling that belong to it. */
 @Mixin(targets = "dev.dihclient.gui.MeteorGuiScreen")
 public abstract class ConfigDockMixin {
-    /** The window of the Donut category gets a free place on the first frame (see DonutPanel). */
+
     @Inject(method = "placeDefaults", at = @At("HEAD"))
     private void dih$donutSpot(CallbackInfo ci) {
         class_437 self = (class_437) (Object) this;
@@ -27,7 +26,7 @@ public abstract class ConfigDockMixin {
             m.setAccessible(true);
             scale = (Float) m.invoke(null);
         } catch (Throwable ignored) {
-            // scale 1
+
         }
         DonutPanel.place(self, (int) (self.field_22789 / scale));
     }

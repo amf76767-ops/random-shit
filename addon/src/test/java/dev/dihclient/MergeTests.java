@@ -24,7 +24,7 @@ public final class MergeTests {
     }
 
     public static void main(String[] args) {
-        // Tunnel folded into Miner: settings move (Reach got a new name), the old one was on so the mode follows
+
         JsonObject root = json("{\"modules\":{\"tunnel\":{\"enabled\":true,\"key\":72,\"settings\":{\"width\":5,\"reach\":4.0,\"torches\":false}},"
                 + "\"automine\":{\"enabled\":false,\"key\":-1,\"settings\":{\"reach\":3.5,\"vein_mine\":true}}}}");
         List<ConfigMigration.Rule> rules = List.of(
@@ -41,7 +41,6 @@ public final class MergeTests {
         check(miner.get("enabled").getAsBoolean(), "miner is on because tunnel was");
         check(miner.get("key").getAsInt() == 72, "key binding taken over");
 
-        // existing values are never overwritten
         JsonObject again = json("{\"modules\":{\"miner\":{\"enabled\":false,\"key\":5,\"settings\":{\"width\":9,\"mode\":\"ORES\"}},"
                 + "\"tunnel\":{\"enabled\":true,\"key\":72,\"settings\":{\"width\":5}}}}");
         ConfigMigration.apply(again, rules);
@@ -49,20 +48,18 @@ public final class MergeTests {
         check(s2.get("width").getAsInt() == 9 && "ORES".equals(s2.get("mode").getAsString()), "a second run changes nothing that is there");
         check(again.getAsJsonObject("modules").getAsJsonObject("miner").get("key").getAsInt() == 5, "own key kept");
 
-        // an option switch (SafeRoute into Goto)
         JsonObject sr = json("{\"modules\":{\"saferoute\":{\"enabled\":true,\"settings\":{\"avoid_mobs\":false}}}}");
         ConfigMigration.apply(sr, List.of(new ConfigMigration.Rule("saferoute", "goto", Map.of(), "safe_route", null, null, false, false)));
         JsonObject gs = sr.getAsJsonObject("modules").getAsJsonObject("goto").getAsJsonObject("settings");
         check(gs.get("safe_route").getAsBoolean() && !gs.get("avoid_mobs").getAsBoolean(), "option switch turned on, settings moved");
         check(!sr.getAsJsonObject("modules").getAsJsonObject("goto").has("enabled"), "an option does not turn the host on");
 
-        // a plain rename keeps on/off
         JsonObject rn = json("{\"modules\":{\"flipfinder\":{\"enabled\":true,\"key\":-1,\"settings\":{\"x\":1}}}}");
         ConfigMigration.apply(rn, List.of(ConfigMigration.Rule.rename("flipfinder", "autoflipper")));
         check(rn.getAsJsonObject("modules").getAsJsonObject("autoflipper").get("enabled").getAsBoolean(), "rename keeps enabled");
         check(rn.getAsJsonObject("modules").getAsJsonObject("autoflipper").getAsJsonObject("settings").get("x").getAsInt() == 1, "rename keeps settings");
 
-        ConfigMigration.apply(json("{}"), rules); // no modules: nothing happens
+        ConfigMigration.apply(json("{}"), rules);
         ConfigMigration.apply(null, rules);
         System.out.println(passed + " passed, " + failed + " failed");
         System.exit(failed == 0 ? 0 : 1);

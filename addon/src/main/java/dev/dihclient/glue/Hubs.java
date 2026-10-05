@@ -18,12 +18,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-/** The modules that several old modules were folded into. Each one shows the settings of the part that is selected. */
 public final class Hubs {
     private Hubs() {
     }
 
-    /** A module that stands for one of its parts. */
     public static class Hub extends Module {
         Supplier<Module> active = () -> null;
 
@@ -44,7 +42,6 @@ public final class Hubs {
         }
     }
 
-    /** AutoMine + Tunnel. */
     public static final class Miner extends Hub {
         public enum Mode { ORES, TUNNEL }
 
@@ -62,7 +59,6 @@ public final class Hubs {
         }
     }
 
-    /** Goto + ElytraBot, with SafeRoute as an option. Keeps the name Goto, so the saved settings stay where they were. */
     public static final class GotoHub extends Hub {
         public enum Mode { WALK, ELYTRA }
 
@@ -84,7 +80,6 @@ public final class Hubs {
         }
     }
 
-    /** Scaffold + SmartBridge. Keeps the name Scaffold. */
     public static final class ScaffoldHub extends Hub {
         public enum Mode { CLASSIC, SMART }
 
@@ -101,7 +96,6 @@ public final class Hubs {
         }
     }
 
-    /** Blink + Air Stuck. Keeps the name Blink, so the saved settings of Blink stay where they were. */
     public static final class BlinkHub extends Hub {
         public enum Type { BLINK, FREEZE }
 

@@ -4,23 +4,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * The animated lyrics block of the Spotify card, without any drawing: wraps the lines, keeps the scroll / fade / glow
- * state between frames and hands back the rows to draw (text, top offset, alpha, how much of it is "sung" already).
- * The original had this inside its ImGui HUD renderer; here it only needs a text-width function, so it can be tested headless.
- * All sizes are in GUI pixels at scale 1 (the card is scaled as a whole when it is drawn).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class LyricView {
-    /** Height of one text row (the game font is 8 px tall plus one line of leading). */
+
     public static final int PX = 9;
     static final float ROW_GAP = 2.0F;
     static final float LINE_GAP = 3.0F;
-    /** Space between the card header and the first lyric row. */
+
     public static final float BLOCK_GAP = 6.0F;
-    /** Rows are 8 px tall, the cell is 9: the block does not need the last pixel. */
+
     static final float DESCENT = 1.0F;
-    /** Height of a one-line status text ("Loading lyrics"). */
+
     static final float STATUS_HEIGHT = 8.0F;
     private static final float RISE = 5.0F;
     private static final float TOP_FADE_SPAN = 5.0F;
@@ -31,7 +25,6 @@ public final class LyricView {
         float width(String text);
     }
 
-    /** One row to draw. {@code text == null} is a pause between lines (three dots). */
     public record Item(String text, float top, float highlight, float alpha, float progress, float fill) {
     }
 
@@ -76,12 +69,10 @@ public final class LyricView {
         this.metrics = metrics;
     }
 
-    /** Phase of the breathing animation of the pause dots, 0..1. */
     public float breath() {
         return this.breath / 1.6F;
     }
 
-    /** Forgets everything (card hidden, other track). */
     public void reset() {
         this.prepared = null;
         this.source = null;
@@ -111,7 +102,7 @@ public final class LyricView {
             }
             if (lyrics != null) {
                 switch (lyrics.status()) {
-                    // a quick answer (disk cache) should not flash the status text
+
                     case LOADING -> status = nowMs - this.loadingSince < 700L ? null : "Loading lyrics";
                     case SYNCED -> {
                         this.prepare(lyrics);
@@ -141,8 +132,6 @@ public final class LyricView {
         return new View(items, status, this.easeBlock(target, dt));
     }
 
-    // ---- leaving / fading ----
-
     private List<Item> leavingItems(boolean quiet, float dt) {
         this.source = null;
         if (!this.lastItems.isEmpty()) {
@@ -171,8 +160,6 @@ public final class LyricView {
             }
         }
     }
-
-    // ---- synced lines ----
 
     private void syncedItems(List<Item> items, SyncedLyrics synced, long position, float viewH, LyricMotion motion, LyricHighlight highlight,
             float innerW, float dt) {
@@ -204,7 +191,7 @@ public final class LyricView {
         this.currentLast = currentLast;
         float stagger = motion == LyricMotion.WAVE ? 0.045F : 0.0F;
         if (start != this.start) {
-            // a normal step to the next line slides; a jump (seek, FADE mode) cross-fades
+
             float distance = start > this.start ? this.restDistance(this.start, start, innerW) : -1.0F;
             if (motion != LyricMotion.FADE && distance > 0.0F && distance <= viewH + LINE_GAP + 0.5F) {
                 if (this.shifts.size() == 8) {
@@ -261,7 +248,7 @@ public final class LyricView {
             }
             restTop += lineHeight(rows) + LINE_GAP;
         }
-        // the lines that already scrolled out above stay while they fade
+
         float lineRest = 0.0F;
         for (int i = from - 1; i >= 0; i--) {
             String[] rows = this.rowsFor(i, innerW);
@@ -294,7 +281,6 @@ public final class LyricView {
         return offset;
     }
 
-    /** How much of a critically damped spring's distance is left after {@code time} seconds. */
     public static float springLeft(float time) {
         float wt = 13.0F * time;
         return (1.0F + wt) * (float) Math.exp(-wt);
@@ -319,7 +305,6 @@ public final class LyricView {
         return shown;
     }
 
-    /** After a jump the rows that fit are visible at once (the cross-fade hides the change). */
     private void showView(SyncedLyrics synced, int from, float viewH, float innerW) {
         Arrays.fill(this.shown, 0.0F);
         float restTop = 0.0F;
@@ -373,7 +358,6 @@ public final class LyricView {
         return index >= 0 && index < this.bright.length ? smooth(this.bright[index]) : 0.0F;
     }
 
-    /** 0..1 progress of a pause (empty line) until the next line starts. */
     private float breakProgress(SyncedLyrics synced, int index, long position) {
         if (index < this.currentFirst || index > this.currentLast) {
             return 1.0F;
@@ -387,9 +371,6 @@ public final class LyricView {
         return end <= begin ? 1.0F : clamp01((float) (position - begin) / (float) (end - begin));
     }
 
-    // ---- karaoke ----
-
-    /** Width in pixels of the part of the row that is already sung ({@code +Infinity} = all of it). */
     private float rowFill(SyncedLyrics synced, int index, String[] rows, int row, long position) {
         if (index < this.currentFirst) {
             return Float.POSITIVE_INFINITY;
@@ -438,10 +419,6 @@ public final class LyricView {
         return lit;
     }
 
-    /**
-     * Word start times of the lines that share one timestamp: from the LRCLIB word tags when the line has them, else spread
-     * over the time until the next line by letter count (at most twice the typical pace of the song).
-     */
     private void timeWords(SyncedLyrics synced, int first) {
         int last = synced.lastWithTimeOf(first);
         int next = last + 1;
@@ -481,7 +458,6 @@ public final class LyricView {
         }
     }
 
-    /** Median milliseconds per letter of the song (used when a line has no word times). */
     private float pace(SyncedLyrics synced) {
         float[] paces = new float[synced.size()];
         int n = 0;
@@ -514,9 +490,6 @@ public final class LyricView {
         return letters;
     }
 
-    // ---- layout ----
-
-    /** Height of the block: the wanted number of rows, more when a group of lines sharing one timestamp needs it (max 4). */
     private float viewHeight(SyncedLyrics synced, int lines, float innerW) {
         this.prepareRows(innerW);
         if (this.viewH >= 0.0F && this.viewLines == lines) {
@@ -589,7 +562,6 @@ public final class LyricView {
         return rows;
     }
 
-    /** At most two rows: split at the space that makes both halves most even, else cut at the width and shorten the rest. */
     public String[] wrap(String text, float maxW) {
         if (text.isEmpty()) {
             return NO_ROWS;

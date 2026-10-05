@@ -12,7 +12,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Tells {@link PacketBus} when the game has finished with login, chunk, block, section and light packets. */
 @Mixin(class_634.class)
 public abstract class PacketAppliedMixin {
     @Inject(method = "method_11120", at = @At("TAIL"))

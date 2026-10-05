@@ -3,10 +3,7 @@ package dev.dihclient.port.chunks;
 import java.util.BitSet;
 import java.util.List;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Sorts the sky-light arrays of a chunk / light packet into {@link LightSectionStatus}. No game classes here, so it can be tested.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class LightDataClassifier {
     private static final int NIBBLES_PER_SECTION = 2048;
 
@@ -36,20 +33,10 @@ public final class LightDataClassifier {
         return allMax ? LightSectionStatus.UNIFORM_MAX : LightSectionStatus.NORMAL;
     }
 
-    /**
-     * @param mask      sections the packet carries data for (bit i = light section i)
-     * @param emptyMask sections the packet says are empty
-     * @param updates   the data arrays, in the order of the set bits of {@code mask}
-     * @param out       status per light section, only the touched entries change
-     */
     public static void applyTrack(BitSet mask, BitSet emptyMask, List<byte[]> updates, LightSectionStatus[] out) {
         applyTrack(mask, emptyMask, updates, out, out.length);
     }
 
-    /**
-     * Same, but only the light sections below {@code classifyBelow} are read (the others only count for the order of the data):
-     * the base signal only looks at the low sections, and reading 2048 bytes of every high section of every packet is wasted work.
-     */
     public static void applyTrack(BitSet mask, BitSet emptyMask, List<byte[]> updates, LightSectionStatus[] out, int classifyBelow) {
         int next = 0;
         for (int i = 0; i < out.length; i++) {

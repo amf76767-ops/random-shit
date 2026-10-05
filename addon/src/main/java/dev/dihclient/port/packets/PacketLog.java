@@ -13,23 +13,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import net.minecraft.class_2596;
 
-/**
- * Ported from a Meteor addon.
- * Reads the packets sent to and received from the server and prints them to the chat and to latest.log. Read-only: it never
- * changes or cancels a packet. Received packets come from {@link PacketBus#received} (worker thread, so reading the fields never
- * slows the network thread); sent packets from {@link #onPacketSend}. Chat lines are queued and written on the game thread,
- * a few per tick, so a busy connection cannot freeze the game.
- * <p>
- * Differences to the Meteor version: the packet list is a comma separated text (parts of packet ids such as "move", "keep_alive")
- * because DIH has no packet picker, and field names are the intermediary names of the running game (a record shows its values).
- */
 public class PacketLog extends Module {
     public enum FilterMode { ALL, WHITELIST, BLACKLIST }
 
     private static final int MAX_QUEUE = 400;
     private static final int CHAT_PER_TICK = 8;
 
-    /** The parsed packet list together with the text it came from, swapped as one object (read by two threads). */
     private record Entries(String raw, String[] parts) {
     }
 
@@ -92,7 +81,7 @@ public class PacketLog extends Module {
         if (this.sent.get()) {
             this.read("->", packet);
         }
-        return false; // never cancels
+        return false;
     }
 
     private void onReceive(class_2596<?> packet) {

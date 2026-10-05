@@ -15,12 +15,7 @@ import net.minecraft.class_4608;
 import org.joml.Matrix4fStack;
 import org.lwjgl.opengl.GL11;
 
-/**
- * Ported from an open-source client (GPL-3.0) (the render step of its ItemIcons).
- * <p>
- * Draws one item model, lit like in a GUI slot, into a square cell of an off-screen texture. All render state it touches is put
- * back afterwards so the frame that is being built is not disturbed.
- */
+/** Ported from an open-source client (GPL-3.0). */
 final class ItemRender {
     private static final int[] VIEWPORT = new int[4];
     private static class_11278 projection;

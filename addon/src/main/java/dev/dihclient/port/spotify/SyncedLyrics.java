@@ -9,10 +9,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Time-stamped lyrics (LRC text) with lookup by playback position; also reads LRCLIB "enhanced" word times.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class SyncedLyrics {
     public static final SyncedLyrics EMPTY = new SyncedLyrics(new SyncedLyrics.Line[0]);
     private static final Pattern TIMESTAMP = Pattern.compile("(\\d{1,3}):(\\d{1,2})(?:[.:](\\d{1,3}))?");

@@ -8,7 +8,6 @@ import net.minecraft.class_2680;
 import net.minecraft.class_310;
 import net.minecraft.class_2338.class_2339;
 
-/** The loaded world as the path search sees it. Answers are cached for one planning round. */
 public final class McTerrain implements Nav.Terrain {
     private static final String[] HAZARD = {"lava", "fire", "cactus", "magma", "campfire", "berry_bush", "wither_rose", "powder_snow",
             "cobweb", "pointed_dripstone", "bubble_column", "end_portal", "nether_portal"};
@@ -60,7 +59,7 @@ public final class McTerrain implements Nav.Terrain {
                 }
             }
         } catch (Throwable t) {
-            out = (byte) (KNOWN | HURTS); // unknown: keep away
+            out = (byte) (KNOWN | HURTS);
         }
         this.cache.put(k, out);
         return out;

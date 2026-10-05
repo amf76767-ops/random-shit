@@ -13,24 +13,14 @@ import java.util.UUID;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.class_310;
 
-/**
- * Puts another login into the running game. Minecraft 1.21 keeps more than the session: the chat signing keys, the
- * report context and the social interactions are made from the session once at start. A server checks the chat key
- * against the account's UUID and kicks on a mismatch, so they are made again for the new account. The first
- * swap remembers what the game started with; {@link #restore()} puts it back.
- *
- * Everything is found by name through reflection and every step has its own try, so a change in a later game version
- * costs one feature (the message says which), not the game.
- */
 public final class SessionApplier {
-    // session, user api service, chat signing keys, report context, social interactions
+
     private static final String[] FIELDS = {"field_1726", "field_26902", "field_39068", "field_39492", "field_41331"};
     private static Object[] original;
 
     private SessionApplier() {
     }
 
-    /** @return null when everything worked, else a short text for the player */
     public static synchronized String apply(String name, UUID uuid, String token, String xuid, boolean offline) {
         class_310 mc = class_310.method_1551();
         List<String> problems = new ArrayList<>();
@@ -91,7 +81,6 @@ public final class SessionApplier {
         }
     }
 
-    /** Back to the account the game was started with. @return null on success, else a text; "nothing to restore" when never swapped */
     public static synchronized String restore() {
         if (original == null) {
             return "Already on the original account";
@@ -138,7 +127,7 @@ public final class SessionApplier {
                 if (p.length == 5) {
                     return c.newInstance(name, uuid, token, Optional.ofNullable(xuid), Optional.empty());
                 }
-                if (p.length == 6 && p[5].isEnum()) { // older versions carry an account type as well
+                if (p.length == 6 && p[5].isEnum()) {
                     Object[] types = p[5].getEnumConstants();
                     Object type = types[types.length - 1];
                     for (Object t : types) {
@@ -175,7 +164,7 @@ public final class SessionApplier {
                 f.setAccessible(true);
                 return f;
             } catch (NoSuchFieldException ignored) {
-                // look in the super class
+
             }
         }
         throw new NoSuchFieldException(name);
@@ -185,7 +174,6 @@ public final class SessionApplier {
         return field(owner, name).get(owner);
     }
 
-    /** Final instance fields can be written once they are made accessible. */
     private static void set(Object owner, String name, Object value) throws ReflectiveOperationException {
         field(owner, name).set(owner, value);
     }

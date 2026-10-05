@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/** Opens the glass GUI whenever the ClickGUI style is "Glass", and swaps screens when the style is changed while one is open. */
 @Mixin(MeteorGuiScreen.class)
 public abstract class GlassGuiMixin {
     @Inject(method = "create", at = @At("HEAD"), cancellable = true)

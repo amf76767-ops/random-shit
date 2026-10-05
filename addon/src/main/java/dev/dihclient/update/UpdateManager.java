@@ -12,11 +12,6 @@ import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-/**
- * Looks for a newer DIHClient on GitHub in the background and tells the player; the player gets it from the GitHub page himself.
- * Nothing is downloaded or installed by the client.
- * Everything here is free of Minecraft classes; the screen that asks the player lives in the glue package.
- */
 public final class UpdateManager {
     public enum State { IDLE, CHECKING, UP_TO_DATE, AVAILABLE }
 
@@ -44,7 +39,6 @@ public final class UpdateManager {
     private UpdateManager() {
     }
 
-    /** @param configDir {@code config/dihclient} */
     public static synchronized void init(Path configDir) {
         configFile = configDir.resolve("update.json");
         config = UpdateConfig.load(configFile);
@@ -59,7 +53,6 @@ public final class UpdateManager {
         }
     }
 
-    /** Called every client tick. Cheap: only compares a timestamp. */
     public static void tick() {
         if (state != State.CHECKING && System.currentTimeMillis() >= nextCheckAt) {
             nextCheckAt = Long.MAX_VALUE;
@@ -92,7 +85,6 @@ public final class UpdateManager {
         });
     }
 
-    /** "Skip this version": the same release is not offered again, a newer one is. */
     public static synchronized void skipRelease() {
         GithubReleases.Release r = release;
         if (r != null) {
@@ -106,7 +98,6 @@ public final class UpdateManager {
         prompted = true;
     }
 
-    /** True exactly once per offered release, when the player should be asked. */
     public static boolean shouldPrompt() {
         if (state == State.AVAILABLE && !prompted) {
             prompted = true;
@@ -160,7 +151,6 @@ public final class UpdateManager {
         }
     }
 
-    /** Files an older version of the updater left in the mods folder (it used to download updates itself): removed. */
     private static void cleanLeftovers(Path modsDir) {
         try (DirectoryStream<Path> ds = Files.newDirectoryStream(modsDir, "dihclient*")) {
             for (Path p : ds) {
@@ -170,7 +160,7 @@ public final class UpdateManager {
                 }
             }
         } catch (IOException ignored) {
-            // an unreadable mods folder is not our problem to solve
+
         }
     }
 }

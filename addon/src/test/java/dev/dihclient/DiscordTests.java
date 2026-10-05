@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-/** Discord Presence: IPC frames, status JSON, address redaction, and the protocol against a fake Discord on a unix socket. */
 public final class DiscordTests {
     static int failed;
     static int passed;
@@ -148,8 +147,6 @@ public final class DiscordTests {
                 "cards compare by value (change detection)");
     }
 
-    // ---- a fake Discord on a unix socket ----
-
     static final class FakeDiscord implements Runnable {
         final ServerSocketChannel server;
         final List<String> received = new CopyOnWriteArrayList<>();
@@ -175,7 +172,7 @@ public final class DiscordTests {
                     return;
                 }
                 write(ch, 1, "{\"cmd\":\"DISPATCH\",\"evt\":\"READY\",\"data\":{\"v\":1}}");
-                write(ch, 3, "{\"hello\":1}"); // ping before any command: must be answered with a pong
+                write(ch, 3, "{\"hello\":1}");
                 while (true) {
                     DiscordIpc.Frame f = read(ch);
                     if (f.opcode() == DiscordIpc.OP_PONG) {
@@ -190,7 +187,7 @@ public final class DiscordTests {
                             + ",\"nonce\":\"" + nonce + "\"}");
                 }
             } catch (EOFException | java.nio.channels.AsynchronousCloseException e) {
-                // client hung up: normal end
+
             } catch (Exception e) {
                 this.received.add("server error " + e);
             }
@@ -229,7 +226,7 @@ public final class DiscordTests {
             return;
         }
         try {
-            // no socket at all: Discord not running -> null, no exception
+
             check(DiscordIpc.connect("1553391775840866314", false, List.of(dir)) == null, "missing socket gives null");
             check(DiscordIpc.connect("1553391775840866314", false, List.of(dir.resolve("nope"))) == null, "missing folder gives null");
 
@@ -240,7 +237,7 @@ public final class DiscordTests {
             t.start();
             DiscordIpc ipc = DiscordIpc.connect("1553391775840866314", false, List.of(dir.resolve("nope"), dir));
             check(ipc != null, "connected through the second folder");
-            ipc.poll(); // answers the ping
+            ipc.poll();
             Thread.sleep(100);
             ipc.setActivity(new DiscordCard("Playing Minecraft", "DIHClient v3", 0L, "x", "logo", "DIHClient").activity());
             ipc.setActivity(null);
@@ -259,7 +256,6 @@ public final class DiscordTests {
             fake.server.close();
             Files.deleteIfExists(sock);
 
-            // Discord refuses the activity
             FakeDiscord refusing = new FakeDiscord(sock, true, false);
             Thread t2 = new Thread(refusing);
             t2.setDaemon(true);
@@ -277,7 +273,6 @@ public final class DiscordTests {
             refusing.server.close();
             Files.deleteIfExists(sock);
 
-            // Discord refuses the handshake (bad application id)
             FakeDiscord bad = new FakeDiscord(sock, false, true);
             Thread t3 = new Thread(bad);
             t3.setDaemon(true);
@@ -293,7 +288,6 @@ public final class DiscordTests {
             bad.server.close();
             Files.deleteIfExists(sock);
 
-            // stale socket file (nobody listening) is skipped quietly
             Files.writeString(dir.resolve("discord-ipc-0"), "not a socket");
             check(DiscordIpc.connect("1553391775840866314", false, List.of(dir)) == null, "stale file gives null, not a crash");
         } finally {

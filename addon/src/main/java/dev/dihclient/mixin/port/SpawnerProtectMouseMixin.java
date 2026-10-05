@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Freezes mouse look while Spawner Protect turns the head by itself. */
 @Mixin(class_312.class)
 public abstract class SpawnerProtectMouseMixin {
     @Inject(method = "method_1606", at = @At("HEAD"), cancellable = true)

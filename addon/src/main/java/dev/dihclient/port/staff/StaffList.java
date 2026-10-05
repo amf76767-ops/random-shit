@@ -48,17 +48,7 @@ import net.minecraft.class_746;
 import net.minecraft.class_7532;
 import net.minecraft.class_8042;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Lists the DonutSMP staff that are online. Everything comes from data the server already sends you (tab list, game-mode
- * updates, nearby players) matched against a built-in name list; this module makes NO network request of its own.
- * <p>
- * Besides the plain list it tries to tell which staff member is in YOUR region (shard): one that switched game mode
- * (the packet only reaches players on the same shard) or whose body is near you is marked "WATCHING YOU" and raises an alarm.
- * <p>
- * Dropped from the original: the spinning ghost face (needs ImGui), a "good luck" note, the name hider (NameFilter)
- * and the HUD layout editor (the list is drawn in onRender2D with the position settings below).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public class StaffList extends Module {
     private static final int SCAN_INTERVAL_TICKS = 10;
     private static final int SETTLE_TICKS = 60;
@@ -68,7 +58,7 @@ public class StaffList extends Module {
     private static final int MAX_ROWS = 8;
     private static final int GROUP_THRESHOLD = 3;
     private static final float ALARM_SECONDS = 3.0F;
-    // "WATCHING YOU" title: shows 1.25 s after the alarm (0.5 s fade in, 2 s stay, 0.75 s fade out)
+
     private static final int TITLE_DELAY_TICKS = 25;
     private static final StaffMatcher RANKS = new StaffMatcher(StaffMatcher.MODE_ALL, StaffMatcher.DEFAULT_RANK_WORDS,
             StaffMatcher.DEFAULT_MARKERS, false, StaffMatcher.DEFAULT_TEAM_RANK_MAX, String.join(",", StaffNames.DONUT_STAFF), "");
@@ -86,7 +76,7 @@ public class StaffList extends Module {
     private boolean resort;
     private final Map<UUID, Classified> classified = new HashMap<>();
     private final Map<UUID, StaffSighting> sightings = new HashMap<>();
-    // filled on the network thread, drained on the game thread
+
     private final Queue<GameModeSwitch> switches = new ConcurrentLinkedQueue<>();
     private final Map<UUID, String> pendingAlerts = new LinkedHashMap<>();
     private final StaffAlarm alarm = new StaffAlarm();
@@ -99,7 +89,7 @@ public class StaffList extends Module {
     private int alertGather;
     private int tickCount;
     private int failures;
-    // WATCHING YOU title state: -1 = idle, otherwise ticks since the alarm; the shown title is kept for the fade-out
+
     private int titleTicks = -1;
     private boolean titleShown;
     private String titleText = "";
@@ -154,13 +144,10 @@ public class StaffList extends Module {
         this.resort = true;
     }
 
-    // ---- API for other ported modules (AntiVanish) ----
-
     public static boolean isStaffName(String name) {
         return StaffNames.isStaffName(name);
     }
 
-    /** True while the staff member is proven to be on your server. */
     public static boolean isInYourRegion(UUID id) {
         StaffList module = ModuleManager.of(StaffList.class);
         if (module == null || !module.isEnabled() || id == null) {
@@ -170,7 +157,6 @@ public class StaffList extends Module {
         return seen != null && seen.marked(System.currentTimeMillis());
     }
 
-    /** True when this staff member raised the alarm in the last seconds (so a second alarm would only be noise). */
     public static boolean alarmedRecently(UUID id) {
         StaffList module = ModuleManager.of(StaffList.class);
         if (module == null || !module.isEnabled() || id == null) {
@@ -179,8 +165,6 @@ public class StaffList extends Module {
         StaffSighting seen = module.sightings.get(id);
         return seen != null && seen.alertedAt != 0L && System.currentTimeMillis() - seen.alertedAt < SHARED_ALARM_MS;
     }
-
-    // ---- packets (network thread) ----
 
     private boolean onPacketNetty(class_2596<?> packet) {
         if (!this.regionAlert.get()) {
@@ -198,7 +182,6 @@ public class StaffList extends Module {
         return false;
     }
 
-    /** Only "game mode changed for a player that was already listed" packets; a fresh join also carries a game mode. */
     private void queueSwitches(class_2703 info) {
         EnumSet<class_5893> actions = info.method_46327();
         if (actions.contains(class_5893.field_29137) && !actions.contains(class_5893.field_29136)) {
@@ -210,14 +193,12 @@ public class StaffList extends Module {
         }
     }
 
-    // ---- tick (game thread) ----
-
     @Override
     public void onTick() {
         try {
             this.tick();
         } catch (Throwable t) {
-            // fail soft: log the first few, keep the game running
+
             if (this.failures++ < 3) {
                 DIHClient.LOG.warn("[DIHClient] Staff List tick failed", t);
             }
@@ -240,7 +221,7 @@ public class StaffList extends Module {
         }
         boolean moved = this.shard.moved(mc);
         if (conn != this.connection) {
-            // new connection (server switch, reconnect): the tab list needs a moment to fill up, do not announce it
+
             this.connection = conn;
             this.forget();
             this.settleTicks = SETTLE_TICKS;
@@ -291,7 +272,7 @@ public class StaffList extends Module {
             }
             inTab.add(id);
             StaffMatcher.Match rank = this.rank(info, id, name);
-            // listed=false in the tab means the entry exists but is hidden from the visible list (vanish plugins do this)
+
             StaffEntry.Presence presence = info.method_2958() == class_1934.field_9219 ? StaffEntry.Presence.SPECTATOR
                     : (listed.contains(id) ? StaffEntry.Presence.ONLINE : StaffEntry.Presence.VANISHED);
             StaffEntry tracked = this.staff.get(id);
@@ -317,7 +298,7 @@ public class StaffList extends Module {
                 continue;
             }
             if (mc.field_1687.method_18470(tracked.id) != null) {
-                // removed from the tab but the body is still here: a vanish that hides the tab entry
+
                 if (++tracked.offTabScans >= 2 && tracked.presence != StaffEntry.Presence.VANISHED) {
                     tracked.presence = StaffEntry.Presence.VANISHED;
                     changes.changed.add(tracked);
@@ -422,7 +403,6 @@ public class StaffList extends Module {
         }
     }
 
-    /** Forgets sightings of staff that left the tab for more than a few seconds. */
     private void pruneSightings(long now) {
         Iterator<Map.Entry<UUID, StaffSighting>> it = this.sightings.entrySet().iterator();
         while (it.hasNext()) {
@@ -439,13 +419,11 @@ public class StaffList extends Module {
         }
     }
 
-    // ---- alerts ----
-
     private void alert(UUID id, StaffSighting seen, long now, String name) {
         seen.alertedAt = now;
         seen.highlightUntil = now + StaffSighting.HIGHLIGHT_MS;
         if (this.pendingAlerts.isEmpty()) {
-            // wait a few ticks so a group of staff on one shard raises one alarm, not many
+
             this.alertGather = ALERT_GATHER_TICKS;
         }
         this.pendingAlerts.put(id, name);
@@ -484,8 +462,6 @@ public class StaffList extends Module {
         }
     }
 
-    // ---- chat announcements ----
-
     private void announce(Changes changes) {
         changes.changed.removeIf(this::echoesSwitchAlert);
         if (changes.isEmpty()) {
@@ -511,7 +487,6 @@ public class StaffList extends Module {
         }
     }
 
-    /** A game-mode switch we already alarmed about a moment ago; the tab scan would only repeat it. */
     private boolean echoesSwitchAlert(StaffEntry s) {
         StaffSighting seen = this.sightings.get(s.id);
         if (seen == null || seen.switchAlertTick < 0 || this.tickCount - seen.switchAlertTick > SWITCH_ECHO_TICKS) {
@@ -552,8 +527,6 @@ public class StaffList extends Module {
             case VANISHED -> "vanished";
         };
     }
-
-    // ---- HUD ----
 
     @Override
     public void onRender2D(class_332 g, float partialTicks) {
@@ -639,7 +612,7 @@ public class StaffList extends Module {
                 int ry = headerH + rowH * i;
                 StaffSighting seen = sight[i];
                 if (tag[i] != null) {
-                    // pulsing tint while the alert is fresh, a faint one afterwards
+
                     float level = seen == null ? 0.0F : seen.alertLevel(now);
                     float wave = 0.5F + 0.5F * (float) Math.cos((1.0F - level) * StaffSighting.HIGHLIGHT_MS * 2.0 * Math.PI / 500.0);
                     float glow = 0.14F + 0.24F * level * wave;
@@ -669,8 +642,6 @@ public class StaffList extends Module {
         }
     }
 
-    // ---- helper types ----
-
     private static final class Changes {
         final List<StaffEntry> joined = new ArrayList<>();
         final List<StaffEntry> changed = new ArrayList<>();
@@ -681,7 +652,6 @@ public class StaffList extends Module {
         }
     }
 
-    /** What we classified last time; the tab texts are compared by identity, so an unchanged entry costs nothing. */
     private record Classified(String name, class_2561 display, class_268 team, class_2561 prefix, class_2561 suffix, StaffMatcher.Match match) {
         boolean isFor(String name, class_2561 display, class_268 team, class_2561 prefix, class_2561 suffix) {
             return this.display == display && this.team == team && this.prefix == prefix && this.suffix == suffix && this.name.equals(name);

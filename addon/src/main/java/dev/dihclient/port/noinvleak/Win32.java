@@ -7,21 +7,15 @@ import com.sun.jna.WString;
 import com.sun.jna.ptr.PointerByReference;
 import com.sun.jna.win32.StdCallLibrary;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * <p>
- * The few Win32 calls the overlay windows need, declared against plain JNA (Minecraft ships it, jna-platform is not used).
- * Handles are {@link Pointer}s, strings are the wide ("W") variants. Nothing here is loaded off Windows: the interfaces
- * are only touched by {@link OverlayWindow}, which is only created when {@link #isWindows()} is true.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class Win32 {
     static final int WS_POPUP = 0x80000000;
-    /** NOACTIVATE | LAYERED | TOOLWINDOW | TRANSPARENT: click-through, no taskbar button, never takes focus. */
+
     static final int EX_STYLE = 0x08000000 | 0x00080000 | 0x00000080 | 0x00000020;
     static final int WDA_EXCLUDEFROMCAPTURE = 0x11;
     static final int SW_HIDE = 0;
     static final int SW_SHOWNOACTIVATE = 4;
-    /** SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE */
+
     static final int SWP_MOVE_ONLY = 0x01 | 0x04 | 0x10;
     static final int ULW_ALPHA = 2;
     static final int AC_SRC_ALPHA = 1;
@@ -74,7 +68,6 @@ public final class Win32 {
         public byte alphaFormat;
     }
 
-    /** BITMAPINFOHEADER followed by the (unused) one-entry colour table, 44 bytes. */
     @Structure.FieldOrder({"biSize", "biWidth", "biHeight", "biPlanes", "biBitCount", "biCompression", "biSizeImage",
             "biXPelsPerMeter", "biYPelsPerMeter", "biClrUsed", "biClrImportant", "bmiColors"})
     public static class BitmapInfo extends Structure {

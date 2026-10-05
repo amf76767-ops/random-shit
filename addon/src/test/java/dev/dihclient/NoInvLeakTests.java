@@ -6,7 +6,6 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Headless tests for the pure drawing code of No Inv Leak (Canvas, DigitFont). */
 public final class NoInvLeakTests {
     static int failed;
     static int passed;
@@ -31,7 +30,7 @@ public final class NoInvLeakTests {
         check(Canvas.premultiply(0xFFFFFFFF, 255) == 0xFFFFFFFF, "premultiply opaque");
         check(Canvas.over(0xFF112233, 0xFFAAAAAA) == 0xFF112233, "opaque source wins");
         check(Canvas.over(0x00000000, 0xFFAAAAAA) == 0xFFAAAAAA, "transparent source keeps dst");
-        // 50% black premultiplied (0x80000000) over opaque white: grey, still opaque
+
         int r = Canvas.over(0x80000000, 0xFFFFFFFF);
         check(r >>> 24 == 255, "alpha stays opaque: " + Integer.toHexString(r));
         check((r >>> 16 & 0xFF) == 127 && (r >>> 8 & 0xFF) == 127 && (r & 0xFF) == 127, "half black over white is grey: " + Integer.toHexString(r));
@@ -40,9 +39,9 @@ public final class NoInvLeakTests {
     static void rectClipsAndUsesStride() {
         int stride = 6;
         int[] px = new int[stride * 4];
-        Canvas c = canvas(px, stride, 5, 4); // stride wider than the picture
-        c.rect(-2, -2, 4, 4, 0xFFFF0000);   // clipped at top left: covers (0..1, 0..1)
-        c.rect(4, 3, 10, 10, 0xFF00FF00);   // clipped at bottom right: covers (4,3) only
+        Canvas c = canvas(px, stride, 5, 4);
+        c.rect(-2, -2, 4, 4, 0xFFFF0000);
+        c.rect(4, 3, 10, 10, 0xFF00FF00);
         for (int y = 0; y < 4; y++) {
             for (int x = 0; x < stride; x++) {
                 int v = px[y * stride + x];
@@ -66,13 +65,13 @@ public final class NoInvLeakTests {
     static void copyClips() {
         int[] px = new int[4 * 4];
         Canvas c = canvas(px, 4, 4, 4);
-        int[] src = {1, 2, 3, 4, 5, 6, 7, 8, 9}; // 3x3
-        c.copy(src, 3, 3, -1, 2);               // x clipped on the left, y clipped at the bottom
-        // source row 0 lands on y=2 with x from -1: source columns 1,2 at x=0,1
+        int[] src = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        c.copy(src, 3, 3, -1, 2);
+
         check(px[2 * 4] == 2 && px[2 * 4 + 1] == 3, "copy row 0 clipped left");
         check(px[3 * 4] == 5 && px[3 * 4 + 1] == 6, "copy row 1 clipped left");
         check(px[0] == 0 && px[1 * 4] == 0, "copy leaves rows above alone");
-        c.copy(src, 3, 3, 3, 0);                // x clipped on the right: one column fits
+        c.copy(src, 3, 3, 3, 0);
         check(px[3] == 1 && px[4 + 3] == 4 && px[8 + 3] == 7, "copy clipped right");
         c.copy(src, 3, 3, 10, 0);
         c.copy(src, 3, 3, 0, 10);
@@ -82,8 +81,8 @@ public final class NoInvLeakTests {
     static void blendScalesAndComposes() {
         int[] px = new int[4 * 4];
         Canvas c = canvas(px, 4, 4, 4);
-        int[] src = {0xFF0000FF, 0x00000000, 0x00000000, 0xFF00FF00}; // 2x2: blue, nothing / nothing, green
-        c.blend(src, 2, 2, 0, 0, 2); // every source pixel becomes 2x2
+        int[] src = {0xFF0000FF, 0x00000000, 0x00000000, 0xFF00FF00};
+        c.blend(src, 2, 2, 0, 0, 2);
         check(px[0] == 0xFF0000FF && px[1] == 0xFF0000FF && px[4] == 0xFF0000FF && px[5] == 0xFF0000FF, "scaled blue block");
         check(px[2] == 0 && px[3] == 0 && px[6] == 0, "transparent source pixel leaves destination");
         check(px[2 * 4 + 2] == 0xFF00FF00 && px[3 * 4 + 3] == 0xFF00FF00, "scaled green block");
@@ -91,7 +90,6 @@ public final class NoInvLeakTests {
         check((px[0] & 0xFF) == 0x7F, "blendPixel darkens: " + Integer.toHexString(px[0]));
     }
 
-    /** Collects the rectangles. */
     static final class Rects implements DigitFont.Sink {
         final List<int[]> list = new ArrayList<>();
 
@@ -100,7 +98,6 @@ public final class NoInvLeakTests {
             this.list.add(new int[] {x, y, w, h, argb});
         }
 
-        /** Number of lit pixels (area) of the given colour, 1:1 scale. */
         long area(int argb) {
             long a = 0;
             for (int[] r : this.list) {
@@ -113,9 +110,9 @@ public final class NoInvLeakTests {
     }
 
     static void digitsHaveTheExpectedShape() {
-        // lit pixels per digit glyph in the 5x7 font
-        int[] lit = {19, 10, 15, 14, 14, 17, 17, 11, 17, 17}; // set bits of the 5x7 rows
-        // a single digit count is that glyph; count 1 draws nothing, so digit 1 is covered by the two digit test
+
+        int[] lit = {19, 10, 15, 14, 14, 17, 17, 11, 17, 17};
+
         for (int digit = 0; digit <= 9; digit++) {
             if (digit == 1) {
                 continue;
@@ -133,7 +130,7 @@ public final class NoInvLeakTests {
         check(one.list.isEmpty(), "count 1 draws nothing");
         Rects two = new Rects();
         DigitFont.decorations(two, false, 0, 0, 12, 0, 0, 1);
-        // two digits: right aligned, the glyph box of the last digit ends at x = 17 - 1 (shadow +1)
+
         int maxX = 0;
         int minX = 1000;
         for (int[] r : two.list) {
@@ -168,7 +165,7 @@ public final class NoInvLeakTests {
     }
 
     static void endToEndSlot() {
-        // an item slot (16x16 at scale 2): icon pixel, bar and count land inside the cell and do not throw
+
         int scale = 2;
         int px = 16 * scale;
         int[] cell = new int[px * px];

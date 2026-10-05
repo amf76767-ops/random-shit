@@ -14,12 +14,7 @@ import com.sun.jna.win32.StdCallLibrary;
 import java.util.ArrayDeque;
 import java.util.Locale;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Just enough of the Windows Runtime (WinRT) to call COM objects through their vtables with plain JNA: activation
- * factories, IAsyncOperation waiting, HSTRINGs. Only ever loaded on Windows (see {@link MediaSession}).
- * The original used jna-platform's GUID type here; this version keeps a GUID as 16 bytes of native memory instead.
- */
+/** Ported from an open-source client (GPL-3.0). */
 final class WinRt {
     static final int RO_INIT_MULTITHREADED = 1;
     static final int RPC_E_CHANGED_MODE = 0x80010106;
@@ -37,13 +32,12 @@ final class WinRt {
     private static final int ASYNC_COMPLETED = 1;
     private static final int ASYNC_CANCELED = 2;
     private static final long MAX_WAIT_STEP_MS = 5L;
-    /** Function.ALT_CONVENTION: the vtable entries are stdcall on 32-bit Windows (no difference on 64-bit). */
+
     private static final int CALL_FLAGS = 63;
 
     private WinRt() {
     }
 
-    /** Native copy of the GUID; keep a reference to it, the memory is freed when the object is collected. */
     static Memory iid(String text) {
         byte[] bytes = GuidBytes.of(text);
         Memory memory = new Memory(bytes.length);
@@ -70,7 +64,6 @@ final class WinRt {
         }
     }
 
-    /** Calls vtable entry {@code slot} of the COM object (slot 0-2 are IUnknown, 3-5 IInspectable, methods start at 6). */
     static int invoke(Pointer self, int slot, Object... args) {
         Pointer vtable = self.getPointer(0L);
         Function method = Function.getFunction(vtable.getPointer((long) slot * Native.POINTER_SIZE), CALL_FLAGS);
@@ -162,7 +155,6 @@ final class WinRt {
         return out.getValue();
     }
 
-    /** Polls IAsyncInfo until the operation completed; cancels it on timeout or interrupt. */
     private static void await(Pointer operation, long timeoutMs, String step) {
         if (operation == null) {
             throw new WinRtException(step + " returned no operation", E_ABORT);
@@ -245,7 +237,6 @@ final class WinRt {
         Pointer WindowsGetStringRawBuffer(Pointer string, IntByReference length);
     }
 
-    /** COM references taken during one call; released in reverse order when the block ends. */
     static final class Refs implements AutoCloseable {
         private final ArrayDeque<Pointer> held = new ArrayDeque<>();
 

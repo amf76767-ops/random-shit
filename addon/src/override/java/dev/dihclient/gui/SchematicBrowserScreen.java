@@ -99,10 +99,6 @@ public class SchematicBrowserScreen extends class_437 {
       }
    }
 
-   /**
-    * Every option of AutoBuild that applies to the chosen source. The module menu only shows the main ones; the rest is
-    * hidden there (see AdvancedOptions) and appears here, because this screen is the current one.
-    */
    private List<Setting<?>> currentOptions() {
       Setting<?> source = this.find("Source");
       List<Setting<?>> out = new ArrayList<>();
@@ -119,7 +115,6 @@ public class SchematicBrowserScreen extends class_437 {
       return out;
    }
 
-   /** Opens the browser straight on the OPTIONS tab (the module menu points here for the options it does not show). */
    public static void openOptions(class_437 parent, AutoBuild module) {
       SchematicBrowserScreen screen = new SchematicBrowserScreen(parent, module);
       screen.tab = SchematicBrowserScreen.Tab.OPTIONS;
@@ -619,7 +614,7 @@ public class SchematicBrowserScreen extends class_437 {
             Gfx.textCentered(g, setting.displayValue(), x + w - 56, ry + 5, -1);
             this.button(g, 201 + index * 2, x + w - 26, ry + 2, 16, 14, "+", false, mouseX, mouseY);
          } else {
-            Gfx.text(g, Gfx.trim(setting.displayValue(), 100), x + w - 108, ry + 5, -7564380); // other kinds: edit them in the module menu
+            Gfx.text(g, Gfx.trim(setting.displayValue(), 100), x + w - 108, ry + 5, -7564380);
          }
       }
 

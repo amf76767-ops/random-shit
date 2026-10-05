@@ -7,11 +7,7 @@ import it.unimi.dsi.fastutil.longs.LongIterator;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Groups flagged chunks into connected areas (8 neighbours) and gives one point per area for the tracer: the middle of the
- * area, moved to the nearest chunk of the area when the middle is not inside it. The result is cached until the set changes.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class ChunkAreas {
     private final DoubleArrayList areaX = new DoubleArrayList();
     private final DoubleArrayList areaZ = new DoubleArrayList();
@@ -21,7 +17,6 @@ public final class ChunkAreas {
     private final LongArrayFIFOQueue queue = new LongArrayFIFOQueue();
     private final LongArrayList area = new LongArrayList();
 
-    /** Recomputes the areas when the set is not the one from the last call. */
     public void update(LongSet chunks) {
         int hash = chunks.hashCode();
         if (chunks.size() == this.areasSize && hash == this.areasHash) {

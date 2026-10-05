@@ -65,13 +65,7 @@ import net.minecraft.class_6606;
 import net.minecraft.class_8886;
 import net.minecraft.class_2338.class_2339;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Below Y 0 the server sends light and block changes of chunks other players work in. This module remembers the block light of
- * every section, compares each new light packet with it and flags the chunk when something changed that no lamp, redstone ore or
- * amethyst nearby explains; redstone parts changing below Y 0 flag the chunk as well. The chunks you were in yourself are ignored.
- * The comparing is {@link LightDiff}; this class keeps the state, asks the world and draws.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class PrimeChunkFinder extends Module {
     private static final int MAX_FLAGGED_CHUNKS = 256;
     private static final long REDSTONE_NOTIFY_COOLDOWN_MS = 15_000L;
@@ -89,7 +83,6 @@ public final class PrimeChunkFinder extends Module {
     public final BoolSetting tracers = this.bool("Tracers", "Draws lines to flagged chunks.", true);
     public final BoolSetting sound = this.bool("Sound", "Plays a sound with the toast.", true).visibleWhen(() -> this.notifications.get());
 
-    /** Block light of every section of the chunks seen, least recently used first. */
     private final LinkedHashMap<Long, Map<Integer, byte[]>> chunkLight = new LinkedHashMap<>(256, 0.75F, true);
     private final LongOpenHashSet passedChunks = new LongOpenHashSet();
     private final LongLinkedOpenHashSet flaggedChunks = new LongLinkedOpenHashSet();
@@ -145,7 +138,6 @@ public final class PrimeChunkFinder extends Module {
         return Integer.toString(this.flaggedChunks.size());
     }
 
-    /** Network thread, before the game handles the packet: the light of the world is still the old one when the queued task runs. */
     private boolean onPacket(class_2596<?> packet) {
         if (packet instanceof class_2678) {
             mc.execute(() -> {
@@ -185,7 +177,7 @@ public final class PrimeChunkFinder extends Module {
     @Override
     public void onTick() {
         if (mc.field_1687 != this.lastWorld) {
-            // new connection or dimension: the remembered light belongs to the old world
+
             this.reset();
             this.lastWorld = mc.field_1687;
         }
@@ -228,7 +220,6 @@ public final class PrimeChunkFinder extends Module {
         }
     }
 
-    /** A flat plane per chunk and an edge line wherever the next chunk is not flagged (a thin box: a zero-height box has no face to draw). */
     private void drawChunks(Render3D r, int fill) {
         int edge = withAlpha(scaleRgb(fill, EDGE_SHADE), Math.min(255, (fill >>> 24) * 3 / 2));
         LongIterator it = this.shownChunks.iterator();
@@ -275,7 +266,6 @@ public final class PrimeChunkFinder extends Module {
         }
     }
 
-    /** One toast per two seconds, the ones in between are counted ("+3 more"). */
     private void toast(String text) {
         if (!this.notifications.get()) {
             return;
@@ -297,7 +287,7 @@ public final class PrimeChunkFinder extends Module {
         }
         int centerX = mc.field_1724.method_31477() >> 4;
         int centerZ = mc.field_1724.method_31479() >> 4;
-        // only as far as chunks can be loaded at all (the view distance), not a fixed 65 x 65 chunks
+
         int radius = Math.min(SNAPSHOT_RADIUS, mc.field_1690.method_38521() + 1);
         for (int chunkX = centerX - radius; chunkX <= centerX + radius; chunkX++) {
             for (int chunkZ = centerZ - radius; chunkZ <= centerZ + radius; chunkZ++) {
@@ -310,7 +300,6 @@ public final class PrimeChunkFinder extends Module {
         this.trimChunkCache();
     }
 
-    /** The block light the world holds right now, or null when the chunk is not loaded. */
     private Map<Integer, byte[]> snapshotChunk(int chunkX, int chunkZ) {
         class_638 level = mc.field_1687;
         if (level == null) {
@@ -331,7 +320,6 @@ public final class PrimeChunkFinder extends Module {
         return sections;
     }
 
-    /** A new chunk: its light is the starting point, nothing to compare with. */
     private void baselineChunk(int chunkX, int chunkZ, class_6606 data) {
         Map<Integer, byte[]> sections = this.createZeroedChunk();
         this.apply(data, sections, chunkX, chunkZ, false, null);
@@ -370,7 +358,6 @@ public final class PrimeChunkFinder extends Module {
                 this.topSection(), compare, this::explained, summary);
     }
 
-    /** A light change that a lamp, redstone ore or amethyst near it explains is not a player. */
     private boolean explained(int x, int y, int z, int oldValue, int newValue) {
         int value = Math.max(oldValue, newValue);
         return this.fromAmethyst(x, y, z, oldValue, newValue) || this.fromRedstoneOre(x, y, z, value) || this.fromLamp(x, y, z, value);
@@ -434,7 +421,6 @@ public final class PrimeChunkFinder extends Module {
                 || block instanceof class_2436;
     }
 
-    /** Chunks the player was in below Y 0 (the light there is the player's own work). */
     private boolean isOwnChunk(long key) {
         if (this.passedChunks.contains(key)) {
             return true;
@@ -466,7 +452,7 @@ public final class PrimeChunkFinder extends Module {
                 }
             }
         }
-        // lamps that were switched off or broken a moment ago: their light is still in the packet that comes now
+
         long now = class_156.method_658();
         ObjectIterator<Long2LongMap.Entry> gone = this.goneLamps.long2LongEntrySet().iterator();
         while (gone.hasNext()) {
@@ -509,7 +495,6 @@ public final class PrimeChunkFinder extends Module {
         return lamps.isEmpty() ? NO_LAMPS : lamps.toIntArray();
     }
 
-    /** The section when it is inside the world, loaded and not empty; else null. */
     private static class_2826 loadedSection(class_638 level, int sectionX, int sectionY, int sectionZ) {
         if (sectionY < level.method_32891() || sectionY > level.method_31597()) {
             return null;
@@ -635,7 +620,6 @@ public final class PrimeChunkFinder extends Module {
         return ores.isEmpty() ? NO_ORES : ores.toLongArray();
     }
 
-    /** Only ore that touches air or a see-through block lights up (ore inside rock does not shine). */
     private boolean exposed(class_638 level, int x, int y, int z) {
         for (class_2350 direction : class_2350.values()) {
             class_2680 neighbour = level.method_8320(this.cursor.method_10103(x + direction.method_10148(), y + direction.method_10164(), z + direction.method_10165()));
@@ -667,7 +651,6 @@ public final class PrimeChunkFinder extends Module {
         return mc.field_1687.method_32891();
     }
 
-    /** Only the sections below Y 0 are kept and compared: the module looks for light changes there and nowhere else. */
     private int topSection() {
         return Math.min(mc.field_1687.method_31597(), -1);
     }

@@ -59,7 +59,6 @@ public class ClickGui extends Module {
         return false;
     }
 
-    /** The three styles of the GUI (the name stays Layout because the old classes of the client use it). */
     public enum Layout {
         MODERN,
         METEOR,

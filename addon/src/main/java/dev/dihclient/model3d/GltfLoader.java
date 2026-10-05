@@ -22,11 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import javax.imageio.ImageIO;
 
-/**
- * Reads glTF 2.0 files (.glb and .gltf): meshes with normals, UVs and vertex colours, materials with a base colour and
- * picture, node hierarchies, skins and node animations (translation, rotation, scale; linear, step and cubic spline).
- * This is the format Blender exports with File → Export → glTF 2.0.
- */
 public final class GltfLoader {
     private static final int GLB_MAGIC = 0x46546C67;
     private static final int CHUNK_JSON = 0x4E4F534A;
@@ -114,7 +109,7 @@ public final class GltfLoader {
                 throw new IOException("Compressed model (" + x + "). Export again without mesh compression.");
             }
         }
-        // materials
+
         JsonArray mats = array(root, "materials");
         for (JsonElement e : mats) {
             ModelBuilder.Mat m = new ModelBuilder.Mat();
@@ -131,7 +126,6 @@ public final class GltfLoader {
             builder.addMaterial(m);
         }
 
-        // nodes
         JsonArray nodes = array(root, "nodes");
         int n = Math.max(1, nodes.size());
         int[] parent = new int[n];
@@ -170,7 +164,6 @@ public final class GltfLoader {
         }
         builder.skeleton(n, parent, t, r, s);
 
-        // skins: all joints of all skins in one table
         JsonArray skins = array(root, "skins");
         int[] skinBase = new int[skins.size()];
         List<Integer> jointNodes = new ArrayList<>();
@@ -197,7 +190,6 @@ public final class GltfLoader {
             System.arraycopy(inverse.get(i), 0, model0.invBind, i * 16, 16);
         }
 
-        // meshes of every node reachable from the scene
         Set<Integer> reachable = reachableNodes(nodes, parent);
         JsonArray meshes = array(root, "meshes");
         for (int ni = 0; ni < nodes.size(); ni++) {
@@ -251,7 +243,7 @@ public final class GltfLoader {
     private void primitive(JsonObject prim, int node, int skinBase) throws IOException {
         int mode = prim.has("mode") ? prim.get("mode").getAsInt() : 4;
         if (mode < 4 || mode > 6) {
-            return; // points and lines
+            return;
         }
         if (prim.has("extensions") && prim.getAsJsonObject("extensions").has("KHR_draco_mesh_compression")) {
             throw new IOException("Compressed model (Draco). Export again without mesh compression.");
@@ -326,11 +318,11 @@ public final class GltfLoader {
         int tris = Math.max(0, raw.length - 2);
         int[] out = new int[tris * 3];
         for (int i = 0; i < tris; i++) {
-            if (mode == 5) { // strip: every second triangle has the other winding
+            if (mode == 5) {
                 out[i * 3] = raw[i + (i & 1)];
                 out[i * 3 + 1] = raw[i + 1 - (i & 1)];
                 out[i * 3 + 2] = raw[i + 2];
-            } else { // fan
+            } else {
                 out[i * 3] = raw[0];
                 out[i * 3 + 1] = raw[i + 1];
                 out[i * 3 + 2] = raw[i + 2];
@@ -388,8 +380,6 @@ public final class GltfLoader {
             }
         }
     }
-
-    // ---- accessors, images, helpers
 
     private Acc read(int index) throws IOException {
         JsonArray accessors = array(root, "accessors");
@@ -476,7 +466,7 @@ public final class GltfLoader {
             images.put(src, img);
             return img;
         } catch (IOException | RuntimeException e) {
-            return null; // a picture we cannot read (for example WebP): the colour of the material is used
+            return null;
         }
     }
 

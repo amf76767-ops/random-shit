@@ -10,11 +10,6 @@ import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * Spawner Protect has to see a block update while the world still holds the old block (to know a block was broken),
- * which PacketBus.applied cannot offer: it fires after the update is applied. This hook runs on the game thread right
- * after the game has moved the packet there and before it changes the world.
- */
 @Mixin(class_634.class)
 public abstract class SpawnerProtectPacketMixin {
     @Inject(

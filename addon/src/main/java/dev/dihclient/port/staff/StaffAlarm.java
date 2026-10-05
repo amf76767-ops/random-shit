@@ -10,10 +10,7 @@ import net.minecraft.class_3414;
 import net.minecraft.class_3417;
 import net.minecraft.class_3419;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * A short repeating alarm sound (a few seconds) that plays at full stereo, no matter where you stand. Game thread only.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class StaffAlarm {
     private static final int MAX_RINGING = 8;
 
@@ -48,7 +45,7 @@ public final class StaffAlarm {
             try {
                 this.play(this.step / interval);
             } catch (Throwable t) {
-                // a broken sound must never end the tick
+
                 DIHClient.LOG.warn("[DIHClient] Staff List alarm sound failed", t);
                 this.ticksLeft = 1;
             }

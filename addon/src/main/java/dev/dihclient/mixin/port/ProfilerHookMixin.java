@@ -11,7 +11,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Times the tick and the drawing of every module for the Frame Profiler. While the profiler is off, each hook is one boolean check. */
 @Mixin(ModuleManager.class)
 public abstract class ProfilerHookMixin {
     @Inject(method = "safe", at = @At("HEAD"), require = 0)

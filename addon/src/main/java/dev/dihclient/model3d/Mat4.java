@@ -1,6 +1,5 @@
 package dev.dihclient.model3d;
 
-/** Column-major 4x4 matrices in plain float arrays (the glTF layout): element (row r, column c) is m[c * 4 + r]. */
 public final class Mat4 {
     private Mat4() {
     }
@@ -9,7 +8,6 @@ public final class Mat4 {
         return new float[]{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
     }
 
-    /** out = a * b. {@code out} must not be the same array as a or b. */
     public static void mul(float[] a, int ao, float[] b, int bo, float[] out, int oo) {
         for (int c = 0; c < 4; c++) {
             for (int r = 0; r < 4; r++) {
@@ -22,7 +20,6 @@ public final class Mat4 {
         }
     }
 
-    /** Translation (t), rotation quaternion (x, y, z, w) and scale (s) as one matrix, written at {@code oo}. */
     public static void trs(float[] t, int to, float[] q, int qo, float[] s, int so, float[] out, int oo) {
         float x = q[qo], y = q[qo + 1], z = q[qo + 2], w = q[qo + 3];
         float n = (float) Math.sqrt(x * x + y * y + z * z + w * w);
@@ -55,7 +52,6 @@ public final class Mat4 {
         out[oo + 15] = 1;
     }
 
-    /** Splits an affine matrix into translation, rotation quaternion and scale. */
     public static void decompose(float[] m, float[] t, float[] q, float[] s) {
         t[0] = m[12];
         t[1] = m[13];

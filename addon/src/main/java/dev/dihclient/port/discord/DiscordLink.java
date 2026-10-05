@@ -6,12 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.BooleanSupplier;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * The thread that owns the Discord connection. The game thread only publishes the wanted {@link DiscordCard} (null = show
- * nothing); everything that can block (finding the pipe, handshake, writes) happens here, on a daemon thread. Reconnects with
- * back-off, sends at most one update per few seconds, and clears the status when told to stop.
- */
+/** Ported from an open-source client (GPL-3.0). */
 final class DiscordLink implements Runnable {
     private static final long RETRY_MIN_MS = 5000L;
     private static final long RETRY_MAX_MS = 30000L;
@@ -32,7 +27,6 @@ final class DiscordLink implements Runnable {
     private long retryMs = RETRY_MIN_MS;
     private String lastProblem;
 
-    /** @param wanted asked every second: false means the module is off, so clear and quit */
     DiscordLink(DiscordLink previous, BooleanSupplier wanted) {
         this.previous = previous != null ? previous.thread : null;
         this.wanted = wanted;
@@ -48,13 +42,11 @@ final class DiscordLink implements Runnable {
         LockSupport.unpark(this.thread);
     }
 
-    /** Asks the thread to clear the status and end; returns at once. */
     void stop() {
         this.running = false;
         LockSupport.unpark(this.thread);
     }
 
-    /** False once stop() was called or the thread ended; a new link must be started then. */
     boolean alive() {
         return this.running && !this.finished;
     }
@@ -63,7 +55,6 @@ final class DiscordLink implements Runnable {
         return this.card;
     }
 
-    /** Waits (bounded) for the thread, so a closing game still gets the status cleared. */
     void join(long millis) {
         try {
             this.thread.join(millis);
@@ -87,7 +78,7 @@ final class DiscordLink implements Runnable {
                     this.clear();
                 }
             } catch (Throwable ignored) {
-                // closing anyway
+
             }
             this.finished = true;
         }
@@ -96,7 +87,7 @@ final class DiscordLink implements Runnable {
     private void step() {
         DiscordCard want = this.card;
         if (want == null) {
-            // nothing to show: drop the connection too, so we are not on Discord's list while idle
+
             if (this.ipc != null) {
                 this.clear();
             }
@@ -146,7 +137,7 @@ final class DiscordLink implements Runnable {
             return false;
         }
         if (this.ipc == null) {
-            // Discord is not running: stay quiet and look again later
+
             return false;
         }
         DIHClient.LOG.info("[DIHClient] Discord Presence: connected to Discord");
@@ -167,14 +158,13 @@ final class DiscordLink implements Runnable {
         this.sentAt = System.currentTimeMillis();
     }
 
-    /** Removes the status and hangs up; every error is ignored because we are leaving anyway. */
     private void clear() {
         try {
             if (this.sent != null) {
                 this.ipc.setActivity(null);
             }
         } catch (DiscordIpc.RefusedException | IOException ignored) {
-            // hanging up clears it on Discord's side too
+
         }
         this.hangUp();
     }
@@ -192,7 +182,6 @@ final class DiscordLink implements Runnable {
         LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(millis));
     }
 
-    /** One line per distinct problem, so a broken Discord never fills the log. */
     private void report(String what, Exception problem) {
         String line = what + " (" + problem + ")";
         if (!line.equals(this.lastProblem)) {

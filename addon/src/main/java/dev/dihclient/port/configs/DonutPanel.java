@@ -5,17 +5,12 @@ import dev.dihclient.module.Category;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-/**
- * Finds a free place for the window of the new Donut category the first time the GUI opens. The GUI's own default
- * placement starts at the top left and would put the window on top of Combat when the other windows already have saved spots.
- */
 public final class DonutPanel {
     private static boolean done;
 
     private DonutPanel() {
     }
 
-    /** @param scaledWidth the width of the GUI in its own (scaled) pixels */
     public static void place(Object screen, int scaledWidth) {
         if (done) {
             return;
@@ -36,7 +31,7 @@ public final class DonutPanel {
             fx.setAccessible(true);
             fy.setAccessible(true);
             if (fx.getInt(mine) >= 0 && fy.getInt(mine) >= 0) {
-                return; // has a saved place
+                return;
             }
             int bestX = -1;
             int bestY = 30;

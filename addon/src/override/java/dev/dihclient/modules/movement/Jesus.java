@@ -9,11 +9,6 @@ import net.minecraft.class_243;
 import net.minecraft.class_3486;
 import net.minecraft.class_3610;
 
-/**
- * Walk on water (and lava). The old version asked "am I touching water?" every tick; standing on the surface the player
- * sinks a hair each tick, so it kept switching between "rise" and "stand" and jittered or fell through. This one looks at
- * the fluid under the feet: close to the surface it snaps onto it, deeper it rises smoothly.
- */
 public class Jesus extends Module {
     public final EnumSetting<Jesus.Mode> mode = this.mode("Mode", "Solid: stand on the surface. Bob: float up and bob.", Jesus.Mode.SOLID);
     public final BoolSetting lava = this.bool("Lava", "Also works on lava.", true);
@@ -30,7 +25,6 @@ public class Jesus extends Module {
         return state.method_15767(class_3486.field_15517) || (this.lava.get() && state.method_15767(class_3486.field_15518));
     }
 
-    /** Height of the fluid surface in the column at (x, y, z), looking from one block above to one block below. NaN = none. */
     private double surface(double x, double y, double z) {
         class_2338 base = class_2338.method_49637(x, y - 0.05, z);
         class_2338[] candidates = {base.method_10084(), base, base.method_10074()};
@@ -58,18 +52,18 @@ public class Jesus extends Module {
         if (Double.isNaN(top)) {
             return;
         }
-        double depth = top - y;               // > 0: feet are under the surface
+        double depth = top - y;
         class_243 v = mc.field_1724.method_18798();
         boolean jump = mc.field_1690.field_1903.method_1434();
         if (depth > 1.6 || depth < -0.35) {
-            return;                           // far below (a real swim) or well above (a jump): leave it alone
+            return;
         }
         if (this.mode.get() == Jesus.Mode.BOB) {
             mc.field_1724.method_18800(v.field_1352, depth > 0.1 ? 0.11 : (depth < -0.05 ? v.field_1351 : 0.0), v.field_1350);
             return;
         }
         if (depth > 0.2) {
-            // deeper than a step: rise smoothly until the snap range is reached
+
             mc.field_1724.method_18800(v.field_1352, Math.min(0.28, 0.08 + depth * 0.5), v.field_1350);
             return;
         }

@@ -14,12 +14,7 @@ import net.minecraft.class_4076;
 import net.minecraft.class_638;
 import net.minecraft.class_2338.class_2339;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * ANBS+ Scan of Amethyst Bypass. Reads the block light the server sent (the light is not hidden by anti-xray) and looks, between
- * Y -58 and 30, for open blocks with light 0 that touch light 4 and nothing brighter: the faint glow a geode throws into the
- * hidden cave around it. The light layers of the chunk and its eight neighbours are cached once per scan.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class GeodeGlowScan {
     public static final int MIN_Y = -58;
     public static final int MAX_Y = 30;
@@ -39,7 +34,6 @@ public final class GeodeGlowScan {
     private int edgeY;
     private int edgeZ;
 
-    /** @return how many glow edges the chunk has; each is passed to {@code hit} as a packed block position (may be null) */
     public int scan(class_638 level, class_2818 chunk, LongConsumer hit) {
         this.level = level;
         this.chunkX = chunk.method_12004().field_9181;
@@ -89,7 +83,7 @@ public final class GeodeGlowScan {
                 for (int s = 0; s < CACHED; s++) {
                     class_2804 layer = light.method_15544(class_4076.method_18676(this.chunkX + dx, FIRST_CACHED + s, this.chunkZ + dz));
                     if (layer != null && layer.method_12146()) {
-                        layer = null; // an all-zero layer says nothing
+                        layer = null;
                     }
                     this.layers[DonutDLogic.glowSlot(dx, dz, s)] = layer;
                     any |= layer != null;
@@ -99,7 +93,6 @@ public final class GeodeGlowScan {
         return any;
     }
 
-    /** Is there any light data in the section or the ones above and below it, in this and the neighbour chunks? */
     private boolean nearLight(int sy) {
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
@@ -138,7 +131,6 @@ public final class GeodeGlowScan {
         return layer == null ? 0 : layer.method_12139(x & 15, y & 15, z & 15);
     }
 
-    /** Air, or an amethyst cluster (it lets light through and sits where a bud grew). */
     private static boolean open(class_2680 state) {
         return state.method_26215() || state.method_27852(class_2246.field_27161);
     }

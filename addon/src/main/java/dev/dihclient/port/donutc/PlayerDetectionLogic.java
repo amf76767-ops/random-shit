@@ -8,18 +8,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * The game-free parts of Player Detection: who counts, comma lists and the panic pay command.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class PlayerDetectionLogic {
-    /** Names that are never reported (lower case): the fake player of a free camera mod. */
+
     public static final Set<String> PERMANENT_WHITELIST = Set.of("freecamera");
 
     private PlayerDetectionLogic() {
     }
 
-    /** Comma separated names to a set of lower case names; blanks are skipped. */
     public static Set<String> parseNames(String raw) {
         Set<String> parsed = new HashSet<>();
         if (raw == null) {
@@ -34,7 +30,6 @@ public final class PlayerDetectionLogic {
         return parsed;
     }
 
-    /** Comma separated entries, trimmed, blanks and repeats (ignoring case) dropped, order kept. */
     public static List<String> parseList(String raw) {
         List<String> out = new ArrayList<>();
         Set<String> seen = new HashSet<>();
@@ -50,11 +45,6 @@ public final class PlayerDetectionLogic {
         return out;
     }
 
-    /**
-     * The players that count right now: not you (by name), not on the permanent or the user whitelist.
-     * @param ignored lower case names
-     * @return names in the order given; empty when nobody counts
-     */
     public static Set<String> relevant(Collection<String> names, String selfName, Set<String> ignored) {
         Set<String> current = new LinkedHashSet<>();
         for (String name : names) {
@@ -69,7 +59,6 @@ public final class PlayerDetectionLogic {
         return current;
     }
 
-    /** "/pay target amount" without the slash, or null when a part is empty or has whitespace (it would become another command). */
     public static String payCommand(String target, String amount) {
         String t = target == null ? "" : target.trim();
         String a = amount == null ? "" : amount.trim();
@@ -88,7 +77,6 @@ public final class PlayerDetectionLogic {
         return false;
     }
 
-    /** Short enough for a toast: the names joined, with "+N" for the rest. */
     public static String shortNames(Collection<String> names, int max) {
         List<String> all = new ArrayList<>(names);
         if (all.size() <= max) {

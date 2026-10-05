@@ -25,13 +25,6 @@ import net.minecraft.class_2761;
 import net.minecraft.class_642;
 import net.minecraft.class_746;
 
-/**
- * Finds places where the server lags without anything happening there. The server sends its game time once a second; the game time
- * that passed divided by the real time that passed is the TPS. The TPS is noted at the place you stand (see {@link LagMap}). A server
- * only ticks what is near a player, so a big hidden base or farm under the ground slows the server down while you are near it and not
- * when you are away: neighbouring cells with a clearly lower TPS than usual become a lag zone. Samples taken in a crowd (many entities
- * around you), right after a teleport or while flying fast are dropped, because there the lag has an obvious reason.
- */
 public class LagFinder extends Module {
     public final DoubleSetting threshold = this.dbl("Lag Threshold", "How many TPS below the usual TPS a place has to average to count as laggy.", 3.0, 0.5, 10.0, 0.5);
     public final IntSetting minSamples = this.integer("Min Samples", "Seconds spent in an area before it is judged (more = fewer false alarms).", 5, 2, 30);
@@ -111,7 +104,6 @@ public class LagFinder extends Module {
         return String.format(Locale.ROOT, "X %d, Z %d (about %d blocks wide): %.1f TPS", (int) z.x(), (int) z.z(), (int) (z.radius() * 2), z.avgTps());
     }
 
-    /** Network thread: the game time of the packet divided by the time since the last one is the TPS. */
     private boolean onPacket(class_2596<?> packet) {
         if (packet instanceof class_2761 time) {
             long now = System.nanoTime();
@@ -160,7 +152,7 @@ public class LagFinder extends Module {
         double x = player.method_23317();
         double z = player.method_23321();
         if (this.haveLast && Math.hypot(x - this.lastX, z - this.lastZ) > 24.0) {
-            this.quiet = 100; // teleported: the server is busy with the new chunks
+            this.quiet = 100;
         }
         double speed = this.haveLast ? Math.hypot(x - this.lastX, z - this.lastZ) * 20.0 : 0.0;
         this.lastX = x;

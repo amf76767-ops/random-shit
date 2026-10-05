@@ -9,18 +9,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.BooleanSupplier;
 import net.minecraft.class_2596;
 
-/**
- * Packet events for the ported modules. DIH only knew "packet send"; the received packets come from {@code NetHandlerMixin}.
- * Three points in time, like in the client the modules come from:
- * <ul>
- *   <li>{@link #netty}: on the network thread, before the game sees the packet. May cancel it.</li>
- *   <li>{@link #received}: on a worker thread right after, for heavy work (the packet is never touched by the game thread).</li>
- *   <li>{@link #applied}: on the game thread after the game has handled the packet (login, chunk, block, section, light).</li>
- * </ul>
- * A listener that throws is logged once and skipped; it can never break the connection.
- */
 public final class PacketBus {
-    /** @return true to swallow the packet */
+
     public interface Netty {
         boolean onPacket(class_2596<?> packet);
     }
@@ -72,7 +62,6 @@ public final class PacketBus {
         return !APPLIED.isEmpty();
     }
 
-    /** Called by the mixin on the network thread. @return true when a listener swallowed the packet */
     public static boolean dispatchNetty(class_2596<?> packet) {
         boolean cancel = false;
         for (Netty l : NETTY) {
@@ -85,7 +74,6 @@ public final class PacketBus {
         return cancel;
     }
 
-    /** Called by the mixin when the packet was not swallowed. Runs the listeners on the worker thread, only while the connection lives. */
     public static void dispatchReceived(class_2596<?> packet, BooleanSupplier connectionActive) {
         if (RECEIVED.isEmpty()) {
             return;
@@ -104,7 +92,6 @@ public final class PacketBus {
         });
     }
 
-    /** Called by the mixin on the game thread after the game handled the packet. */
     public static void dispatchApplied(class_2596<?> packet) {
         for (Listener l : APPLIED) {
             try {

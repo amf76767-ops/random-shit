@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/** Tests of the pure logic of the Staff List port (no Minecraft classes). */
 public final class StaffListTests {
     static int failed;
     static int passed;
@@ -30,7 +29,7 @@ public final class StaffListTests {
     }
 
     public static void main(String[] args) {
-        // names
+
         check(StaffNames.isStaffName("fluffymaster07"), "name match ignores case");
         check(StaffNames.isStaffName("FluffyMaster07"), "exact name");
         check(!StaffNames.isStaffName("Notch") && !StaffNames.isStaffName(null) && !StaffNames.isStaffName(""), "non staff / null");
@@ -43,7 +42,6 @@ public final class StaffListTests {
         check(!StaffNames.isAccount(online, "has space") && !StaffNames.isAccount(online, "waytoolongname_17x") && !StaffNames.isAccount(online, null),
                 "bad names");
 
-        // age
         check(StaffNames.formatAge(0).equals("0:00"), "age 0");
         check(StaffNames.formatAge(9_000).equals("0:09"), "age 9s");
         check(StaffNames.formatAge(65_000).equals("1:05"), "age 1:05");
@@ -51,7 +49,6 @@ public final class StaffListTests {
         check(StaffNames.formatAge(3_725_000L).equals("1:02:05"), "age 1:02:05");
         check(StaffNames.formatAge(-5).equals("0:00"), "negative age");
 
-        // rank matching
         StaffMatcher m = donut();
         StaffMatcher.Match a = m.match("Bob", null, "[Admin] Bob");
         check(a != null && a.rank().equals("Admin"), "rank word in display name");
@@ -77,7 +74,6 @@ public final class StaffListTests {
         check(StaffMatcher.parseMarkers("U+2605, \\u2606 x").containsAll(List.of(0x2605, 0x2606, (int) 'x')), "marker parsing");
         check(StaffMatcher.stripLegacyCodes("§aHi§r").equals("Hi"), "strip legacy codes");
 
-        // sighting
         StaffSighting s = new StaffSighting();
         check(!s.marked(1000), "fresh sighting not marked");
         s.provenAt = 1000;
@@ -90,7 +86,6 @@ public final class StaffListTests {
         check(s.coolingDown(5000 + 119_999) && !s.coolingDown(5000 + 120_000), "alert cooldown 2 minutes");
         check(s.alertLevel(5000) == 1.0F && s.alertLevel(5000 + 2000) == 0.5F && s.alertLevel(99_999) == 0.0F, "alert level fades");
 
-        // ordering: nearby, then proven in region, then hidden, then plain online; then rank, then name
         long now = 10_000;
         StaffEntry nearby = entry("zed", 5, StaffEntry.Presence.ONLINE);
         StaffEntry region = entry("yan", 5, StaffEntry.Presence.ONLINE);
@@ -111,7 +106,6 @@ public final class StaffListTests {
         }
         check(order.equals("zed yan xia walt zoe amy Bea "), "list order: " + order);
 
-        // goliath map
         int centre = GoliathMap.goliathAt(0, 0);
         check(centre == GoliathMap.goliathAt(100, 100), "same cell, same goliath");
         check(GoliathMap.goliathAt(-300_000, 0) == -1 && GoliathMap.goliathAt(0, 300_000) == -1, "outside the map");
@@ -120,7 +114,6 @@ public final class StaffListTests {
         check(GoliathMap.goliathAt(-225_000 + 5 * 12_500, -225_000 + 3 * 12_500 + 1) == 0, "rect 2x4 covers its cells");
         check(GoliathMap.goliathAt(-225_000 + 5 * 12_500, -225_000 + 4 * 12_500 + 1) != 0, "and not the one below");
 
-        // alarm
         check(AlarmPattern.interval(AlarmPattern.GUARDIAN) == 60 && AlarmPattern.interval(AlarmPattern.BEEP) == 3
                 && AlarmPattern.interval(AlarmPattern.BELL) == 10 && AlarmPattern.interval(AlarmPattern.SIREN) == 4, "alarm intervals");
         check(AlarmPattern.pitch(AlarmPattern.SIREN, 0) == 1.5F && AlarmPattern.pitch(AlarmPattern.SIREN, 1) == 1.0F, "siren alternates");

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-/** The model files in .minecraft/dihclient/models. */
 final class ModelFiles {
     private static final String DEFAULT = "tung_tung_tung_sahur.obj";
 
@@ -20,12 +19,11 @@ final class ModelFiles {
         try (Stream<Path> s = Files.list(CustomModel.modelDir())) {
             s.filter(p -> Files.isRegularFile(p) && ModelLoader.supported(p)).sorted().forEach(out::add);
         } catch (IOException ignored) {
-            // empty list
+
         }
         return out;
     }
 
-    /** The file with that name; with an empty name the default model, else the first one. */
     static Path pick(String name) {
         List<Path> all = list();
         String want = name == null ? "" : name.trim();

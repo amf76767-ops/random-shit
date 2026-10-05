@@ -8,10 +8,6 @@ import dev.dihclient.setting.EnumSetting;
 import dev.dihclient.setting.IntSetting;
 import java.lang.reflect.Method;
 
-/**
- * Sets the time of day on your screen, no matter what the server says: always noon, always night, or a day that runs
- * at your own speed. Only you see it; the server and the other players keep their time.
- */
 public class FakeTime extends Module {
     public enum Mode { FIXED, CYCLE }
 
@@ -82,8 +78,8 @@ public class FakeTime extends Module {
             return;
         }
         Class<?> world = mc.field_1687.getClass();
-        this.setTime = world.getMethod("method_29089", long.class, long.class, boolean.class); // ClientWorld.setTime
-        this.getProps = world.getMethod("method_28104");                                      // ClientWorld.getLevelProperties
+        this.setTime = world.getMethod("method_29089", long.class, long.class, boolean.class);
+        this.getProps = world.getMethod("method_28104");
         Class<?> props = this.getProps.invoke(mc.field_1687).getClass();
         this.propsGameTime = props.getMethod("method_188");
         this.propsDayTime = props.getMethod("method_217");

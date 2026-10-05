@@ -9,10 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-/**
- * Ported from an open-source client (GPL-3.0) (MixinNoInvLeakSlot).
- * The grey silhouette of an empty armor/offhand slot would show through the overlay, so it is dropped for filled own slots.
- */
+/** Ported from an open-source client (GPL-3.0). */
 @Mixin(class_1735.class)
 public abstract class NoInvLeakSlotMixin {
     @Inject(method = "method_7679", at = @At("RETURN"), cancellable = true)

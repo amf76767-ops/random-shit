@@ -4,17 +4,11 @@ import dev.dihclient.DIHClient;
 import net.minecraft.class_1041;
 import net.minecraft.class_310;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * <p>
- * Exclusive fullscreen hides every other window, including the overlay windows. While Stream Only wants borderless, the
- * game's fullscreen is a borderless window of the monitor's size instead ({@code BorderlessWindowMixin} does the switch).
- */
+/** Ported from an open-source client (GPL-3.0). */
 public final class BorderlessFullscreen {
     private BorderlessFullscreen() {
     }
 
-    /** Implemented by the window mixin. */
     public interface Switchable {
         boolean dih$isBorderless();
 
@@ -29,7 +23,6 @@ public final class BorderlessFullscreen {
         }
     }
 
-    /** Render thread: asks the window to re-apply its mode when the wish and the state differ. */
     public static void tick() {
         try {
             class_310 mc = class_310.method_1551();

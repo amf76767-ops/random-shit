@@ -248,8 +248,6 @@ public class NetheriteFinder extends Module implements ChunkEvents.Listener {
       }
    }
 
-   // The area sweep: the spots around the player on a grid of 5 blocks, nearest first. They only change when the player moves into
-   // another grid cell, so the list is built then (not every tick, with thousands of allocations) and walked with a pointer.
    private long[] areaSpots = new long[0];
    private int areaPos;
    private long areaKey = Long.MIN_VALUE;
@@ -386,7 +384,6 @@ public class NetheriteFinder extends Module implements ChunkEvents.Listener {
       return var1;
    }
 
-   /** What the worker found in one chunk: only block positions, no judgement yet. */
    private static final class Raw {
       int x;
       int z;
@@ -398,7 +395,6 @@ public class NetheriteFinder extends Module implements ChunkEvents.Listener {
       List<class_238> hints = new ArrayList<>();
    }
 
-   /** Reads the blocks of a chunk (the heavy part). Runs on the worker thread, or on the game thread as a fallback. */
    private Raw collect(Object level, int cx, int cz, int low, int high, boolean wantHints, int generation) {
       Raw out = new Raw();
       out.x = cx;
@@ -442,7 +438,6 @@ public class NetheriteFinder extends Module implements ChunkEvents.Listener {
       return out;
    }
 
-   /** Judges what was found (exposed, fake ores, deposits, alerts). Game thread only. */
    private void finish(Raw raw) {
       long var4 = class_1923.method_8331(raw.x, raw.z);
       if (raw.gone) {
@@ -475,7 +470,6 @@ public class NetheriteFinder extends Module implements ChunkEvents.Listener {
       this.finish(this.collect(mc.field_1687, cx, cz, this.minY.get(), this.maxY.get(), this.sectionHints.get(), this.generation));
    }
 
-   // ---- the scan runs on a worker thread: the game thread only judges the finished chunks
    private static final int IN_FLIGHT = 12;
    private java.util.concurrent.ExecutorService worker;
    private final java.util.concurrent.ConcurrentLinkedQueue<Raw> finished = new java.util.concurrent.ConcurrentLinkedQueue<>();
@@ -502,7 +496,6 @@ public class NetheriteFinder extends Module implements ChunkEvents.Listener {
       this.inFlight.set(0);
    }
 
-   /** Hands queued chunks to the worker (nearest first) and judges what came back. */
    private void pump() {
       java.util.concurrent.ExecutorService w = this.worker;
       if (w == null || w.isShutdown()) {
@@ -550,10 +543,10 @@ public class NetheriteFinder extends Module implements ChunkEvents.Listener {
       while ((done < this.speed.get() * 2 || done == 0) && (done == 0 || ScanBudget.hasTime()) && (raw = this.finished.poll()) != null) {
          done++;
          if (raw.generation != this.generation || raw.level != mc.field_1687) {
-            continue; // from before a rescan or another world
+            continue;
          }
          if (raw.failed) {
-            this.scan(raw.x, raw.z); // the worker read something half changed: once more here, on the game thread
+            this.scan(raw.x, raw.z);
          } else {
             this.finish(raw);
          }

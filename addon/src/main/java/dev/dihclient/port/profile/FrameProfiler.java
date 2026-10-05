@@ -16,12 +16,6 @@ import java.util.Map;
 import net.minecraft.class_310;
 import net.minecraft.class_332;
 
-/**
- * Measures how much time every module takes (its tick, its 2D and its 3D drawing) and shows the biggest ones, so a slow game can be
- * traced to a module instead of guessed. Only the time spent inside the modules is measured (the game's own rendering is not
- * included): if the modules together take little but the FPS is low, the cause is somewhere else (shaders, render distance ...).
- * Off by default; while it is off nothing is measured.
- */
 public class FrameProfiler extends Module {
     public static final int TICK = 0;
     public static final int R2D = 1;
@@ -34,7 +28,6 @@ public class FrameProfiler extends Module {
     private static String startedName;
     private static int startedPhase;
 
-    /** One finished window: module name, nanoseconds per phase, calls per phase. */
     private record Row(String name, long[] nanos, int[] calls) {
         double percent(long window) {
             return (this.nanos[0] + this.nanos[1] + this.nanos[2]) * 100.0 / window;
@@ -77,8 +70,6 @@ public class FrameProfiler extends Module {
     public String getInfo() {
         return String.format(Locale.ROOT, "%d fps · %.0f%%", this.fps, this.totalPercent);
     }
-
-    // ---------------------------------------------------------------- measuring (called by ProfilerHookMixin)
 
     public static boolean active() {
         return active;

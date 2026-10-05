@@ -6,17 +6,13 @@ import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Decodes the cover bytes Windows hands over (PNG/JPEG/BMP...) with stb_image, which the game ships. Runs on the poll thread.
- */
+/** Ported from an open-source client (GPL-3.0). */
 final class ArtDecoder {
     private static final int MAX_SOURCE_SIDE = 4096;
 
     private ArtDecoder() {
     }
 
-    /** Null when the bytes are not an image we want (too large, corrupt). */
     static AlbumArt decode(byte[] encoded, int maxSide) {
         if (encoded == null || encoded.length == 0 || maxSide <= 0) {
             return null;

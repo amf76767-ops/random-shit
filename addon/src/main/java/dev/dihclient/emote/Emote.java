@@ -2,7 +2,6 @@ package dev.dihclient.emote;
 
 import java.util.Locale;
 
-/** The emotes: each one is a movement of the whole body over a few seconds. */
 public enum Emote {
     DANCE("Dance", 4.0f),
     SPIN("Spin", 1.6f),
@@ -42,12 +41,10 @@ public enum Emote {
         return x * x * (3 - 2 * x);
     }
 
-    /** 0 → 1 → hold → 0: up in {@code rise} seconds, down in the last {@code fall} seconds. */
     private static double bump(double t, double total, double rise, double fall) {
         return Math.min(ease(t / rise), ease((total - t) / fall));
     }
 
-    /** The pose {@code t} seconds after the start; {@link EmotePose#NONE} when it is over. */
     public EmotePose at(double t) {
         if (t < 0 || t >= this.seconds) {
             return EmotePose.NONE;
@@ -76,7 +73,7 @@ public enum Emote {
                 double b = bump(t, this.seconds, 0.6, 0.6);
                 pitch = 85 * b;
                 dy = -0.75 * b;
-                roll = 2 * Math.sin(tau * 0.4 * t) * b; // breathing
+                roll = 2 * Math.sin(tau * 0.4 * t) * b;
             }
             case WIGGLE -> {
                 roll = 14 * Math.sin(tau * 3 * t);
@@ -91,10 +88,10 @@ public enum Emote {
             default -> {
             }
         }
-        // no jump at the start and the end of the show
+
         double env = Math.min(1.0, Math.min(t / RAMP, (this.seconds - t) / RAMP));
         if (this == SPIN || this == BACKFLIP || this == BOW || this == SLEEP || this == FAINT) {
-            env = 1.0; // these already start and end at rest
+            env = 1.0;
         }
         return new EmotePose((float) (dy * env), (float) (yaw * env), (float) (pitch * env), (float) (roll * env));
     }

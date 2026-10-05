@@ -22,7 +22,6 @@ import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
 import java.util.List;
 
-/** Tests of the pure logic of the Spotify HUD port (no Minecraft, no JNA, no network). */
 public final class SpotifyHudTests {
     static int failed;
     static int passed;
@@ -53,8 +52,6 @@ public final class SpotifyHudTests {
         System.exit(failed == 0 ? 0 : 1);
     }
 
-    // ---- GUID layout ----
-
     static void guids() {
         byte[] manager = GuidBytes.of("2050C4EE-11A0-57DE-AED7-C97C70338245");
         byte[] expected = {(byte) 0xEE, (byte) 0xC4, 0x50, 0x20, (byte) 0xA0, 0x11, (byte) 0xDE, 0x57, (byte) 0xAE, (byte) 0xD7, (byte) 0xC9,
@@ -70,8 +67,6 @@ public final class SpotifyHudTests {
         }
         check(bad, "GUID: garbage rejected");
     }
-
-    // ---- LRC ----
 
     static void lrc() {
         SyncedLyrics s = SyncedLyrics.parse("[00:12.00]Hello\n[00:15.5]World\r\n[01:02]Last");
@@ -136,8 +131,6 @@ public final class SpotifyHudTests {
         check(new LrclibTrack(1, null, null, null, -5, false, null, null).duration() == 0, "track: negative duration and nulls sanitised");
     }
 
-    // ---- matching ----
-
     static LrclibTrack cand(long id, String name, String artist, double duration, boolean synced) {
         return new LrclibTrack(id, name, artist, "", duration, false, "plain text", synced ? "[00:01.00]x" : "");
     }
@@ -196,8 +189,6 @@ public final class SpotifyHudTests {
                 && !new LyricsQuery("a", " ", "", 0).searchable(), "query: needs title and artist");
     }
 
-    // ---- text ----
-
     static void text() {
         check(DisplayText.fold("Don’t – stop…").equals("Don't - stop..."), "fold: quotes, dashes, ellipsis");
         check(DisplayText.fold("♪ la  la la ♫").equals("la la la"), "fold: notes dropped, spaces squeezed");
@@ -210,8 +201,6 @@ public final class SpotifyHudTests {
                 && DisplayText.clock(3725).equals("1:02:05") && DisplayText.clock(-4).equals("0:00"), "clock format");
     }
 
-    // ---- playback clock ----
-
     static NowPlaying session(NowPlaying.Status status, String title, long durationMs, long positionMs, long sampledAt, double rate) {
         return new NowPlaying(status, title, "Artist", "Album", NowPlaying.Source.SESSION, durationMs, positionMs, sampledAt, rate, null);
     }
@@ -222,39 +211,32 @@ public final class SpotifyHudTests {
         c.update(first, 1000);
         check(c.positionAt(1000) == 10_000 && c.positionAt(2500) == 11_500, "clock: runs with real time");
 
-        // the next sample agrees within 1.2 s: no jump, the difference fades in over 1.5 s
         NowPlaying second = session(NowPlaying.Status.PLAYING, "T", 200_000, 11_100, 2000, 1.0);
         c.update(second, 2000);
         check(c.positionAt(2000) == 11_000, "clock: no jump on a small correction");
         check(c.positionAt(3500) == 12_600, "clock: correction fully applied after 1.5 s");
         check(c.positionAt(2750) == 11_000 + 750 + 50, "clock: correction half applied after 0.75 s");
 
-        // a seek: snaps
         NowPlaying seek = session(NowPlaying.Status.PLAYING, "T", 200_000, 100_000, 4000, 1.0);
         c.update(seek, 4000);
         check(c.positionAt(4000) == 100_000, "clock: seek snaps");
 
-        // pause freezes
         NowPlaying paused = session(NowPlaying.Status.PAUSED, "T", 200_000, 101_000, 5000, 1.0);
         c.update(paused, 5000);
         check(c.positionAt(5000) == 101_000 && c.positionAt(9000) == 101_000, "clock: paused stands still");
 
-        // other track: snaps even if close
         NowPlaying next = session(NowPlaying.Status.PLAYING, "U", 180_000, 0, 6000, 1.0);
         c.update(next, 6000);
         check(c.positionAt(6000) == 0 && c.positionAt(7000) == 1000, "clock: new track starts at its position");
 
-        // clamps to the length
         NowPlaying end = session(NowPlaying.Status.PLAYING, "U", 180_000, 179_000, 8000, 1.0);
         c.update(end, 8000);
         check(c.positionAt(20_000) == 180_000, "clock: never past the end");
 
-        // rate
         PlaybackClock fast = new PlaybackClock();
         fast.update(session(NowPlaying.Status.PLAYING, "T", 200_000, 0, 0, 2.0), 0);
         check(fast.positionAt(1000) == 2000, "clock: playback rate");
 
-        // window title source has no timeline
         PlaybackClock none = new PlaybackClock();
         none.update(new NowPlaying(NowPlaying.Status.PLAYING, "T", "A"), 0);
         check(none.positionAt(5000) == 0, "clock: no timeline, no position");
@@ -297,10 +279,8 @@ public final class SpotifyHudTests {
         check(odd.status() == NowPlaying.Status.NOT_RUNNING && odd.title().isEmpty() && odd.durationMs() == 0 && odd.rate() == 1.0, "record: sanitised");
     }
 
-    // ---- album art ----
-
     static void art() {
-        // 4x2 image: the centre square (columns 1..2) is kept
+
         ByteBuffer px = ByteBuffer.allocate(4 * 2 * 4);
         for (int i = 0; i < 8; i++) {
             px.put((byte) (i * 10)).put((byte) 0).put((byte) 0).put((byte) 255);
@@ -310,7 +290,6 @@ public final class SpotifyHudTests {
         check(a.argb(0, 0) == (0xFF000000 | 10 << 16) && a.argb(1, 0) == (0xFF000000 | 20 << 16) && a.argb(0, 1) == (0xFF000000 | 50 << 16),
                 "art: centre columns, ARGB order");
 
-        // 4x4 -> 2x2: each output pixel is the mean of a 2x2 block
         ByteBuffer big = ByteBuffer.allocate(4 * 4 * 4);
         for (int y = 0; y < 4; y++) {
             for (int x = 0; x < 4; x++) {
@@ -323,8 +302,6 @@ public final class SpotifyHudTests {
                 "art: box filter downscale");
         check(AlbumArt.crop(big, 4, 4, 100).size() == 4, "art: never upscaled");
     }
-
-    // ---- disk cache ----
 
     static void diskCache() throws IOException {
         Path dir = Files.createTempDirectory("spotifyhud-cache");
@@ -352,7 +329,6 @@ public final class SpotifyHudTests {
             Files.writeString(dir.resolve("cache").resolve(k3 + ".json"), "{\"format\":1,\"fetchedAt\":5}");
             check(cache.read(k3) != null, "cache: valid minimal entry");
 
-            // prune: oldest by use goes first, the limit is two files
             Files.setLastModifiedTime(dir.resolve("cache").resolve(k1 + ".json"), FileTime.fromMillis(1_000));
             Files.setLastModifiedTime(dir.resolve("cache").resolve(k2 + ".json"), FileTime.fromMillis(2_000));
             Files.setLastModifiedTime(dir.resolve("cache").resolve(k3 + ".json"), FileTime.fromMillis(3_000));
@@ -367,8 +343,6 @@ public final class SpotifyHudTests {
             }
         }
     }
-
-    // ---- lyric view ----
 
     static final LyricView.Metrics SIX = text -> text.length() * 6.0F;
 
@@ -407,7 +381,6 @@ public final class SpotifyHudTests {
         check(first.highlight() > 0.95F && second.highlight() < 0.05F, "view: current line glows, next does not");
         check(first.fill() > 0.0F && first.fill() < 120.0F && second.fill() == 0.0F, "view: karaoke fills only the current line");
 
-        // go on to the next line: the rows slide up, afterwards the old one is gone and the new one at the top
         LyricView.View sliding = v.update(l, true, true, 4100, 2, LyricMotion.WAVE, LyricHighlight.KARAOKE, 200, 0.016F, 20_000);
         LyricView.Item moving = item(sliding, "beta line");
         check(moving != null && moving.top() > 5.0F, "view: new current line starts below and slides in");
@@ -417,11 +390,10 @@ public final class SpotifyHudTests {
         LyricView.Item before = item(settled, "alpha line");
         check(before == null || before.fill() == Float.POSITIVE_INFINITY, "view: finished line is fully filled (or gone)");
 
-        // FADE motion has no slide: the new line is at the top at once
         LyricView fadeView = new LyricView(SIX);
         run(fadeView, l, 500, 60, LyricMotion.FADE, LyricHighlight.OFF);
         LyricView.View faded = fadeView.update(l, true, true, 4100, 2, LyricMotion.FADE, LyricHighlight.OFF, 200, 0.016F, 30_000);
-        // the cross-fade shows the old rows (fading out) and the new ones (fading in) at the same time: take the new one
+
         LyricView.Item direct = null;
         for (LyricView.Item i : faded.items()) {
             if ("beta line".equals(i.text()) && (direct == null || i.top() < direct.top())) {
@@ -434,7 +406,6 @@ public final class SpotifyHudTests {
         check(item(faded2, "beta line") != null && Math.abs(item(faded2, "beta line").top()) < 0.5F && item(faded2, "alpha line") == null,
                 "view: fade mode settles, old line gone");
 
-        // status texts
         LyricView st = new LyricView(SIX);
         check("No lyrics found".equals(st.update(Lyrics.NOT_FOUND, true, true, 0, 2, LyricMotion.WAVE, LyricHighlight.OFF, 200, 0.016F, 1000).status()),
                 "status: not found");
@@ -452,7 +423,6 @@ public final class SpotifyHudTests {
         check("Loading lyrics".equals(loading.update(Lyrics.LOADING, true, true, 0, 2, LyricMotion.WAVE, LyricHighlight.OFF, 200, 0.016F, 5800).status()),
                 "status: loading shown after 0.7 s");
 
-        // not wanted: the block closes
         LyricView close = new LyricView(SIX);
         run(close, l, 500, 60, LyricMotion.WAVE, LyricHighlight.OFF);
         LyricView.View gone = null;
@@ -461,7 +431,6 @@ public final class SpotifyHudTests {
         }
         check(gone.height() == 0.0F && gone.items().isEmpty(), "view: block closes when lyrics are switched off");
 
-        // pause between lines
         Lyrics gap = synced("[00:00.00]one\n[00:02.00]\n[00:10.00]two");
         LyricView gv = new LyricView(SIX);
         LyricView.View inGap = run(gv, gap, 5000, 60, LyricMotion.WAVE, LyricHighlight.KARAOKE);
@@ -471,7 +440,6 @@ public final class SpotifyHudTests {
         }
         check(dots, "view: empty line is a row of dots with progress");
 
-        // wrapping
         LyricView wrap = new LyricView(SIX);
         check(Arrays.equals(wrap.wrap("short", 200), new String[] {"short"}), "wrap: fits");
         String[] two = wrap.wrap("one two three four five six", 100);
@@ -484,7 +452,6 @@ public final class SpotifyHudTests {
         check(wrap.wrap("", 100).length == 0, "wrap: empty text has no rows");
         check(wrap.ellipsize("abcdefghijkl", 60).length() * 6 <= 60 && wrap.ellipsize("abcdefghijkl", 60).endsWith("..."), "ellipsize: fits the width");
 
-        // helpers
         check(LyricView.springLeft(0) == 1.0F && LyricView.springLeft(1.37F) < 0.001F && LyricView.springLeft(0.1F) < LyricView.springLeft(0.05F),
                 "spring: 1 at start, settled at 1.37 s, falling");
         check(LyricView.topFade(0) == 1.0F && LyricView.topFade(-10) == 0.0F && LyricView.topFade(-2.5F) > 0.0F && LyricView.topFade(-2.5F) < 1.0F,
@@ -493,12 +460,11 @@ public final class SpotifyHudTests {
         check(LyricView.smooth(-1) == 0.0F && LyricView.smooth(2) == 1.0F && LyricView.smooth(0.5F) == 0.5F, "smooth");
         check(LyricView.letterCount("ab cd ") == 4, "letterCount");
 
-        // karaoke from word times: first word done, second half done
         Lyrics timed = synced("[00:10.00]<00:10.00>aaaa <00:11.00>bbbb\n[00:20.00]end");
         LyricView kv = new LyricView(SIX);
         LyricView.View mid = run(kv, timed, 10_400, 60, LyricMotion.WAVE, LyricHighlight.KARAOKE);
         LyricView.Item line = item(mid, "aaaa bbbb");
-        // 400 ms into a 180 ms sweep: the first word is lit completely, the second not at all: fill = width of "aaaa" (4 chars)
+
         check(line != null && Math.abs(line.fill() - 24.0F) < 0.01F, "karaoke: word times drive the fill (first word done)");
         LyricView.View later = run(kv, timed, 11_090, 5, LyricMotion.WAVE, LyricHighlight.KARAOKE);
         LyricView.Item part = item(later, "aaaa bbbb");

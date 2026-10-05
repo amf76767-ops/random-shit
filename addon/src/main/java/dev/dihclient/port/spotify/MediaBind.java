@@ -1,10 +1,6 @@
 package dev.dihclient.port.spotify;
 
-/**
- * Ported from an open-source client (GPL-3.0).
- * Keys that can be bound to the media actions. the original let you press any key or mouse button in its own bind widget; the
- * DIHClient settings have no such widget, so this is a fixed list of keys that the game itself does not use.
- */
+/** Ported from an open-source client (GPL-3.0). */
 public enum MediaBind {
     NONE(-1, false),
     F6(295, false),
@@ -35,7 +31,6 @@ public enum MediaBind {
     MOUSE_4(3, true),
     MOUSE_5(4, true);
 
-    /** GLFW key code, or GLFW mouse button index when {@link #mouse}. */
     public final int code;
     public final boolean mouse;
 
