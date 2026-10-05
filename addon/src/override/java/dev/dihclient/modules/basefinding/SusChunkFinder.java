@@ -62,7 +62,6 @@ extends ChunkMarkModule {
     public SusChunkFinder() {
         super("Sus ChunkFinder", Category.BASEFINDING, "Finds probable base locations using plant/amethyst growth and rotated deepslate.");
         this.opacity.set(80);
-        this.friend.set(true);
         for (BoolSetting boolSetting : List.of(this.kelp, this.caveVines, this.vines, this.amethyst, this.bamboo, this.beeNest, this.rotatedDeepslate)) {
             boolSetting.onChange(this::rescan);
         }

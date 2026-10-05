@@ -41,7 +41,6 @@ public abstract class ChunkMarkModule extends Module implements ChunkEvents.List
    public final BoolSetting throughWalls = this.bool("Through Walls", "Markers stay visible behind terrain.", true);
    public final BoolSetting fadeInside = this.bool("Fade Inside", "Marker gets see-through while you stand in that chunk.", true);
    public final BoolSetting tracers = this.bool("Tracers", "Draws lines to marked chunks.", false);
-   public final BoolSetting friend = this.bool("Friend", "Shows Tung Tung Tung Sahur above every marked chunk instead of the coloured box.", false);
    public final BoolSetting labels = this.bool(
       "Show Text", "Text above the marked area (what was found). Off = only the coloured marker, no text at all.", true
    );
@@ -75,6 +74,10 @@ public abstract class ChunkMarkModule extends Module implements ChunkEvents.List
    }
 
    public static volatile FriendDrawer friendDrawer;
+
+   protected boolean showsFriend() {
+      return false;
+   }
 
    public abstract Map<Long, Integer> chunkMarks();
 
@@ -277,13 +280,13 @@ public abstract class ChunkMarkModule extends Module implements ChunkEvents.List
             if (var1.visible(var24, 0.0)) {
                double friendY = var19 + 1.0;
                boolean friendShown = false;
-               if (this.friend.get()) {
+               if (this.showsFriend()) {
                   class_2818 friendChunk = mc.field_1687.method_2935().method_21730(var14, var15);
                   if (friendChunk != null) {
                      friendY = Math.max(friendY, friendChunk.method_12005(class_2902.class_2903.field_13197, 8, 8) + 0.5);
                   }
 
-                  friendShown = friendDrawer != null && friendDrawer.draw(var1, var16 + 8, friendY, var17 + 8, 7.0);
+                  friendShown = friendDrawer != null && friendDrawer.draw(var1, var16 + 8, friendY, var17 + 8, 6.0);
                }
 
                if (!friendShown) {

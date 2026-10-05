@@ -404,3 +404,9 @@ Nicht im Spiel getestet.
   - Jeder Chunk wird zweimal geprüft (nach 1,5 und 7 Sekunden), weil die Lichtdaten nach dem Chunk ankommen.
   - Ob Donut die Lichtdaten wirklich mitsendet, weiß ich nicht. Ohne sie findet der Dao Finder nichts.
 - **Freund statt Kasten:** Alle Chunk-Marker haben die neue Einstellung **Friend**. Ist sie an, steht über dem markierten Chunk Tung Tung Tung Sahur (7 Blöcke hoch, dreht sich zu dir und wippt) statt des farbigen Kastens. Er steht an der Oberfläche, damit man ihn sieht, auch wenn der Fund tief im Boden liegt. Das Label steht über ihm. Bei **Sus ChunkFinder** und **Dao Finder** ist Friend standardmäßig an, bei den anderen Findern aus. Das Modell stammt aus `dihclient/models` und braucht das Modul CustomModel nicht.
+
+### 8.12.1: Freund nur im Dao Finder
+Nicht im Spiel getestet.
+- Der Tung-Tung-Tung-Sahur-Marker aus 8.12.0 ist wieder entfernt. Sus ChunkFinder und alle anderen Finder zeigen wie vorher ihre Kästen.
+- **Dao Finder → Marker:** `Box` (der normale Kasten) oder `Friend` (Standard). Bei `Friend` steht über dem markierten Chunk ein Bild deines Freundes (6 Blöcke groß, dreht sich zu dir und wippt) an der Oberfläche, das Label darüber. Die Einstellung gibt es nur im Dao Finder.
+- Das Bild liegt nur in der gebauten Jar, nicht im Repo (`addon/src/resources/assets/dihclient/friend/` steht in der `.gitignore` und fehlt im Source-Zip). Wer ein anderes Bild will, legt eine Datei `friend.png` nach `.minecraft/dihclient/`, die hat Vorrang.

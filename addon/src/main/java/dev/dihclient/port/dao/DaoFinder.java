@@ -3,6 +3,7 @@ package dev.dihclient.port.dao;
 import dev.dihclient.module.Category;
 import dev.dihclient.scan.ChunkMarkModule;
 import dev.dihclient.setting.ColorSetting;
+import dev.dihclient.setting.EnumSetting;
 import dev.dihclient.setting.IntSetting;
 import java.util.ArrayDeque;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ public class DaoFinder extends ChunkMarkModule {
     public final IntSetting speed = this.integer("Scan Speed", "Chunks checked per tick.", 2, 1, 8);
     public final IntSetting spawnRadius = this.integer("Ignore Spawn", "Chunks around 0, 0 that are never marked (public builds). 0 = off.", 0, 0, 200);
     public final IntSetting keep = this.integer("Keep Range", "Marks further away than this many chunks are forgotten.", 48, 8, 200);
+    public final EnumSetting<Marker> marker = this.mode("Marker", "Box: the normal coloured marker · Friend: a picture of your friend stands above the chunk instead.", Marker.FRIEND);
     public final ColorSetting color = this.color("Color", "Marker colour.", 0xFFB44CFF);
 
     private final Map<Long, Integer> marks = new HashMap<>();
@@ -39,10 +41,19 @@ public class DaoFinder extends ChunkMarkModule {
     private final Map<Long, Integer> best = new HashMap<>();
     private int ticks;
 
+    public enum Marker {
+        BOX,
+        FRIEND
+    }
+
+    @Override
+    protected boolean showsFriend() {
+        return this.marker.get() == Marker.FRIEND;
+    }
+
     public DaoFinder() {
         super("Dao Finder", Category.BASEFINDING, "Finds hidden bases by their light: a chunk can show solid deepslate while the light data still tells that a lamp or torch burns inside.");
         this.opacity.set(120);
-        this.friend.set(true);
         this.action("Clear", "Forgets all marks and checks the loaded chunks again.", this::reset);
     }
 
