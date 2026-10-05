@@ -63,7 +63,7 @@ public final class Commands {
         d.register(class_2170.method_9247("fakedonut")
             .then(class_2170.method_9247("status").executes(ctx -> {
                 Config c = Config.get();
-                say(ctx.getSource(), "Bases: " + Bases.all().size() + ", anti-xray: " + c.antiXray + ", hide below Y " + c.hideBelowY + ", chance " + c.baseChance);
+                say(ctx.getSource(), "Bases: " + Bases.all().size() + ", anti-xray: " + c.antiXray + ", hidden below Y " + c.hideBelowY + ", reveal radius " + c.revealChunks + " chunks, chance " + c.baseChance);
                 return 1;
             }))
             .then(class_2170.method_9247("list").executes(ctx -> {

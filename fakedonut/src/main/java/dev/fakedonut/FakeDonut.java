@@ -6,7 +6,6 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.class_1937;
 import net.minecraft.class_3218;
 import net.minecraft.class_3222;
@@ -17,6 +16,7 @@ public class FakeDonut implements ModInitializer {
     public static final Logger LOG = LoggerFactory.getLogger("FakeDonut");
 
     private static int tick;
+    private static final java.util.Set<Long> SEEN = java.util.concurrent.ConcurrentHashMap.newKeySet();
     private static final java.util.concurrent.ConcurrentLinkedQueue<Object[]> PENDING = new java.util.concurrent.ConcurrentLinkedQueue<>();
 
     @Override
@@ -24,6 +24,7 @@ public class FakeDonut implements ModInitializer {
         Config.load();
         Economy.load();
         Bases.load();
+        Stashes.load();
         CommandRegistrationCallback.EVENT.register((dispatcher, access, env) -> Commands.register(dispatcher));
         ServerLifecycleEvents.SERVER_STARTED.register(Auction::start);
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
@@ -31,11 +32,20 @@ public class FakeDonut implements ModInitializer {
             Economy.save();
             Bases.save();
         });
-        ServerChunkEvents.CHUNK_GENERATE.register((world, chunk) -> {
+        ServerChunkEvents.CHUNK_LOAD.register((world, chunk) -> {
             if (world.method_27983() != class_1937.field_25179) {
                 return;
             }
-            PENDING.add(new Object[] {world, chunk.method_12004().field_9181, chunk.method_12004().field_9180});
+            int cx = chunk.method_12004().field_9181;
+            int cz = chunk.method_12004().field_9180;
+            if (SEEN.add(((long) cx << 32) ^ (cz & 0xFFFFFFFFL))) {
+                PENDING.add(new Object[] {world, cx, cz});
+            }
+        });
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+            SEEN.clear();
+            PENDING.clear();
+            AntiXray.clear();
         });
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             tick++;
@@ -62,31 +72,19 @@ public class FakeDonut implements ModInitializer {
                 Auction.expire();
                 Auction.restock();
             }
-            if (tick % 10 != 0 || !Config.get().antiXray) {
+            if (tick % 10 != 0) {
                 return;
             }
-            int r = Config.get().proximityRadius;
             for (class_3218 world : server.method_3738()) {
                 if (world.method_27983() != class_1937.field_25179) {
                     continue;
                 }
                 for (class_3222 p : world.method_18456()) {
-                    if (p.method_23318() > Config.get().hideBelowY + r + 1) {
-                        continue;
+                    try {
+                        AntiXray.tick(world, p);
+                    } catch (RuntimeException e) {
+                        LOG.warn("anti-xray tick failed", e);
                     }
-                    AntiXray.reveal(p, world, p.method_31477(), p.method_31478(), p.method_31479(), r);
-                    AntiXray.prune(p);
-                }
-            }
-        });
-        PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, be) -> {
-            if (!(world instanceof class_3218 sw) || !Config.get().antiXray || world.method_27983() != class_1937.field_25179) {
-                return;
-            }
-            int r = Config.get().breakRevealRadius;
-            for (class_3222 p : sw.method_18456()) {
-                if (p.method_24515().method_19771(pos, 24.0)) {
-                    AntiXray.reveal(p, sw, pos.method_10263(), pos.method_10264(), pos.method_10260(), r);
                 }
             }
         });

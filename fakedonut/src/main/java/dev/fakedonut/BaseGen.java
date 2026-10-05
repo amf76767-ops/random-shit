@@ -152,7 +152,9 @@ public final class BaseGen {
         b.kelpFloor = floor;
         b.spawner = r.nextDouble() < c.spawnerChance;
         b.owner = OWNERS[r.nextInt(OWNERS.length)];
-        room(world, b, r);
+        if (!stash(world, b, r)) {
+            room(world, b, r);
+        }
         Bases.add(b);
         FakeDonut.LOG.info("Base at {} {} {} under {} kelp ({} {})", b.x, b.y, b.z, placed, bestX, bestZ);
         return true;
@@ -173,6 +175,45 @@ public final class BaseGen {
                 inv.method_5447(r.nextInt(inv.method_5439()), roll(r));
             }
         }
+    }
+
+    private static boolean stash(class_3218 w, Bases.Base b, Random r) {
+        java.util.List<Stashes.Stash> all = Stashes.all();
+        if (all.isEmpty()) {
+            return false;
+        }
+        Stashes.Stash st = all.get(r.nextInt(all.size()));
+        int ox = b.x - st.sx / 2;
+        int oz = b.z - st.sz / 2;
+        int oy = b.y;
+        if (oy + st.sy >= 0 || oy < w.method_31607()) {
+            return false;
+        }
+        for (int cx = ox >> 4; cx <= (ox + st.sx - 1) >> 4; cx++) {
+            for (int cz = oz >> 4; cz <= (oz + st.sz - 1) >> 4; cz++) {
+                if (!w.method_8393(cx, cz)) {
+                    return false;
+                }
+            }
+        }
+        for (int i = 0; i < st.pos.size(); i++) {
+            int[] p = st.pos.get(i);
+            class_2680 state = st.states.get(i);
+            class_2338 at = new class_2338(ox + p[0], oy + p[1], oz + p[2]);
+            w.method_8652(at, state, 2);
+            class_2586 be = w.method_8321(at);
+            if (be instanceof class_2636 sp) {
+                sp.method_46408(r.nextBoolean() ? Ids.ZOMBIE_TYPE : Ids.SKELETON_TYPE, w.field_9229);
+            } else if (be instanceof class_1263 inv && !(be instanceof class_2636)) {
+                int n = 4 + r.nextInt(10);
+                for (int k = 0; k < n; k++) {
+                    inv.method_5447(r.nextInt(inv.method_5439()), roll(r));
+                }
+            }
+        }
+        b.spawner = false;
+        FakeDonut.LOG.info("Stash {} placed at {} {} {}", st.name, ox, oy, oz);
+        return true;
     }
 
     private static void room(class_3218 w, Bases.Base b, Random r) {

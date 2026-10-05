@@ -9,17 +9,15 @@ import java.nio.file.Path;
 import net.fabricmc.loader.api.FabricLoader;
 
 public final class Config {
-    public double baseChance = 0.06;
+    public double baseChance = 0.08;
     public int baseMinKelp = 4;
     public int baseY = -40;
     public int seaMinDepth = 6;
     public int kelpPerBase = 8;
     public double spawnerChance = 0.5;
     public boolean antiXray = true;
-    public int hideBelowY = 8;
-    public boolean hideClosedRooms = true;
-    public int breakRevealRadius = 2;
-    public int proximityRadius = 4;
+    public int hideBelowY = 0;
+    public int revealChunks = 2;
     public long startBalance = 1_000_000L;
     public int minListings = 60;
     public int listingHours = 48;
