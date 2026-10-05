@@ -29,7 +29,7 @@ public class ShaderModule extends Module {
     private static final int FORMAT = 75;
 
     public enum Style {
-        AURORA, RAINBOW, FIRE, ICE, GOLD, TOXIC, GALAXY, CRIMSON
+        AURORA, RAINBOW, FIRE, ICE, GOLD, TOXIC, GALAXY, CRIMSON, OCEAN, SUNSET, EMERALD, VOID, HOLO, PLASMA, SAKURA, ELECTRIC
     }
 
     public final EnumSetting<Style> style = this.mode("Style", "Colour and look of the shine.", Style.GALAXY).onChange(this::changed);
@@ -107,7 +107,7 @@ public class ShaderModule extends Module {
     }
 
     private String packName() {
-        return PREFIX + "-" + this.style.get().name().toLowerCase(Locale.ROOT) + "-" + Math.round(this.strength.get() * 100) + ".zip";
+        return PREFIX + "-v2-" + this.style.get().name().toLowerCase(Locale.ROOT) + "-" + Math.round(this.strength.get() * 100) + ".zip";
     }
 
     private void apply(boolean on) {
@@ -159,9 +159,13 @@ public class ShaderModule extends Module {
         try (ZipOutputStream zip = new ZipOutputStream(out)) {
             put(zip, "pack.mcmeta", mcmeta.getBytes(StandardCharsets.UTF_8));
 
-            try (java.io.InputStream in = ShaderModule.class.getResourceAsStream("/assets/minecraft/shaders/core/glint.fsh")) {
+            try (java.io.InputStream in = ShaderModule.class.getResourceAsStream("/dihclient/shine_glint.fsh")) {
                 if (in != null) {
-                    put(zip, "assets/minecraft/shaders/core/glint.fsh", in.readAllBytes());
+                    double[] p = params(this.style.get());
+                    String src = new String(in.readAllBytes(), StandardCharsets.UTF_8)
+                            .replace("@TWINKLE@", num(p[0])).replace("@LAYER@", num(p[1])).replace("@CHROMA@", num(p[2]))
+                            .replace("@PULSE@", num(p[3])).replace("@BOOST@", num(p[4] * (0.8 + 0.2 * this.strength.get())));
+                    put(zip, "assets/minecraft/shaders/core/glint.fsh", src.getBytes(StandardCharsets.UTF_8));
                 }
             }
             for (String kind : new String[]{"item", "armor"}) {
@@ -178,42 +182,94 @@ public class ShaderModule extends Module {
         zip.closeEntry();
     }
 
+    private static String num(double v) {
+        return String.format(Locale.ROOT, "%.3f", v);
+    }
+
+    private static double[] params(Style style) {
+        return switch (style) {
+            case RAINBOW, HOLO -> new double[]{0.35, 0.6, 1.5, 0.05, 1.2};
+            case VOID -> new double[]{0.6, 0.7, 0.0, 0.1, 1.45};
+            case ELECTRIC -> new double[]{0.9, 0.5, 0.4, 0.16, 1.3};
+            case FIRE -> new double[]{0.5, 0.6, 0.0, 0.14, 1.3};
+            case GOLD, SAKURA -> new double[]{0.6, 0.5, 0.0, 0.07, 1.25};
+            default -> new double[]{0.35, 0.55, 0.0, 0.06, 1.25};
+        };
+    }
+
+    private static double fade(double v) {
+        return v * v * (3 - 2 * v);
+    }
+
+    private static double lattice(int x, int y, int cells, int seed) {
+        int ix = ((x % cells) + cells) % cells;
+        int iy = ((y % cells) + cells) % cells;
+        return hash(ix + seed * 131, iy + seed * 71) / (double) 0x7FFFFFFF;
+    }
+
+    private static double noise(double x, double y, int cells, int seed) {
+        double gx = x * cells;
+        double gy = y * cells;
+        int x0 = (int) Math.floor(gx);
+        int y0 = (int) Math.floor(gy);
+        double fx = fade(gx - x0);
+        double fy = fade(gy - y0);
+        double a = lattice(x0, y0, cells, seed) * (1 - fx) + lattice(x0 + 1, y0, cells, seed) * fx;
+        double b = lattice(x0, y0 + 1, cells, seed) * (1 - fx) + lattice(x0 + 1, y0 + 1, cells, seed) * fx;
+        return a * (1 - fy) + b * fy;
+    }
+
     static int[] glintPixels(Style style, double strength) {
         int[] px = new int[SIZE * SIZE];
         for (int y = 0; y < SIZE; y++) {
             for (int x = 0; x < SIZE; x++) {
+                double nx = (double) x / SIZE;
+                double ny = (double) y / SIZE;
                 double u = (double) (x + y) / SIZE;
                 double v = (double) (x - y) / SIZE;
-                double band = Math.pow(0.5 + 0.5 * Math.sin(2 * Math.PI * 2 * u), 3);
-                double thin = Math.pow(0.5 + 0.5 * Math.sin(2 * Math.PI * (5 * u + 0.3)), 12) * 0.6;
-                double hue = 0.5 + 0.5 * Math.sin(2 * Math.PI * (u + v));
-                double light = Math.min(1.0, band + thin);
-                int sparkleChance = style == Style.GALAXY ? 40 : (style == Style.ICE ? 70 : 140);
+                double fbm = 0.55 * noise(nx, ny, 4, 1) + 0.3 * noise(nx, ny, 8, 2) + 0.15 * noise(nx, ny, 16, 3);
+                double band = Math.pow(0.5 + 0.5 * Math.sin(2 * Math.PI * (2 * u + fbm * 0.6)), 3);
+                double thin = Math.pow(0.5 + 0.5 * Math.sin(2 * Math.PI * (5 * u + 0.3 + fbm * 0.4)), 12) * 0.6;
+                double cloud = Math.pow(fbm, 2.4) * 1.3;
+                double hue = 0.5 + 0.5 * Math.sin(2 * Math.PI * (u + v)) * 0.7 + (fbm - 0.5) * 0.6;
+                double light = Math.min(1.0, band * 0.85 + thin + cloud);
+                int sparkleChance = style == Style.GALAXY || style == Style.VOID ? 36 : (style == Style.ICE || style == Style.ELECTRIC ? 60 : 130);
                 int h = hash(x, y);
                 if (h % sparkleChance == 0) {
                     light = 1.0;
                 }
-                double[] c = colour(style, hue, (double) x / SIZE);
+                double[] c = colour(style, Math.max(0.0, Math.min(1.0, hue)), nx);
                 double k = light * strength;
-                int r = clamp(c[0] * k);
-                int g = clamp(c[1] * k);
-                int b = clamp(c[2] * k);
-                px[y * SIZE + x] = 0xFF000000 | r << 16 | g << 8 | b;
+                px[y * SIZE + x] = 0xFF000000 | clamp(c[0] * k) << 16 | clamp(c[1] * k) << 8 | clamp(c[2] * k);
             }
         }
         return px;
     }
 
+    private static double[] grad(double[][] stops, double t) {
+        t = Math.max(0.0, Math.min(1.0, t)) * (stops.length - 1);
+        int i = Math.min(stops.length - 2, (int) Math.floor(t));
+        return mix(stops[i], stops[i + 1], t - i);
+    }
+
     private static double[] colour(Style style, double t, double xPos) {
         return switch (style) {
-            case AURORA -> mix(new double[]{70, 220, 255}, new double[]{190, 90, 255}, t);
+            case AURORA -> grad(new double[][]{{70, 220, 255}, {120, 255, 170}, {190, 90, 255}}, t);
             case RAINBOW -> hsv((t + xPos) % 1.0);
-            case FIRE -> mix(new double[]{255, 50, 0}, new double[]{255, 200, 40}, t);
-            case ICE -> mix(new double[]{120, 200, 255}, new double[]{240, 250, 255}, t);
-            case GOLD -> mix(new double[]{255, 160, 10}, new double[]{255, 240, 140}, t);
-            case TOXIC -> mix(new double[]{40, 255, 70}, new double[]{200, 255, 30}, t);
-            case GALAXY -> mix(new double[]{110, 40, 255}, new double[]{255, 80, 210}, t);
-            case CRIMSON -> mix(new double[]{190, 0, 30}, new double[]{255, 80, 120}, t);
+            case FIRE -> grad(new double[][]{{255, 40, 0}, {255, 140, 10}, {255, 230, 90}}, t);
+            case ICE -> grad(new double[][]{{90, 170, 255}, {190, 235, 255}, {250, 255, 255}}, t);
+            case GOLD -> grad(new double[][]{{255, 150, 10}, {255, 215, 70}, {255, 250, 190}}, t);
+            case TOXIC -> grad(new double[][]{{30, 255, 80}, {150, 255, 30}, {230, 255, 100}}, t);
+            case GALAXY -> grad(new double[][]{{80, 30, 255}, {190, 60, 255}, {255, 80, 200}}, t);
+            case CRIMSON -> grad(new double[][]{{160, 0, 30}, {235, 30, 70}, {255, 110, 150}}, t);
+            case OCEAN -> grad(new double[][]{{0, 90, 200}, {0, 200, 220}, {150, 255, 235}}, t);
+            case SUNSET -> grad(new double[][]{{120, 50, 190}, {255, 70, 110}, {255, 190, 80}}, t);
+            case EMERALD -> grad(new double[][]{{0, 140, 70}, {40, 230, 130}, {190, 255, 210}}, t);
+            case VOID -> grad(new double[][]{{20, 0, 60}, {90, 0, 170}, {210, 60, 255}}, t);
+            case HOLO -> mix(hsv((t * 0.8 + xPos * 0.5) % 1.0), new double[]{255, 255, 255}, 0.35);
+            case PLASMA -> grad(new double[][]{{255, 0, 140}, {120, 60, 255}, {0, 200, 255}}, t);
+            case SAKURA -> grad(new double[][]{{255, 150, 190}, {255, 200, 220}, {255, 245, 250}}, t);
+            case ELECTRIC -> grad(new double[][]{{0, 120, 255}, {80, 220, 255}, {255, 255, 255}}, t);
         };
     }
 

@@ -383,3 +383,10 @@ Nicht im Spiel getestet.
 - **Nur Meteor-Stil:** Die Stile Modern und Glass sind entfernt. Die Einstellung **Style** im ClickGUI gibt es nicht mehr, der Knopf "Modern Layout" unten ist weg, die Glass-Oberfläche ist gelöscht. Alte Configs mit Modern oder Glass öffnen automatisch das Meteor-GUI.
 - **Meteor-GUI verbessert:** Die Kopfzeilen der Kategorien haben einen weißen Glanz oben und eine Akzentlinie unten, die von einer Farbe in die nächste übergeht. Eingeschaltete Module haben statt einer flachen Fläche einen Farbverlauf, der nach rechts ausläuft. Die Verläufe bestehen aus wenigen Streifen, damit die FPS nicht leiden.
 - **Shader (Modul Shader):** Neuer Schalter **Hats**. Hüte bekommen einen bewegten Glanz in den Farben des gewählten Stils (Aurora, Galaxy, Fire und so weiter), mit hellen Wellen, die über den Hut laufen. **Strength** gilt auch dafür. Schwerter, Werkzeuge und Rüstung glänzen wie bisher über **Tools** und **Armor**.
+
+### 8.11.0: Mehr und schönere Shader
+Nicht im Spiel getestet.
+- **8 neue Stile** im Modul Shader: Ocean, Sunset, Emerald, Void, Holo, Plasma, Sakura und Electric (jetzt 16 Stile).
+- **Schöneres Aussehen:** Alle Stile haben drei Farbstufen statt zwei, und die Textur hat weiche Wolken (kachelbares Rauschen) unter den Streifen und Funken.
+- **Eigener Glanz-Shader:** Der Glanz ändert die Farbe nicht mehr durch den Farbkreis (vorher haben sich alle Stile durchgefärbt und sahen ähnlich aus). Stattdessen funkeln die Zellen, der Glanz pulsiert, eine zweite verschobene Schicht gibt Tiefe, und Holo und Rainbow haben einen Farbsaum an den Kanten. Jeder Stil hat eigene Werte (Void und Electric funkeln stärker, Fire pulsiert).
+- Die Hüte-Einstellung nutzt die neuen Farben auch.
