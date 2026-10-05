@@ -410,3 +410,7 @@ Nicht im Spiel getestet.
 - Der Tung-Tung-Tung-Sahur-Marker aus 8.12.0 ist wieder entfernt. Sus ChunkFinder und alle anderen Finder zeigen wie vorher ihre Kästen.
 - **Dao Finder → Marker:** `Box` (der normale Kasten) oder `Friend` (Standard). Bei `Friend` steht über dem markierten Chunk ein Bild deines Freundes (6 Blöcke groß, dreht sich zu dir und wippt) an der Oberfläche, das Label darüber. Die Einstellung gibt es nur im Dao Finder.
 - Das Bild liegt nur in der gebauten Jar, nicht im Repo (`addon/src/resources/assets/dihclient/friend/` steht in der `.gitignore` und fehlt im Source-Zip). Wer ein anderes Bild will, legt eine Datei `friend.png` nach `.minecraft/dihclient/`, die hat Vorrang.
+
+### 8.12.2: Alter Sus ChunkFinder zurück
+Nicht im Spiel getestet.
+- Der Sus ChunkFinder aus 8.11.1 (Krypton-Variante) ist wieder entfernt. Es ist wieder unser Sus ChunkFinder mit Punktewertung, Cocoa, Highlight Blocks und dem inkrementellen Block-Scanner (Stand 8.11.0). Der Dao Finder und die übrigen Änderungen bleiben.

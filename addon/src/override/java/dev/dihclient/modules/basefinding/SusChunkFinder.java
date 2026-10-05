@@ -2,500 +2,321 @@ package dev.dihclient.modules.basefinding;
 
 import dev.dihclient.module.Category;
 import dev.dihclient.render.Render3D;
+import dev.dihclient.scan.BlockScanner;
 import dev.dihclient.scan.ChunkMarkModule;
 import dev.dihclient.setting.BoolSetting;
 import dev.dihclient.setting.ColorSetting;
 import dev.dihclient.setting.IntSetting;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.Supplier;
+import java.util.Map.Entry;
 import net.minecraft.class_1923;
 import net.minecraft.class_2246;
+import net.minecraft.class_2248;
+import net.minecraft.class_2282;
 import net.minecraft.class_2338;
-import net.minecraft.class_2350;
 import net.minecraft.class_238;
+import net.minecraft.class_2393;
 import net.minecraft.class_2680;
-import net.minecraft.class_2741;
-import net.minecraft.class_2769;
-import net.minecraft.class_2818;
-import net.minecraft.class_2826;
 
-public class SusChunkFinder
-extends ChunkMarkModule {
-    public static volatile Supplier<Map<Long, float[]>> amethystSource;
-    public final IntSetting simulationDistance = this.integer("Simulation Distance", "Chunk radius around a growing chunk that is treated as simulated (those chunks are never marked).", 4, 2, 16);
-    public final IntSetting sensitivity = this.integer("Sensitivity", "Minimum grown things in range needed to mark a chunk as sus.", 3, 1, 20);
-    public final IntSetting maxChunks = this.integer("Max Chunks", "Most sus chunks marked at the same time - only the strongest ones are shown (closest first on ties).", 10, 1, 100);
-    public final BoolSetting kelp = (BoolSetting)this.bool("Kelp", "Kelp blocks.", true).legacy("sus.kelp");
-    public final BoolSetting caveVines = this.bool("Cave Vines", "Cave vines.", true);
-    public final BoolSetting vines = (BoolSetting)this.bool("Vines", "Vines.", true).legacy("sus.vines");
-    public final BoolSetting amethyst = (BoolSetting)this.bool("Amethyst", "Amethyst buds / clusters (also fed by the Amethyst Bypass geode data).", true).legacy("sus.amethyst");
-    public final BoolSetting bamboo = this.bool("Bamboo", "Bamboo.", true);
-    public final BoolSetting beeNest = this.bool("Bee Nest", "Bee nests with honey mean someone loaded the chunk.", true);
-    public final BoolSetting rotatedDeepslate = this.bool("Rotated Deepslate", "Outlines rotated deepslate buried between Y 0-60.", true);
-    public final BoolSetting maybe = this.bool("Show Maybe", "Chunks with at least half the needed evidence get a dim mark.", false);
-    public final ColorSetting color = this.color("Color", "Marker colour.", -61424);
-    public final ColorSetting maybeColor = (ColorSetting)this.color("Maybe Color", "Colour of \"maybe\" chunks.", -26064).visibleWhen(this.maybe::get);
-    public final IntSetting speed = this.integer("Scan Speed", "Chunks scanned per tick.", 3, 1, 16);
-    private final Map<Long, Integer> chunkHeatmap = new HashMap<Long, Integer>();
-    private final Map<Long, Integer> trackedChunks = new HashMap<Long, Integer>();
-    private final Set<Long> loadedChunkPositions = new HashSet<Long>();
-    private final Map<Long, List<class_2338>> chunkDeepslateMap = new HashMap<Long, List<class_2338>>();
-    private final Map<Long, Integer> chunkGrowthCounts = new HashMap<Long, Integer>();
-    private final Map<Long, Boolean> chunkHasFullyGrown = new HashMap<Long, Boolean>();
-    private final Map<Long, Integer> effective = new HashMap<Long, Integer>();
-    private final Map<Long, Integer> marks = new HashMap<Long, Integer>();
-    private final Map<Long, Integer> counts = new HashMap<Long, Integer>();
-    private final Set<Long> announced = new HashSet<Long>();
-    private final Queue<Long> incoming = new ConcurrentLinkedQueue<Long>();
-    private final ArrayDeque<Long> pending = new ArrayDeque<Long>();
-    private final Set<Long> queued = new HashSet<Long>();
-    private int ticks;
+public class SusChunkFinder extends ChunkMarkModule {
 
-    public SusChunkFinder() {
-        super("Sus ChunkFinder", Category.BASEFINDING, "Finds probable base locations using plant/amethyst growth and rotated deepslate.");
-        this.opacity.set(80);
-        for (BoolSetting boolSetting : List.of(this.kelp, this.caveVines, this.vines, this.amethyst, this.bamboo, this.beeNest, this.rotatedDeepslate)) {
-            boolSetting.onChange(this::rescan);
-        }
-        this.simulationDistance.onChange(this::rescan);
-        this.action("Clear", "Removes all marks and scans again.", this::rescan);
-    }
+   public static volatile java.util.function.Supplier<Map<Long, float[]>> amethystSource;
 
-    private static long key(int n, int n2) {
-        return class_1923.method_8331((int)n, (int)n2);
-    }
+   public final IntSetting sensitivity = this.integer(
+      "Sensitivity",
+      "1 = many sus chunks (little evidence needed) … 15 = only rare, very certain ones. Points needed ≈ 2 at 1, 5 at 3, 15 at 8, 38 at 15 (1 grown kelp = 1 point).",
+      3,
+      1,
+      15
+   );
+   public final IntSetting maxChunks = this.integer(
+      "Max Chunks", "Most sus chunks marked at the same time – only the strongest ones are shown (closest first on ties).", 10, 1, 100
+   );
+   public final BoolSetting kelp = this.bool("Kelp", "Fully grown kelp (age 25) – 1 point each.", true).legacy("sus.kelp");
+   public final BoolSetting vines = this.bool("Vines", "Vines hanging 6+ blocks – 1 point per vine.", true).legacy("sus.vines");
+   public final BoolSetting cocoa = this.bool("Cocoa Beans", "Fully grown cocoa – 1/3 point (can generate grown).", true).legacy("sus.cocoa");
+   public final BoolSetting amethyst = this.bool("Amethyst", "Amethyst geodes that anti-xray hides (bypass, see Method below) – 1 point per geode chunk, 1/4 point per hidden bud.", true).legacy("sus.amethyst");
+   public final BoolSetting maybe = this.bool("Show Maybe", "Chunks with at least half the needed score get a dim mark.", true);
+   public final ColorSetting color = this.color("Color", "Marker colour.", -61424);
+   public final ColorSetting maybeColor = this.color("Maybe Color", "Colour of \"maybe\" chunks.", -26064).visibleWhen(this.maybe::get);
+   public final IntSetting speed = this.integer("Scan Speed", "Chunks scanned per tick.", 3, 1, 16);
+   public final BoolSetting highlightBlocks = this.bool(
+      "Highlight Blocks", "Also outlines the grown blocks (vines, kelp …) that triggered the mark. Off = only the chunk is marked.", false
+   );
+   private final BlockScanner scanner = new BlockScanner(this::candidate, 3);
+   private final Map<Long, SusChunkFinder.Score> scores = new HashMap<>();
+   private final Map<Long, Integer> marks = new HashMap<>();
+   private final Set<Long> announced = new HashSet<>();
 
-    private void reset() {
-        this.chunkHeatmap.clear();
-        this.trackedChunks.clear();
-        this.loadedChunkPositions.clear();
-        this.chunkDeepslateMap.clear();
-        this.chunkGrowthCounts.clear();
-        this.chunkHasFullyGrown.clear();
-        this.effective.clear();
-        this.marks.clear();
-        this.counts.clear();
-        this.announced.clear();
-        this.incoming.clear();
-        this.pending.clear();
-        this.queued.clear();
-    }
+   public SusChunkFinder() {
+      super(
+         "Sus ChunkFinder",
+         Category.BASEFINDING,
+         "Marks chunks where crops grew while a player was there: grown kelp, long vines, cocoa, amethyst. Labels show what was found."
+      );
+      this.opacity.set(120);
+      this.scanner.setMaxPerChunk(1024);
 
-    private void rescan() {
-        this.reset();
-        if (SusChunkFinder.mc.field_1724 == null || SusChunkFinder.mc.field_1687 == null) {
-            return;
-        }
-        int n = (Integer)SusChunkFinder.mc.field_1690.method_42503().method_41753() + 1;
-        class_1923 class_19232 = SusChunkFinder.mc.field_1724.method_31476();
-        for (int i = -n; i <= n; ++i) {
-            for (int j = -n; j <= n; ++j) {
-                if (SusChunkFinder.mc.field_1687.method_2935().method_21730(class_19232.field_9181 + i, class_19232.field_9180 + j) == null) continue;
-                this.enqueue(class_19232.field_9181 + i, class_19232.field_9180 + j);
+      for (BoolSetting var2 : List.of(this.kelp, this.vines, this.cocoa, this.amethyst)) {
+         var2.onChange(this::reset);
+      }
+
+      this.action("Clear", "Removes all marks and scans again.", this::reset);
+   }
+
+   private void reset() {
+      this.scanner.clear();
+      this.scores.clear();
+      this.marks.clear();
+      this.announced.clear();
+   }
+
+   private boolean candidate(class_2680 var1) {
+      class_2248 var2 = var1.method_26204();
+      if (this.kelp.get() && var2 == class_2246.field_9993 && (Integer)var1.method_11654(class_2393.field_22509) >= 25) {
+         return true;
+      } else if (this.amethyst.get() && amethystSource == null && var2 == class_2246.field_27161) {
+         return true;
+      } else {
+         return this.cocoa.get() && var2 == class_2246.field_10302 && var1.method_11654(class_2282.field_10779) >= 2
+            ? true
+            : this.vines.get() && var2 == class_2246.field_10597;
+      }
+   }
+
+   private float needed() {
+      int var1 = this.sensitivity.get();
+      return var1 + 1.0F + var1 * var1 / 10.0F;
+   }
+
+   @Override
+   public Map<Long, Integer> chunkMarks() {
+      return this.marks;
+   }
+
+   @Override
+   protected void onEnable() {
+      this.reset();
+   }
+
+   @Override
+   public void onWorldChange() {
+      this.reset();
+   }
+
+   @Override
+   public void onChunkLoaded(int var1, int var2) {
+      this.scanner.prioritize(var1, var2);
+   }
+
+   @Override
+   public void onTick() {
+      this.scanner.setChunksPerTick(this.speed.get());
+      this.scanner.tick();
+      if (mc.field_1724.field_6012 % 20 == 0) {
+         for (Entry var2 : this.scanner.results().entrySet()) {
+            SusChunkFinder.Score var3 = this.score((List<class_2338>)var2.getValue());
+            if (var3.points() > 0.0F) {
+               this.scores.put((Long)var2.getKey(), var3);
+            } else {
+               this.scores.remove(var2.getKey());
             }
-        }
-    }
+         }
 
-    private void enqueue(int n, int n2) {
-        long l = SusChunkFinder.key(n, n2);
-        if (this.queued.add(l)) {
-            this.pending.add(l);
-        }
-    }
-
-    @Override
-    protected void onEnable() {
-        this.rescan();
-    }
-
-    @Override
-    public void onWorldChange() {
-        this.reset();
-    }
-
-    @Override
-    public void onChunkLoaded(int n, int n2) {
-        this.incoming.add(SusChunkFinder.key(n, n2));
-    }
-
-    @Override
-    public Map<Long, Integer> chunkMarks() {
-        return this.marks;
-    }
-
-    @Override
-    public void onTick() {
-        Long l;
-        if (SusChunkFinder.mc.field_1687 == null || SusChunkFinder.mc.field_1724 == null) {
-            return;
-        }
-        while ((l = this.incoming.poll()) != null) {
-            this.enqueue(class_1923.method_8325((long)l), class_1923.method_8332((long)l));
-        }
-        for (int i = 0; i < (Integer)this.speed.get() && !this.pending.isEmpty(); ++i) {
-            long l2 = this.pending.poll();
-            this.queued.remove(l2);
-            int n = class_1923.method_8325((long)l2);
-            int n2 = class_1923.method_8332((long)l2);
-            class_2818 class_28182 = SusChunkFinder.mc.field_1687.method_2935().method_21730(n, n2);
-            if (class_28182 == null) continue;
-            this.loadedChunkPositions.add(l2);
-            this.updateChunkData(n, n2, class_28182);
-        }
-        if (this.ticks++ % 10 == 0) {
-            this.refreshMarks();
-        }
-    }
-
-    private void spreadHeat(int n, int n2, int n3) {
-        int n4 = (Integer)this.simulationDistance.get();
-        for (int i = -n4; i <= n4; ++i) {
-            for (int j = -n4; j <= n4; ++j) {
-                long l = SusChunkFinder.key(n + i, n2 + j);
-                int n5 = this.chunkHeatmap.getOrDefault(l, 0) + n3;
-                if (n5 <= 0) {
-                    this.chunkHeatmap.remove(l);
-                    continue;
-                }
-                this.chunkHeatmap.put(l, n5);
+         this.scores.keySet().removeIf(var1 -> !this.scanner.results().containsKey(var1));
+         java.util.function.Supplier<Map<Long, float[]>> source = amethystSource;
+         if (source != null && this.amethyst.get()) {
+            Map<Long, float[]> geodes = source.get();
+            if (geodes != null) {
+               for (Entry<Long, float[]> e : geodes.entrySet()) {
+                  float[] g = e.getValue();
+                  SusChunkFinder.Score old = this.scores.get(e.getKey());
+                  this.scores.put(e.getKey(), old == null
+                     ? new SusChunkFinder.Score(g[0], 0, 0, 0, (int)g[1], g[2])
+                     : new SusChunkFinder.Score(old.points() + g[0], old.kelp(), old.vines(), old.cocoa(), old.amethyst() + (int)g[1], old.avgY()));
+               }
             }
-        }
-    }
+         }
+         float var11 = this.needed();
+         this.marks.clear();
+         ArrayList<Entry<Long, SusChunkFinder.Score>> var12 = new ArrayList<>(this.scores.entrySet());
+         double var13 = mc.field_1724.method_23317();
+         double var5 = mc.field_1724.method_23321();
+         var12.sort((var4, var5x) -> {
+            int var6 = Float.compare(((SusChunkFinder.Score)var5x.getValue()).points(), ((SusChunkFinder.Score)var4.getValue()).points());
+            return var6 != 0 ? var6 : Double.compare(dist((Long)var4.getKey(), var13, var5), dist((Long)var5x.getKey(), var13, var5));
+         });
+         int var7 = this.maxChunks.get();
 
-    private void spreadTracked(int n, int n2, int n3) {
-        int n4 = (Integer)this.simulationDistance.get();
-        for (int i = -n4; i <= n4; ++i) {
-            for (int j = -n4; j <= n4; ++j) {
-                long l = SusChunkFinder.key(n + i, n2 + j);
-                int n5 = this.trackedChunks.getOrDefault(l, 0) + n3;
-                if (n5 <= 0) {
-                    this.trackedChunks.remove(l);
-                    continue;
-                }
-                this.trackedChunks.put(l, n5);
+         for (Entry var9 : var12) {
+            if (this.marks.size() >= var7) {
+               break;
             }
-        }
-    }
 
-    private void updateChunkData(int n, int n2, class_2818 class_28182) {
-        long l = SusChunkFinder.key(n, n2);
-        int n3 = this.chunkGrowthCounts.getOrDefault(l, 0);
-        boolean bl = Boolean.TRUE.equals(this.chunkHasFullyGrown.get(l));
-        this.chunkDeepslateMap.remove(l);
-        if (n3 > 0) {
-            this.spreadHeat(n, n2, -n3);
-        }
-        if (bl) {
-            this.spreadTracked(n, n2, -1);
-        }
-        ChunkScan chunkScan = this.scanChunkBlocks(n, n2, class_28182);
-        this.chunkGrowthCounts.put(l, chunkScan.notGrown);
-        this.chunkHasFullyGrown.put(l, chunkScan.hasGrown);
-        if (chunkScan.hasGrown) {
-            this.spreadTracked(n, n2, 1);
-        }
-        if (chunkScan.notGrown > 0) {
-            this.spreadHeat(n, n2, chunkScan.notGrown);
-        }
-        if (!chunkScan.deepslate.isEmpty()) {
-            this.chunkDeepslateMap.put(l, chunkScan.deepslate);
-        }
-    }
-
-    private boolean relevant(class_2680 class_26802) {
-        return (Boolean)this.kelp.get() != false && class_26802.method_27852(class_2246.field_9993) || (Boolean)this.caveVines.get() != false && class_26802.method_27852(class_2246.field_28675) || (Boolean)this.vines.get() != false && class_26802.method_27852(class_2246.field_10597) || (Boolean)this.amethyst.get() != false && (SusChunkFinder.isAmethystBud(class_26802) || SusChunkFinder.isAmethystCluster(class_26802)) || (Boolean)this.bamboo.get() != false && class_26802.method_27852(class_2246.field_10211) || (Boolean)this.beeNest.get() != false && class_26802.method_27852(class_2246.field_20421) || (Boolean)this.rotatedDeepslate.get() != false && class_26802.method_27852(class_2246.field_28888);
-    }
-
-    private ChunkScan scanChunkBlocks(int n, int n2, class_2818 class_28182) {
-        int n3;
-        class_2826[] class_2826Array = class_28182.method_12006();
-        int n4 = class_28182.method_32891();
-        int n5 = n << 4;
-        int n6 = n2 << 4;
-        int n7 = 0;
-        int n8 = 0;
-        int n9 = 0;
-        int n10 = 0;
-        int n11 = 0;
-        int n12 = 0;
-        int n13 = 0;
-        int n14 = 0;
-        int n15 = 0;
-        int n16 = 0;
-        int n17 = 0;
-        int n18 = 0;
-        boolean bl = (Boolean)this.amethyst.get() != false && this.isDonutFolia();
-        boolean bl2 = false;
-        boolean bl3 = false;
-        ArrayList<class_2338> arrayList = new ArrayList<class_2338>();
-        for (n3 = 0; n3 < class_2826Array.length; ++n3) {
-            class_2826 class_28262 = class_2826Array[n3];
-            if (class_28262 == null || class_28262.method_38292()) continue;
-            int n19 = n4 + n3 << 4;
-            if (bl) {
-                if (!bl2 && class_28262.method_19523(SusChunkFinder::isAmethystBud)) {
-                    bl2 = true;
-                }
-                if (!bl3 && class_28262.method_19523(SusChunkFinder::isAmethystCluster)) {
-                    bl3 = true;
-                }
+            float var10 = ((SusChunkFinder.Score)var9.getValue()).points();
+            if (var10 >= var11) {
+               this.marks.put((Long)var9.getKey(), var10 >= var11 * 2.0F ? hotter(this.color.get()) : this.color.get());
+               if (this.announced.add((Long)var9.getKey())) {
+                  this.announce((Long)var9.getKey(), "Suspicious chunk: " + describe((SusChunkFinder.Score)var9.getValue()));
+               }
+            } else if (this.maybe.get() && var10 >= var11 / 2.0F) {
+               this.marks.put((Long)var9.getKey(), this.maybeColor.get());
             }
-            if (!class_28262.method_19523(this::relevant)) continue;
-            for (int i = 0; i < 16; ++i) {
-                for (int j = 0; j < 16; ++j) {
-                    for (int k = 0; k < 16; ++k) {
-                        class_2680 belowState;
-                        class_2680 aboveState;
-                        boolean bl4;
-                        class_2338 class_23384;
-                        int n20;
-                        class_2680 class_26802 = class_28262.method_12254(i, j, k);
-                        if (class_26802.method_26215()) continue;
-                        int n21 = n5 + i;
-                        int n22 = n19 + j;
-                        int n23 = n6 + k;
-                        if (((Boolean)this.kelp.get()).booleanValue() && class_26802.method_27852(class_2246.field_9993) && class_26802.method_28498((class_2769)class_2741.field_12517)) {
-                            n20 = (Integer)class_26802.method_11654((class_2769)class_2741.field_12517);
-                            class_23384 = new class_2338(n21, n22 + 1, n23);
-                            bl4 = SusChunkFinder.mc.field_1687.method_8320(class_23384).method_27852(class_2246.field_10382);
-                            if (n20 != 25 && bl4) {
-                                ++n7;
-                            } else {
-                                ++n8;
-                            }
-                        }
-                        if (((Boolean)this.caveVines.get()).booleanValue() && class_26802.method_27852(class_2246.field_28675) && class_26802.method_28498((class_2769)class_2741.field_12517)) {
-                            n20 = (Integer)class_26802.method_11654((class_2769)class_2741.field_12517);
-                            class_23384 = new class_2338(n21, n22 - 1, n23);
-                            bl4 = SusChunkFinder.mc.field_1687.method_8320(class_23384).method_26215();
-                            if (n20 != 25 && bl4) {
-                                ++n9;
-                            } else {
-                                ++n10;
-                            }
-                        }
-                        if (((Boolean)this.vines.get()).booleanValue() && class_26802.method_27852(class_2246.field_10597) && !(belowState = SusChunkFinder.mc.field_1687.method_8320(new class_2338(n21, n22, n23).method_10074())).method_27852(class_2246.field_10597)) {
-                            if (!belowState.method_26215()) {
-                                ++n12;
-                            } else if (((Boolean)class_26802.method_11654((class_2769)class_2741.field_12489)).booleanValue() || ((Boolean)class_26802.method_11654((class_2769)class_2741.field_12487)).booleanValue() || ((Boolean)class_26802.method_11654((class_2769)class_2741.field_12540)).booleanValue() || ((Boolean)class_26802.method_11654((class_2769)class_2741.field_12527)).booleanValue()) {
-                                ++n11;
-                            } else {
-                                ++n12;
-                            }
-                        }
-                        if (((Boolean)this.amethyst.get()).booleanValue() && !bl) {
-                            if (class_26802.method_27852(class_2246.field_27161)) {
-                                ++n14;
-                            } else if ((class_26802.method_27852(class_2246.field_27164) || class_26802.method_27852(class_2246.field_27163) || class_26802.method_27852(class_2246.field_27162)) && class_26802.method_28498((class_2769)class_2741.field_12525)) {
-                                class_2350 class_23502 = (class_2350)class_26802.method_11654((class_2769)class_2741.field_12525);
-                                class_23384 = new class_2338(n21, n22, n23).method_10093(class_23502.method_10153());
-                                if (SusChunkFinder.mc.field_1687.method_8320(class_23384).method_27852(class_2246.field_27160)) {
-                                    ++n13;
-                                } else {
-                                    ++n14;
-                                }
-                            }
-                        }
-                        if (((Boolean)this.bamboo.get()).booleanValue() && class_26802.method_27852(class_2246.field_10211) && class_26802.method_28498((class_2769)class_2741.field_12549) && !(aboveState = SusChunkFinder.mc.field_1687.method_8320(new class_2338(n21, n22 + 1, n23))).method_27852(class_2246.field_10211)) {
-                            if ((Integer)class_26802.method_11654((class_2769)class_2741.field_12549) == 1) {
-                                ++n16;
-                            } else if (aboveState.method_26215()) {
-                                ++n15;
-                            }
-                        }
-                        if (((Boolean)this.beeNest.get()).booleanValue() && class_26802.method_27852(class_2246.field_20421) && class_26802.method_28498((class_2769)class_2741.field_20432)) {
-                            if ((Integer)class_26802.method_11654((class_2769)class_2741.field_20432) == 5) {
-                                ++n18;
-                            } else {
-                                ++n17;
-                            }
-                        }
-                        if (!((Boolean)this.rotatedDeepslate.get()).booleanValue() || !class_26802.method_27852(class_2246.field_28888) || !class_26802.method_28498((class_2769)class_2741.field_12496) || class_26802.method_11654((class_2769)class_2741.field_12496) == class_2350.class_2351.field_11052 || n22 < 0 || n22 > 60) continue;
-                        class_2338 class_23385 = new class_2338(n21, n22, n23);
-                        boolean bl5 = true;
-                        for (class_2350 class_23503 : class_2350.values()) {
-                            if (!SusChunkFinder.mc.field_1687.method_8320(class_23385.method_10093(class_23503)).method_26215()) continue;
-                            bl5 = false;
-                            break;
-                        }
-                        if (!bl5) continue;
-                        arrayList.add(class_23385);
-                    }
-                }
+         }
+      }
+   }
+
+   private SusChunkFinder.Score score(List<class_2338> var1) {
+      int var2 = 0;
+      int var3 = 0;
+      int var4 = 0;
+      int var5 = 0;
+      HashSet var6 = new HashSet();
+      double var7 = 0.0;
+      int var9 = 0;
+
+      for (class_2338 var11 : var1) {
+         class_2680 var12 = mc.field_1687.method_8320(var11);
+         if (this.candidate(var12)) {
+            var7 += var11.method_10264();
+            var9++;
+            class_2248 var13 = var12.method_26204();
+            if (var13 == class_2246.field_9993) {
+               var2++;
+            } else if (var13 == class_2246.field_10302) {
+               var4++;
+            } else if (var13 == class_2246.field_27161) {
+               var5++;
+            } else if (var13 == class_2246.field_10597 && !mc.field_1687.method_8320(var11.method_10074()).method_27852(class_2246.field_10597)) {
+               int var14 = 1;
+
+               while (var14 < 32 && mc.field_1687.method_8320(var11.method_10086(var14)).method_27852(class_2246.field_10597)) {
+                  var14++;
+               }
+
+               if (var14 >= 6 && var6.add(class_2338.method_10064(var11.method_10263(), 0, var11.method_10260()))) {
+                  var3++;
+               }
             }
-        }
-        if (bl) {
-            if (bl2) {
-                ++n13;
-            } else if (bl3) {
-                ++n14;
+         }
+      }
+
+      float var15 = var2 + var3 + var4 / 3.0F + var5 / 4.0F;
+      return new SusChunkFinder.Score(var15, var2, var3, var4, var5, var9 > 0 ? var7 / var9 : Double.NaN);
+   }
+
+   private static double dist(long var0, double var2, double var4) {
+      double var6 = (class_1923.method_8325(var0) << 4) + 8 - var2;
+      double var8 = (class_1923.method_8332(var0) << 4) + 8 - var4;
+      return var6 * var6 + var8 * var8;
+   }
+
+   private static int hotter(int var0) {
+      int var1 = var0 >> 16 & 0xFF;
+      int var2 = var0 >> 8 & 0xFF;
+      int var3 = var0 & 0xFF;
+      return 0xFF000000 | Math.min(255, var1 + 40) << 16 | (int)(var2 * 0.55) << 8 | (int)(var3 * 0.55);
+   }
+
+   @Override
+   protected double chunkY(long var1) {
+      SusChunkFinder.Score var3 = this.scores.get(var1);
+      return var3 == null ? Double.NaN : var3.avgY();
+   }
+
+   @Override
+   protected float chunkIntensity(long var1) {
+      SusChunkFinder.Score var3 = this.scores.get(var1);
+      return var3 == null ? 0.3F : Math.min(1.0F, var3.points() / (this.needed() * 2.0F));
+   }
+
+   @Override
+   protected String chunkSubLabel(long var1) {
+      SusChunkFinder.Score var3 = this.scores.get(var1);
+      return var3 == null ? null : describe(var3);
+   }
+
+   private static String describe(SusChunkFinder.Score var0) {
+      ArrayList var1 = new ArrayList();
+      if (var0.kelp() > 0) {
+         var1.add(var0.kelp() + " kelp");
+      }
+
+      if (var0.vines() > 0) {
+         var1.add(var0.vines() + " long vines");
+      }
+
+      if (var0.cocoa() > 0) {
+         var1.add(var0.cocoa() + " cocoa");
+      }
+
+      if (var0.amethyst() > 0) {
+         var1.add(var0.amethyst() + " amethyst");
+      }
+
+      return String.join(", ", var1);
+   }
+
+   @Override
+   protected String chunkLabel(long var1) {
+      SusChunkFinder.Score var3 = this.scores.get(var1);
+      return var3 == null ? null : (var3.points() >= this.needed() ? "SUS " : "maybe ") + String.format("%.1f", var3.points());
+   }
+
+   @Override
+   public void onRender3D(Render3D var1) {
+      super.onRender3D(var1);
+      if (this.highlightBlocks.get()) {
+         int var2 = this.color.get() | 0xFF000000;
+
+         for (Entry var4 : this.scanner.results().entrySet()) {
+            if (this.marks.containsKey(var4.getKey())) {
+               int var5 = 0;
+
+               for (class_2338 var7 : (List<class_2338>)var4.getValue()) {
+                  if (var5++ > 64) {
+                     break;
+                  }
+
+                  var1.box(new class_238(var7).method_1011(0.02), var2, 35, true);
+               }
             }
-        }
-        n3 = ((Boolean)this.kelp.get() != false ? n7 : 0) + ((Boolean)this.caveVines.get() != false ? n9 : 0) + ((Boolean)this.vines.get() != false ? n11 : 0) + ((Boolean)this.amethyst.get() != false ? n13 : 0) + ((Boolean)this.bamboo.get() != false ? n15 : 0) + ((Boolean)this.beeNest.get() != false ? n17 : 0);
-        int n24 = ((Boolean)this.kelp.get() != false ? n8 : 0) + ((Boolean)this.caveVines.get() != false ? n10 : 0) + ((Boolean)this.vines.get() != false ? n12 : 0) + ((Boolean)this.amethyst.get() != false ? n14 : 0) + ((Boolean)this.bamboo.get() != false ? n16 : 0) + ((Boolean)this.beeNest.get() != false ? n18 : 0);
-        return new ChunkScan(n24, n3 > 0, arrayList);
-    }
+         }
+      }
+   }
 
-    private void refreshMarks() {
-        int n;
-        long l;
-        int n2;
-        Map<Long, float[]> map;
-        this.effective.clear();
-        this.effective.putAll(this.chunkHeatmap);
-        Supplier<Map<Long, float[]>> supplier = amethystSource;
-        if (supplier != null && ((Boolean)this.amethyst.get()).booleanValue() && (map = supplier.get()) != null) {
-            n2 = (Integer)this.simulationDistance.get();
-            for (Map.Entry<Long, float[]> entry3 : map.entrySet()) {
-                int n3 = (int)Math.ceil(entry3.getValue()[0]);
-                int n4 = class_1923.method_8325((long)entry3.getKey());
-                int n5 = class_1923.method_8332((long)entry3.getKey());
-                for (int i = -n2; i <= n2; ++i) {
-                    for (int j = -n2; j <= n2; ++j) {
-                        this.effective.merge(SusChunkFinder.key(n4 + i, n5 + j), n3, Integer::sum);
-                    }
-                }
-            }
-        }
-        int n6 = (Integer)this.sensitivity.get();
-        n2 = Math.max(1, n6 / 2);
-        boolean bl = (Boolean)this.maybe.get();
-        double d = SusChunkFinder.mc.field_1724.method_23317();
-        double d2 = SusChunkFinder.mc.field_1724.method_23321();
-        ArrayList<Map.Entry<Long, Integer>> arrayList = new ArrayList<Map.Entry<Long, Integer>>();
-        for (Map.Entry<Long, Integer> entry4 : this.effective.entrySet()) {
-            int n7 = entry4.getValue();
-            if (n7 < (bl ? n2 : n6)) continue;
-            l = entry4.getKey();
-            n = class_1923.method_8325((long)l);
-            int n8 = class_1923.method_8332((long)l);
-            if (this.trackedChunks.containsKey(l) || !SusChunkFinder.mc.field_1687.method_8393(n, n8)) continue;
-            int n9 = 0;
-            for (int i = -1; i <= 1; ++i) {
-                for (int j = -1; j <= 1; ++j) {
-                    if (i == 0 && j == 0 || !this.loadedChunkPositions.contains(SusChunkFinder.key(n + i, n8 + j))) continue;
-                    ++n9;
-                }
-            }
-            if (n9 < 3) continue;
-            arrayList.add(entry4);
-        }
-        arrayList.sort((entry, entry2) -> {
-            int cmp = Integer.compare((Integer)entry2.getValue(), (Integer)entry.getValue());
-            return cmp != 0 ? cmp : Double.compare(SusChunkFinder.dist((Long)entry.getKey(), d, d2), SusChunkFinder.dist((Long)entry2.getKey(), d, d2));
-        });
-        this.marks.clear();
-        this.counts.clear();
-        int n10 = (Integer)this.maxChunks.get();
-        for (Map.Entry<Long, Integer> entry5 : arrayList) {
-            if (this.marks.size() >= n10) break;
-            l = (Long)entry5.getKey();
-            n = (Integer)entry5.getValue();
-            this.counts.put(l, n);
-            if (n >= n6) {
-                this.marks.put(l, n >= n6 * 2 ? SusChunkFinder.hotter((Integer)this.color.get()) : (Integer)this.color.get());
-                if (!this.announced.add(l)) continue;
-                this.announce(l, "Suspicious chunk: " + n + " grown things in range");
-                continue;
-            }
-            this.marks.put(l, (Integer)this.maybeColor.get());
-        }
-    }
+   @Override
+   public List<String> details() {
+      ArrayList var1 = new ArrayList();
+      int var2 = 0;
 
-    private static double dist(long l, double d, double d2) {
-        double d3 = (double)((class_1923.method_8325((long)l) << 4) + 8) - d;
-        double d4 = (double)((class_1923.method_8332((long)l) << 4) + 8) - d2;
-        return d3 * d3 + d4 * d4;
-    }
+      for (Entry var4 : this.scores.entrySet()) {
+         if (((SusChunkFinder.Score)var4.getValue()).points() >= this.needed()) {
+            var2++;
+         }
+      }
 
-    private static int hotter(int n) {
-        int n2 = n >> 16 & 0xFF;
-        int n3 = n >> 8 & 0xFF;
-        int n4 = n & 0xFF;
-        return 0xFF000000 | Math.min(255, n2 + 40) << 16 | (int)((double)n3 * 0.55) << 8 | (int)((double)n4 * 0.55);
-    }
+      var1.add("Suspicious chunks: " + var2 + " · score needed: " + String.format("%.1f", this.needed()) + " · max " + this.maxChunks.get());
+      this.scores
+         .entrySet()
+         .stream()
+         .filter(var1x -> var1x.getValue().points() >= this.needed() / 2.0F)
+         .sorted((var0, var1x) -> Float.compare(var1x.getValue().points(), var0.getValue().points()))
+         .limit(5L)
+         .forEach(var1x -> {
+            int var2x = (class_1923.method_8325(var1x.getKey()) << 4) + 8;
+            int var3 = (class_1923.method_8332(var1x.getKey()) << 4) + 8;
+            int var4x = mc.field_1724 == null ? 0 : (int)Math.hypot(var2x - mc.field_1724.method_23317(), var3 - mc.field_1724.method_23321());
+            var1.add(String.format("%.1f pts · %dm · %s", var1x.getValue().points(), var4x, describe(var1x.getValue())));
+         });
+      return var1;
+   }
 
-    @Override
-    protected double chunkY(long l) {
-        return Double.NaN;
-    }
-
-    @Override
-    protected float chunkIntensity(long l) {
-        Integer n = this.counts.get(l);
-        return n == null ? 0.3f : Math.min(1.0f, (float)n.intValue() / ((float)((Integer)this.sensitivity.get()).intValue() * 2.0f));
-    }
-
-    @Override
-    protected String chunkSubLabel(long l) {
-        Integer n = this.counts.get(l);
-        return n == null ? null : n + " grown things in range";
-    }
-
-    @Override
-    protected String chunkLabel(long l) {
-        Integer n = this.counts.get(l);
-        return n == null ? null : (n >= (Integer)this.sensitivity.get() ? "SUS " : "maybe ") + n;
-    }
-
-    @Override
-    public void onRender3D(Render3D render3D) {
-        super.onRender3D(render3D);
-        if (SusChunkFinder.mc.field_1687 == null || !((Boolean)this.rotatedDeepslate.get()).booleanValue() || this.chunkDeepslateMap.isEmpty()) {
-            return;
-        }
-        int n = -16711681;
-        int n2 = (Integer)this.opacity.get();
-        for (Map.Entry<Long, List<class_2338>> entry : this.chunkDeepslateMap.entrySet()) {
-            long l = entry.getKey();
-            if (!SusChunkFinder.mc.field_1687.method_8393(class_1923.method_8325((long)l), class_1923.method_8332((long)l))) continue;
-            for (class_2338 class_23382 : entry.getValue()) {
-                render3D.box(new class_238(class_23382), n, n2, true);
-            }
-        }
-    }
-
-    @Override
-    public List<String> details() {
-        ArrayList<String> arrayList = new ArrayList<String>();
-        int n = 0;
-        for (int n2 : this.counts.values()) {
-            if (n2 < (Integer)this.sensitivity.get()) continue;
-            ++n;
-        }
-        int n3 = 0;
-        for (List<class_2338> list : this.chunkDeepslateMap.values()) {
-            n3 += list.size();
-        }
-        arrayList.add("Suspicious chunks: " + n + " - sensitivity " + String.valueOf(this.sensitivity.get()) + " - max " + String.valueOf(this.maxChunks.get()));
-        arrayList.add("Rotated deepslate blocks: " + n3 + " - queued chunks: " + this.pending.size());
-        return arrayList;
-    }
-
-    private boolean isDonutFolia() {
-        if (mc.method_1562() == null) {
-            return false;
-        }
-        String string = mc.method_1562().method_52790();
-        return string != null && string.contains("DonutFolia");
-    }
-
-    private static boolean isAmethystCluster(class_2680 class_26802) {
-        return class_26802.method_26204() == class_2246.field_27161;
-    }
-
-    private static boolean isAmethystBud(class_2680 class_26802) {
-        return class_26802.method_26204() == class_2246.field_27164 || class_26802.method_26204() == class_2246.field_27163 || class_26802.method_26204() == class_2246.field_27162;
-    }
-
-    private record ChunkScan(int notGrown, boolean hasGrown, List<class_2338> deepslate) {
-    }
+   private record Score(float points, int kelp, int vines, int cocoa, int amethyst, double avgY) {
+   }
 }
