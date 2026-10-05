@@ -390,3 +390,9 @@ Nicht im Spiel getestet.
 - **Schöneres Aussehen:** Alle Stile haben drei Farbstufen statt zwei, und die Textur hat weiche Wolken (kachelbares Rauschen) unter den Streifen und Funken.
 - **Eigener Glanz-Shader:** Der Glanz ändert die Farbe nicht mehr durch den Farbkreis (vorher haben sich alle Stile durchgefärbt und sahen ähnlich aus). Stattdessen funkeln die Zellen, der Glanz pulsiert, eine zweite verschobene Schicht gibt Tiefe, und Holo und Rainbow haben einen Farbsaum an den Kanten. Jeder Stil hat eigene Werte (Void und Electric funkeln stärker, Fire pulsiert).
 - Die Hüte-Einstellung nutzt die neuen Farben auch.
+
+### 8.11.1: Sus ChunkFinder ausgetauscht
+Nicht im Spiel getestet.
+- **Sus ChunkFinder** ist durch die Version aus der Jar `dihclient-v8.9.1mc1.21.11-krypton-suschunkfinder.jar` ersetzt. Ich habe die Jar geprüft: Nur diese eine Klasse unterscheidet sich von unserer 8.9.1, sie ist nicht verschleiert, und sie enthält keine Netzwerk-, Datei-, Prozess- oder Reflection-Aufrufe. Ich habe die Klasse in lesbaren Quelltext zurückübersetzt und aus dem Quelltext gebaut, die fremde Datei steckt nicht in der Jar.
+- **Neu:** Simulation Distance (Chunks im Umkreis eines wachsenden Chunks gelten als simuliert und werden nicht markiert), Cave Vines, Bamboo, Bee Nest, Rotated Deepslate (Y 0 bis 60), Scan Speed (Chunks pro Tick).
+- **Weg gegenüber unserer Version:** Cocoa, Highlight Blocks, die Punktewertung mit Sensitivity-Formel und der inkrementelle Block-Scanner. Sensitivity ist jetzt die Mindestzahl gewachsener Dinge (1 bis 20). Alte gespeicherte Werte für Cocoa und Highlight Blocks werden ignoriert. Der Amethyst-Bypass liefert weiter Geoden-Daten.
