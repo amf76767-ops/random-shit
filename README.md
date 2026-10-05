@@ -369,3 +369,11 @@ Nicht im Spiel getestet.
 Nicht im Spiel getestet.
 - **Build-Wächter (AutoBuild → Guard):** Pausiert den Bau, wenn es nicht sicher ist, und macht weiter, wenn es wieder sicher ist. Gründe: ein Spieler, der kein Freund ist, kommt näher als **Guard Range** (Standard 32 Blöcke), deine Gesundheit fällt auf **Guard Hearts** (Standard 4 Herzen) oder weniger, oder der Server läuft zwei Sekunden lang unter **Guard TPS** (Standard 12). Mit **Guard Resume** (Standard 5 Sekunden) legst du fest, wie lange es sicher sein muss, bevor es weitergeht. Pausierst du selbst, bleibt deine Pause bestehen. Die Gründe stehen im Build Log. Die Feineinstellungen sind im OPTIONS-Reiter des Schematic-Browsers, im Menü steht nur der Schalter **Guard**. Im Kreativmodus gilt der Gesundheitsgrund nicht.
 - **Kein Kommentar mehr im Code:** Alle Kommentare (`//`, `/* */`, `#`) sind aus den Quelldateien des Add-ons, der Tests und der Hilfsskripte entfernt. Geblieben ist die Zeile "Ported from an open-source client (GPL-3.0)" in den übernommenen Dateien. Der Code selbst ist unverändert.
+
+### 8.9.1: HUD viel schneller
+Nicht im Spiel getestet.
+- **Ursache:** Das HUD zeichnete hunderte 1-Pixel-Rechtecke pro Bild (weiche Ecken, Radar-Kreise, Radar-Sweep, Chunk-Raster). Jedes Rechteck ist beim Rendern ein eigener Zeichenaufruf, deshalb fielen die FPS von 300 auf 80.
+- **Weiche Ecken** gibt es nur noch, wenn ein Menü offen ist. Im HUD sind die Ecken gestuft (wenige Rechtecke). Das Budget für weiche Ecken ist kleiner.
+- **Radar:** Scheiben werden zeilenweise zusammengefasst, die Kreise haben weniger Punkte, der Sweep hat etwa ein Fünftel der Rechtecke.
+- **Chunk-Radar:** Statt eines Schachbretts aus einem Rechteck pro Chunk gibt es eine Fläche und Gitterlinien.
+- **Verlauf-Balken** (Akzentleisten) nutzen weniger Streifen.

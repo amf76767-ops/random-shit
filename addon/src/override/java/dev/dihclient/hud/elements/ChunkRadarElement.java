@@ -57,11 +57,10 @@ public class ChunkRadarElement extends HudElement {
       g.method_51433(mc.field_1772, "Chunks", 5, 3, 0xCCFFFFFF, false);
       g.method_51433(mc.field_1772, "N", this.width - 10, 3, 0xFFFF6A6A, false);
 
-      for (int cx = 0; cx < cells; cx++) {
-         for (int cz = 0; cz < cells; cz++) {
-            int shade = (cx + cz) % 2 == 0 ? 0x18FFFFFF : 0x0AFFFFFF;
-            g.method_25294(ox + cx * cell, oy + cz * cell, ox + cx * cell + cell, oy + cz * cell + cell, shade);
-         }
+      g.method_25294(ox, oy, ox + cells * cell, oy + cells * cell, 0x0CFFFFFF);
+      for (int i = 0; i <= cells; i++) {
+         g.method_25294(ox + i * cell, oy, ox + i * cell + 1, oy + cells * cell, 0x14FFFFFF);
+         g.method_25294(ox, oy + i * cell, ox + cells * cell, oy + i * cell + 1, 0x14FFFFFF);
       }
       int mx = ox + range * cell;
       int mz = oy + range * cell;

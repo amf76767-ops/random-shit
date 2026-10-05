@@ -155,12 +155,12 @@ public final class Gfx {
         }
     }
 
-    private static final int AA_BUDGET = 3000;
+    private static final int AA_BUDGET = 1500;
     private static class_332 pass;
     private static int budget;
 
     private static boolean smoothCorners(class_332 g, int cost) {
-        if (!corners()) {
+        if (!corners() || class_310.method_1551().field_1755 == null) {
             return false;
         }
         if (g != pass) {
@@ -290,7 +290,7 @@ public final class Gfx {
 
     public static void hGradient(class_332 g, int x, int y, int w, int h, int from, int to) {
         if (w > 0) {
-            int step = w > 160 ? 2 : 1;
+            int step = Math.max(1, w / 48);
             for (int i = 0; i < w; i += step) {
                 int c = ColorUtil.blend(from, to, (float) i / Math.max(1, w - 1));
                 g.method_25294(x + i, y, x + Math.min(w, i + step), y + h, c);
@@ -303,7 +303,7 @@ public final class Gfx {
     }
 
     public static void accentBar(class_332 g, int x, int y, int w, int h, double phase) {
-        int step = Math.max(1, w / 40);
+        int step = Math.max(1, w / 12);
         for (int i = 0; i < w; i += step) {
             g.method_25294(x + i, y, x + Math.min(w, i + step), y + h, Theme.accentAt(phase + (double) i / Math.max(1, w) * 0.5));
         }

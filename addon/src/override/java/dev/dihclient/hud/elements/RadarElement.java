@@ -23,9 +23,17 @@ public class RadarElement extends HudElement {
    }
 
    private static void disc(class_332 g, int cx, int cy, int r, int color) {
-      for (int dy = -r; dy <= r; dy++) {
-         int half = (int)Math.round(Math.sqrt((double)r * r - (double)dy * dy));
-         g.method_25294(cx - half, cy + dy, cx + half + 1, cy + dy + 1, color);
+      int start = -r;
+      int prev = (int)Math.round(Math.sqrt((double)r * r - (double)r * r));
+      for (int dy = -r; dy <= r + 1; dy++) {
+         int half = dy > r ? -1 : (int)Math.round(Math.sqrt((double)r * r - (double)dy * dy));
+         if (dy == -r) {
+            prev = half;
+         } else if (half != prev) {
+            g.method_25294(cx - prev, cy + start, cx + prev + 1, cy + dy, color);
+            start = dy;
+            prev = half;
+         }
       }
    }
 
@@ -58,15 +66,15 @@ public class RadarElement extends HudElement {
 
       disc(g, cx, cy, radius, 0x99080C12);
       disc(g, cx, cy, radius * 2 / 3, 0x0CFFFFFF);
-      circle(g, cx, cy, radius, alpha(accent, 190), 120);
-      circle(g, cx, cy, radius * 2 / 3, 0x2CFFFFFF, 72);
-      circle(g, cx, cy, radius / 3, 0x2CFFFFFF, 48);
+      circle(g, cx, cy, radius, alpha(accent, 190), 80);
+      circle(g, cx, cy, radius * 2 / 3, 0x2CFFFFFF, 36);
+      circle(g, cx, cy, radius / 3, 0x2CFFFFFF, 20);
       g.method_25294(cx, cy - radius, cx + 1, cy + radius + 1, 0x16FFFFFF);
       g.method_25294(cx - radius, cy, cx + radius + 1, cy + 1, 0x16FFFFFF);
 
       for (int s = -1; s <= 1; s += 2) {
          double a = s * Math.toRadians(35.0);
-         for (int t = 6; t < radius; t += 3) {
+         for (int t = 6; t < radius; t += 6) {
             int x = cx + (int)Math.round(Math.sin(a) * t);
             int y = cy - (int)Math.round(Math.cos(a) * t);
             g.method_25294(x, y, x + 1, y + 1, alpha(accent, 90));
@@ -74,14 +82,14 @@ public class RadarElement extends HudElement {
       }
 
       double sweep = System.currentTimeMillis() % 3200L / 3200.0 * Math.PI * 2.0;
-      for (int k = 0; k < 14; k++) {
-         double a = sweep - k * 0.07;
-         int al = 70 - k * 5;
-         for (int t = 3; t < radius; t += 2) {
+      for (int k = 0; k < 7; k++) {
+         double a = sweep - k * 0.14;
+         int al = 70 - k * 10;
+         for (int t = 3; t < radius; t += 4) {
             int x = cx + (int)Math.round(Math.cos(a) * t);
             int y = cy + (int)Math.round(Math.sin(a) * t);
             if (al > 0) {
-               g.method_25294(x, y, x + 2, y + 2, alpha(accent, al));
+               g.method_25294(x, y, x + 3, y + 3, alpha(accent, al));
             }
          }
       }
