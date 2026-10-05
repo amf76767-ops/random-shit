@@ -58,22 +58,14 @@ public class UpdateScreen extends class_437 {
         return out;
     }
 
-    /** The button captions for the current state; the first one is the main action. */
+    /** The button captions: the first one opens the release page on GitHub (nothing is downloaded by the game). */
     private List<String> buttons() {
-        UpdateManager.State s = UpdateManager.state();
         List<String> b = new ArrayList<>();
-        if (s == UpdateManager.State.AVAILABLE) {
-            if (UpdateManager.canInstall()) {
-                b.add("Update now");
-            }
+        if (UpdateManager.state() == UpdateManager.State.AVAILABLE) {
+            b.add("Open GitHub");
             b.add("Later");
             b.add("Skip this version");
-        } else if (s == UpdateManager.State.FAILED) {
-            b.add("Try again");
-            b.add("Close");
-        } else if (s == UpdateManager.State.READY) {
-            b.add("OK");
-        } else if (s != UpdateManager.State.DOWNLOADING) {
+        } else {
             b.add("Close");
         }
         return b;
@@ -100,18 +92,7 @@ public class UpdateScreen extends class_437 {
             ny += 11;
         }
         int by = y + h - BTN_H - 4;
-        UpdateManager.State s = UpdateManager.state();
-        if (s == UpdateManager.State.DOWNLOADING) {
-            Gfx.text(g, "Downloading ...", x + 4, by - 16, -1);
-            Gfx.bar(g, x + 4, by + 4, W - 8, 8, (float) UpdateManager.progress(), -14079703, accent);
-        } else if (s == UpdateManager.State.READY) {
-            Gfx.text(g, "Downloaded. It is installed when you close Minecraft.", x + 4, by - 26, -11870592);
-            Gfx.text(g, "Start the game again afterwards.", x + 4, by - 15, -7564380);
-        } else if (s == UpdateManager.State.FAILED) {
-            Gfx.text(g, Gfx.trim("Update failed: " + UpdateManager.error(), W - 8), x + 4, by - 16, -495247);
-        } else if (s == UpdateManager.State.AVAILABLE && !UpdateManager.canInstall()) {
-            Gfx.text(g, "Cannot update by itself here. Download it from GitHub.", x + 4, by - 16, -278748);
-        }
+        Gfx.text(g, "Get the new version from the GitHub page and put it in your mods folder.", x + 4, by - 16, -7564380);
         List<String> btn = buttons();
         int bw = (W - 8 - (btn.size() - 1) * 6) / Math.max(1, btn.size());
         for (int i = 0; i < btn.size(); i++) {
@@ -145,7 +126,10 @@ public class UpdateScreen extends class_437 {
 
     private void press(String caption) {
         switch (caption) {
-            case "Update now", "Try again" -> UpdateManager.startDownload();
+            case "Open GitHub" -> {
+                openRelease();
+                this.method_25419();
+            }
             case "Skip this version" -> {
                 UpdateManager.skipRelease();
                 this.method_25419();
@@ -154,8 +138,21 @@ public class UpdateScreen extends class_437 {
         }
     }
 
+    /** Opens the release page in the browser, only if it is an address on github.com. */
+    private static void openRelease() {
+        GithubReleases.Release r = UpdateManager.release();
+        if (r == null || r.pageUrl() == null || !r.pageUrl().startsWith("https://github.com/")) {
+            return;
+        }
+        try {
+            net.minecraft.class_156.method_668().method_673(java.net.URI.create(r.pageUrl()));
+        } catch (RuntimeException ignored) {
+            // no browser: the player can find the page himself
+        }
+    }
+
     public boolean method_25404(class_11908 key) {
-        if (key.comp_4795() == 256 && UpdateManager.state() != UpdateManager.State.DOWNLOADING) {
+        if (key.comp_4795() == 256) {
             this.method_25419();
             return true;
         }

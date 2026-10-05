@@ -13,11 +13,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Looks for a newer DIHClient on GitHub in the background and, when the player agrees, downloads it.
+ * Looks for a newer DIHClient on GitHub in the background and tells the player; the player gets it from the GitHub page himself.
+ * Nothing is downloaded or installed by the client.
  * Everything here is free of Minecraft classes; the screen that asks the player lives in the glue package.
  */
 public final class UpdateManager {
-    public enum State { IDLE, CHECKING, UP_TO_DATE, AVAILABLE, DOWNLOADING, READY, FAILED }
+    public enum State { IDLE, CHECKING, UP_TO_DATE, AVAILABLE }
 
     private static final long FIRST_CHECK_MS = 8_000;
     private static final long RETRY_AFTER_FAILURE_MS = 30 * 60_000L;
@@ -38,7 +39,6 @@ public final class UpdateManager {
     private static volatile State state = State.IDLE;
     private static volatile GithubReleases.Release release;
     private static volatile String error = "";
-    private static volatile double progress;
     private static volatile boolean prompted;
 
     private UpdateManager() {
@@ -61,17 +61,16 @@ public final class UpdateManager {
 
     /** Called every client tick. Cheap: only compares a timestamp. */
     public static void tick() {
-        if (state != State.CHECKING && state != State.DOWNLOADING && System.currentTimeMillis() >= nextCheckAt) {
+        if (state != State.CHECKING && System.currentTimeMillis() >= nextCheckAt) {
             nextCheckAt = Long.MAX_VALUE;
             checkNow();
         }
     }
 
     public static void checkNow() {
-        if (current == null || state == State.CHECKING || state == State.DOWNLOADING) {
+        if (current == null || state == State.CHECKING) {
             return;
         }
-        State before = state;
         state = State.CHECKING;
         POOL.execute(() -> {
             try {
@@ -82,34 +81,13 @@ public final class UpdateManager {
                     prompted = false;
                     state = State.AVAILABLE;
                 } else {
-                    state = before == State.READY ? State.READY : State.UP_TO_DATE;
+                    state = State.UP_TO_DATE;
                 }
                 schedule(config.checkEveryHours * 3_600_000L);
             } catch (Exception e) {
                 error = String.valueOf(e.getMessage());
-                state = before == State.READY ? State.READY : State.IDLE;
+                state = State.IDLE;
                 schedule(RETRY_AFTER_FAILURE_MS);
-            }
-        });
-    }
-
-    /** Starts the download of the offered release. */
-    public static void startDownload() {
-        GithubReleases.Release r = release;
-        if (r == null || (state != State.AVAILABLE && state != State.FAILED) || !canInstall()) {
-            return;
-        }
-        state = State.DOWNLOADING;
-        progress = 0;
-        error = "";
-        POOL.execute(() -> {
-            try {
-                Path pending = Installer.download(r, ownJar.getParent(), p -> progress = p);
-                Installer.swapOnExit(ownJar, pending, r.assetName());
-                state = State.READY;
-            } catch (Exception e) {
-                error = String.valueOf(e.getMessage());
-                state = State.FAILED;
             }
         });
     }
@@ -137,11 +115,6 @@ public final class UpdateManager {
         return false;
     }
 
-    /** False when the mod is not running from a jar (development) or the folder is read-only. */
-    public static boolean canInstall() {
-        return ownJar != null && Files.isRegularFile(ownJar) && Files.isWritable(ownJar.getParent());
-    }
-
     public static State state() {
         return state;
     }
@@ -152,10 +125,6 @@ public final class UpdateManager {
 
     public static String error() {
         return error;
-    }
-
-    public static double progress() {
-        return progress;
     }
 
     public static Version currentVersion() {
@@ -191,30 +160,12 @@ public final class UpdateManager {
         }
     }
 
-    /**
-     * A download that was finished but not swapped in (game crashed, killed) is retried if it is newer than the
-     * running jar and removed otherwise. Half-finished downloads are always removed.
-     */
+    /** Files an older version of the updater left in the mods folder (it used to download updates itself): removed. */
     private static void cleanLeftovers(Path modsDir) {
         try (DirectoryStream<Path> ds = Files.newDirectoryStream(modsDir, "dihclient*")) {
             for (Path p : ds) {
                 String n = p.getFileName().toString();
-                if (n.endsWith(".part")) {
-                    Files.deleteIfExists(p);
-                } else if (n.endsWith(Installer.PENDING_SUFFIX)) {
-                    String jarName = n.substring(0, n.length() - Installer.PENDING_SUFFIX.length());
-                    Version v = Version.parse(jarName);
-                    try {
-                        Installer.verifyJar(p, v);
-                        if (v != null && current != null && v.compareTo(current) > 0
-                                && (minecraft == null || v.minecraft() == null || minecraft.equals(v.minecraft()))) {
-                            Installer.swapOnExit(ownJar, p, jarName);
-                            state = State.READY;
-                            continue;
-                        }
-                    } catch (IOException ignored) {
-                        // fall through and delete
-                    }
+                if (n.endsWith(".part") || n.endsWith(".jar.update")) {
                     Files.deleteIfExists(p);
                 }
             }

@@ -2,7 +2,6 @@ package dev.dihclient;
 
 import com.sun.net.httpserver.HttpServer;
 import dev.dihclient.update.GithubReleases;
-import dev.dihclient.update.Installer;
 import dev.dihclient.update.UpdateConfig;
 import dev.dihclient.update.Version;
 import java.io.ByteArrayOutputStream;
@@ -46,7 +45,6 @@ public final class UpdateTests {
         versions();
         selection();
         config();
-        installer();
         System.out.println(passed + " passed, " + failed + " failed");
         System.exit(failed == 0 ? 0 : 1);
     }
@@ -117,78 +115,6 @@ public final class UpdateTests {
         Files.writeString(f, "{\"repo\":\"me/mine\",\"skippedVersion\":\"5.7.0\"}");
         c = UpdateConfig.load(f);
         check(c.repo.equals("me/mine") && c.skippedVersion.equals("5.7.0"), "values are kept");
-    }
-
-    static void installer() throws Exception {
-        GithubReleases.allowLoopbackForTests = true;
-        byte[] good = jar("dihclient", "5.7.0+mc1.21.11");
-        byte[] wrongId = jar("othermod", "5.7.0+mc1.21.11");
-        byte[] wrongVer = jar("dihclient", "5.6.5+mc1.21.11");
-        HttpServer srv = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        srv.createContext("/good.jar", ex -> send(ex, good));
-        srv.createContext("/wrongid.jar", ex -> send(ex, wrongId));
-        srv.createContext("/wrongver.jar", ex -> send(ex, wrongVer));
-        srv.createContext("/short.jar", ex -> send(ex, java.util.Arrays.copyOf(good, good.length - 5)));
-        srv.createContext("/missing.jar", ex -> { ex.sendResponseHeaders(404, -1); ex.close(); });
-        srv.start();
-        String base = "http://127.0.0.1:" + srv.getAddress().getPort();
-        Version v = Version.parse("5.7.0+mc1.21.11");
-        String sha = HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(good));
-        Path mods = Files.createTempDirectory("dihmods");
-        double[] last = {0};
-
-        Path done = Installer.download(rel(v, "dihclient-v5.7.0+mc1.21.11.jar", base + "/good.jar", good.length, sha), mods, p -> last[0] = p);
-        check(Files.exists(done) && done.getFileName().toString().endsWith(".jar.update") && last[0] == 1.0, "good download");
-        check(!Files.exists(mods.resolve("dihclient-v5.7.0+mc1.21.11.jar.part")), "no .part left");
-
-        check(fails(() -> Installer.download(rel(v, "dihclient-a.jar", base + "/good.jar", good.length, "00" + sha.substring(2)), mods, null)), "bad checksum rejected");
-        check(fails(() -> Installer.download(rel(v, "dihclient-b.jar", base + "/wrongid.jar", wrongId.length, ""), mods, null)), "foreign mod id rejected");
-        check(fails(() -> Installer.download(rel(v, "dihclient-c.jar", base + "/wrongver.jar", wrongVer.length, ""), mods, null)), "wrong version rejected");
-        check(fails(() -> Installer.download(rel(v, "dihclient-d.jar", base + "/short.jar", good.length, ""), mods, null)), "short file rejected");
-        check(fails(() -> Installer.download(rel(v, "dihclient-e.jar", base + "/missing.jar", 10, ""), mods, null)), "404 rejected");
-        check(fails(() -> Installer.download(rel(v, "../evil.jar", base + "/good.jar", good.length, ""), mods, null)), "path traversal in name rejected");
-        check(fails(() -> Installer.download(rel(v, "dihclient-f.jar", "https://evil.example/x.jar", 10, ""), mods, null)), "untrusted host rejected");
-        try (var ls = Files.list(mods)) {
-            check(ls.noneMatch(p -> p.toString().endsWith(".part")), "failed downloads leave no .part");
-        }
-        srv.stop(0);
-
-        // the swap script, run for real on this (unix) machine
-        Path old = mods.resolve("dihclient-v5.6.0+mc1.21.11.jar");
-        Files.write(old, jar("dihclient", "5.6.0+mc1.21.11"));
-        Path fin = mods.resolve("dihclient-v5.7.0+mc1.21.11.jar");
-        Method m = Installer.class.getDeclaredMethod("launchHelper", Path.class, Path.class, Path.class, boolean.class);
-        m.setAccessible(true);
-        m.invoke(null, old, done, fin, false);
-        for (int i = 0; i < 50 && !Files.exists(fin); i++) {
-            Thread.sleep(100);
-        }
-        check(Files.exists(fin) && !Files.exists(old) && !Files.exists(done), "old jar replaced by new one");
-        Installer.verifyJar(fin, v);
-        check(true, "swapped jar verifies");
-
-        // paths with spaces and quotes must survive the script
-        Path odd = Files.createTempDirectory("dih odd'dir");
-        Path old2 = odd.resolve("dihclient old.jar");
-        Path pend2 = odd.resolve("dihclient new.jar.update");
-        Path fin2 = odd.resolve("dihclient new.jar");
-        Files.writeString(old2, "x");
-        Files.write(pend2, good);
-        m.invoke(null, old2, pend2, fin2, false);
-        for (int i = 0; i < 50 && !Files.exists(fin2); i++) {
-            Thread.sleep(100);
-        }
-        check(Files.exists(fin2) && !Files.exists(old2), "swap works with spaces and quotes in the path");
-
-        String win = (String) call("windowsScript", old, done, fin);
-        check(win.contains("del /f /q") && win.contains("move /y") && win.contains(old.toString()), "windows script contains the steps");
-        check(((String) call("windowsScript", Path.of("/a/100%/b.jar"), done, fin)).contains("100%%"), "percent is escaped for cmd");
-    }
-
-    static Object call(String name, Path a, Path b, Path c) throws Exception {
-        Method m = Installer.class.getDeclaredMethod(name, Path.class, Path.class, Path.class);
-        m.setAccessible(true);
-        return m.invoke(null, a, b, c);
     }
 
     static GithubReleases.Release rel(Version v, String asset, String url, long size, String sha) {

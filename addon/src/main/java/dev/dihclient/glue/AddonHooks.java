@@ -125,7 +125,7 @@ public final class AddonHooks {
         }
         try {
             UpdateManager.tick();
-            if (UpdateManager.state() != UpdateManager.State.AVAILABLE && UpdateManager.state() != UpdateManager.State.FAILED) {
+            if (UpdateManager.state() != UpdateManager.State.AVAILABLE) {
                 return;
             }
             if (mc.field_1755 instanceof class_442) {

@@ -354,3 +354,9 @@ Nicht im Spiel getestet.
 - Es sind höchstens 12 Chunks gleichzeitig unterwegs, die nächsten zuerst. Ergebnisse aus einer anderen Welt oder von vor einem Rescan werden verworfen.
 - **Sicherheitsnetz:** Liest der Hintergrund-Thread einen Chunk, der sich gerade ändert, und es kommt ein Fehler, wird dieser Chunk noch einmal auf dem Spiel-Thread gescannt. Beim Ausschalten des Moduls endet der Thread.
 - **Scan Speed** bestimmt jetzt, wie viele fertige Chunks pro Tick bewertet werden (bisher: wie viele gescannt wurden).
+
+### 8.8.0: Kein Installer mehr, MP3-Decoder im Mod
+Nicht im Spiel getestet.
+- **Updater:** Der Installer ist ganz entfernt. Das Spiel lädt keine Updates mehr herunter und startet keine Skripte zum Austauschen. Gibt es eine neue Version, zeigt das Update-Fenster (wie bisher auf dem Titelbildschirm) die Neuigkeiten und die Knöpfe **Open GitHub** (öffnet die Release-Seite im Browser, nur Adressen auf github.com), **Later** und **Skip this version**. Die neue Jar legst du selbst in den mods-Ordner. Übrig gebliebene `.part`- und `.jar.update`-Dateien eines älteren Updaters werden beim Start gelöscht.
+- **Radio:** Der MP3-Decoder `jlayer-1.0.1.jar` (JLayer, LGPL-2.1, SHA-1 `2bfef7a5a4c9af2184ff74b460b6d7d24349b98a`, identisch mit der Datei auf Maven Central) steckt jetzt im Mod unter `dihclient/jlayer-1.0.1.jar`. Beim ersten Benutzen des Radios wird er in `dihclient/libs` kopiert (die Prüfsumme wird dabei gegen den fest eingetragenen Wert geprüft) und von dort geladen. Es wird nichts mehr heruntergeladen. Die Radio-Streams selbst kommen weiter aus dem Netz.
+- Damit startet der Client keine Programme mehr und lädt keinen Code aus dem Netz.
