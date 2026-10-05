@@ -1,0 +1,4 @@
+JLayer 1.0.1 (javazoom.jl.*), MP3 decoder. Copyright (C) 1999-2005 JavaZOOM. License: GNU Lesser General Public License 2.1
+(https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html). Source: https://github.com/umjammer/jlayer (maven: javazoom:jlayer:1.0.1,
+SHA-1 of the original jar 2bfef7a5a4c9af2184ff74b460b6d7d24349b98a). The classes are included unchanged in the DIHClient jar (package
+javazoom.jl); they can be replaced by another build of the library by replacing those classes.

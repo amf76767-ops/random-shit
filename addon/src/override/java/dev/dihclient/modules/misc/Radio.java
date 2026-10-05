@@ -22,7 +22,6 @@ import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -58,7 +57,6 @@ public class Radio extends Module {
       "nl1.api.radio-browser.info",
       "all.api.radio-browser.info"
    };
-   private static final String JLAYER_URL = "https://repo1.maven.org/maven2/javazoom/jlayer/1.0.1/jlayer-1.0.1.jar";
    private static final String UA = "DIHClient/1.0 (Minecraft mod radio)";
    private static ClassLoader jlayer;
    private static Constructor<?> bitstreamCtor;
@@ -487,27 +485,8 @@ public class Radio extends Module {
          return true;
       } else {
          try {
-            Path var1 = FabricLoader.getInstance().getGameDir().resolve("dihclient").resolve("libs");
-            Files.createDirectories(var1);
-            Path var2 = var1.resolve("jlayer-1.0.1.jar");
-            // the MP3 decoder is part of this mod (nothing is downloaded): it is copied out of the mod once and loaded from there
-            byte[] bundled;
-            try (InputStream in = Radio.class.getResourceAsStream("/dihclient/jlayer-1.0.1.jar")) {
-               if (in == null) {
-                  throw new IOException("decoder is missing from the mod");
-               }
-               bundled = in.readAllBytes();
-            }
-            if (!HexFormat.of().formatHex(MessageDigest.getInstance("SHA-1").digest(bundled)).equals("2bfef7a5a4c9af2184ff74b460b6d7d24349b98a")) {
-               throw new IOException("decoder in the mod has the wrong checksum");
-            }
-            if (!Files.exists(var2) || !java.util.Arrays.equals(Files.readAllBytes(var2), bundled)) {
-               Path var6 = var1.resolve("jlayer-1.0.1.jar.part");
-               Files.write(var6, bundled);
-               Files.move(var6, var2, StandardCopyOption.REPLACE_EXISTING);
-            }
-
-            URLClassLoader var9 = new URLClassLoader(new URL[]{var2.toUri().toURL()}, Radio.class.getClassLoader());
+            // the MP3 decoder (JLayer, javazoom.jl) is part of this mod's jar: no download, no second jar, no extra class loader
+            ClassLoader var9 = Radio.class.getClassLoader();
             Class var10 = var9.loadClass("javazoom.jl.decoder.Bitstream");
             Class var11 = var9.loadClass("javazoom.jl.decoder.Header");
             Class var12 = var9.loadClass("javazoom.jl.decoder.Decoder");
