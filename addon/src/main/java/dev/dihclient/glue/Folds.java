@@ -28,6 +28,8 @@ import dev.dihclient.modules.world.SmartBridge;
 import dev.dihclient.modules.world.Tunnel;
 import dev.dihclient.setting.ActionSetting;
 import dev.dihclient.setting.BoolSetting;
+import dev.dihclient.setting.DoubleSetting;
+import dev.dihclient.setting.IntSetting;
 import dev.dihclient.setting.EnumSetting;
 import dev.dihclient.setting.StringSetting;
 import java.lang.reflect.Method;
@@ -179,6 +181,21 @@ public final class Folds {
         BuildPlannerModule planner = new BuildPlannerModule(build, planFirst);
         add(modules, planner);
         planner.setEnabledSilently(true);
+        BoolSetting guard = new BoolSetting("Guard", "Pauses the build when another player comes close, your health is low or the server is slow, and goes on when it is safe again.", true);
+        IntSetting guardRange = new IntSetting("Guard Range", "Pauses when a player who is not a friend is closer than this many blocks (0 = off).", 32, 0, 128);
+        DoubleSetting guardHealth = new DoubleSetting("Guard Hearts", "Pauses when your health is at or below this many hearts (0 = off).", 4.0, 0.0, 10.0, 0.5);
+        DoubleSetting guardTps = new DoubleSetting("Guard TPS", "Pauses when the server runs below this many ticks per second for two seconds (0 = off).", 12.0, 0.0, 19.0, 0.5);
+        IntSetting guardResume = new IntSetting("Guard Resume", "Seconds of safety before the build goes on again.", 5, 1, 60);
+        for (dev.dihclient.setting.Setting<?> g : new dev.dihclient.setting.Setting<?>[]{guard, guardRange, guardHealth, guardTps, guardResume}) {
+            Merge.addSetting(build, g, false);
+        }
+        guardRange.visibleWhen(guard::get);
+        guardHealth.visibleWhen(guard::get);
+        guardTps.visibleWhen(guard::get);
+        guardResume.visibleWhen(guard::get);
+        BuildGuard guardModule = new BuildGuard(build, guard, guardRange, guardHealth, guardTps, guardResume);
+        add(modules, guardModule);
+        guardModule.setEnabledSilently(true);
         Merge.addSetting(build, new ActionSetting("Build Log",
                 "Shows the last lines of what AutoBuild did (trips, stuck spots, walls, parked blocks) and copies them. The whole log is the file build-log.txt in the config folder.",
                 () -> {
