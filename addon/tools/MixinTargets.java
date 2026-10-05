@@ -31,7 +31,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.TypeInsnNode;
 
 public final class MixinTargets {
-    private static final String MIXIN_PACKAGE = "dev/dihclient/mixin/";
+    private static final String MIXIN_PACKAGE = System.getProperty("mixin.package", "dev/dihclient/mixin/");
     private static final String MX = "Lorg/spongepowered/asm/mixin/";
     private static final String INJ = MX + "injection/";
     private static final String MIXIN_EXTRAS = "Lcom/llamalad7/mixinextras/";

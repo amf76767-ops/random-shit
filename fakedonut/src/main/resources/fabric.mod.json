@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "fakedonut",
+  "version": "${version}",
+  "name": "FakeDonut",
+  "description": "A local test server that behaves like a big survival server: auction house, /sell, money, fake bases under grown kelp and an anti-xray that hides bases and geodes.",
+  "authors": ["DIH"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["dev.fakedonut.FakeDonut"]
+  },
+  "mixins": ["fakedonut.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}

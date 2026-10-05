@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "package": "dev.fakedonut.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": ["ChunkDataMixin"],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
