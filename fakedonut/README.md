@@ -1,4 +1,4 @@
-# FakeDonut 0.1.0
+# FakeDonut 0.1.1
 
 Fabric-Mod (1.21.11) für Singleplayer oder eigenen Server, um den DIH-Client gegen einen "Donut-ähnlichen" Server zu testen. Nicht im Spiel getestet.
 
@@ -19,4 +19,4 @@ Lichtdaten werden nicht verändert. Basen entstehen nur in neu generierten Chunk
 
 ## Bauen
 
-`./build.sh 0.1.0` (braucht /tmp/mc-int.jar, siehe addon/tools/README-mc-int.txt, und die Fabric-API-Jars in /tmp/fd/libs).
+`./build.sh 0.1.1` (braucht /tmp/mc-int.jar, siehe addon/tools/README-mc-int.txt, und die Fabric-API-Jars in /tmp/fd/libs).

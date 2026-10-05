@@ -90,6 +90,15 @@ public final class AntiXray {
     }
 
     private static class_2826[] compute(class_2818 chunk) {
+        try {
+            return computeUnsafe(chunk);
+        } catch (RuntimeException e) {
+            FakeDonut.LOG.warn("anti-xray failed, sending the chunk unchanged", e);
+            return chunk.method_12006();
+        }
+    }
+
+    private static class_2826[] computeUnsafe(class_2818 chunk) {
         class_2826[] src = chunk.method_12006();
         Config cfg = Config.get();
         if (!cfg.antiXray) {
@@ -226,7 +235,9 @@ public final class AntiXray {
         }
         if (isOre(b) || SPECIAL.contains(b)) {
             for (int[] d : DIRS) {
-                if (!opaque(world.method_8320(p.method_10069(d[0], d[1], d[2])))) {
+                int nx = x + d[0];
+                int nz = z + d[2];
+                if (world.method_8393(nx >> 4, nz >> 4) && !opaque(world.method_8320(p.method_10069(d[0], d[1], d[2])))) {
                     return false;
                 }
             }
@@ -236,7 +247,7 @@ public final class AntiXray {
             for (int dx = -1; dx <= 1; dx++) {
                 for (int dy = -1; dy <= 1; dy++) {
                     for (int dz = -1; dz <= 1; dz++) {
-                        if (GEODE.contains(world.method_8320(p.method_10069(dx, dy, dz)).method_26204())) {
+                        if (world.method_8393((x + dx) >> 4, (z + dz) >> 4) && GEODE.contains(world.method_8320(p.method_10069(dx, dy, dz)).method_26204())) {
                             return true;
                         }
                     }
@@ -255,6 +266,9 @@ public final class AntiXray {
                     int y = cy + dy;
                     int z = cz + dz;
                     if (y > Config.get().hideBelowY || y < world.method_31607()) {
+                        continue;
+                    }
+                    if (!world.method_8393(x >> 4, z >> 4)) {
                         continue;
                     }
                     class_2338 p = new class_2338(x, y, z);
@@ -292,6 +306,14 @@ public final class AntiXray {
     }
 
     public static boolean hiddenEntity(class_2818 chunk, int packedXz, int y) {
+        try {
+            return hiddenEntityUnsafe(chunk, packedXz, y);
+        } catch (RuntimeException e) {
+            return false;
+        }
+    }
+
+    private static boolean hiddenEntityUnsafe(class_2818 chunk, int packedXz, int y) {
         Config cfg = Config.get();
         if (!cfg.antiXray || y > cfg.hideBelowY) {
             return false;
