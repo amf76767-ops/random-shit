@@ -43,9 +43,10 @@ import net.minecraft.class_3417;
 import net.minecraft.class_437;
 
 public class MeteorGuiScreen extends class_437 implements TextInputScreen {
-   private static final int PANEL_W = 118;
-   private static final int HEADER_H = 17;
-   private static final int ROW_H = 14;
+   private static final int PANEL_W = 124;
+   private static final int HEADER_H = 22;
+   private static final int ROW_H = 16;
+   private static final int INSET = 4;
    private static final int PAD = 4;
    private static final int GAP = 6;
    private static final Map<Category, MeteorGuiScreen.Panel> PANELS = new EnumMap<>(Category.class);
@@ -167,7 +168,9 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
    }
 
    private void hit(int var1, int var2, int var3, int var4, MeteorGuiScreen.ClickAction var5) {
-      this.hits.add(new MeteorGuiScreen.Hit(var1, var2, var3, var4, var5));
+      if (!this.lock) {
+         this.hits.add(new MeteorGuiScreen.Hit(var1, var2, var3, var4, var5));
+      }
    }
 
    private void sound() {
@@ -195,23 +198,23 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
    }
 
    private void placeDefaults() {
-      byte var1 = 8;
-      int var2 = 30;
+      int var1 = 10;
+      int var2 = 40;
       int var3 = 0;
 
       for (Category var7 : Category.values()) {
          MeteorGuiScreen.Panel var8 = PANELS.get(var7);
          if (var8.x < 0 || var8.y < 0) {
-            if (var1 + 118 > this.sw - 4) {
-               var1 = 8;
-               var2 += Math.max(var3, 120) + 6;
+            if (var1 + PANEL_W > this.sw - 6) {
+               var1 = 10;
+               var2 += Math.max(var3, 120) + 10;
                var3 = 0;
             }
 
             var8.x = var1;
             var8.y = var2;
-            var1 += 124;
-            var3 = Math.max(var3, 17 + Math.min(200, DIHClient.modules().byCategory(var7).size() * 14));
+            var1 += PANEL_W + 8;
+            var3 = Math.max(var3, HEADER_H + Math.min(200, DIHClient.modules().byCategory(var7).size() * ROW_H));
          }
       }
    }
@@ -230,7 +233,39 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
       return false;
    }
 
+   private static final long INTRO_MS = 320L;
+   private static final long STAGGER_MS = 34L;
+   private static final long OUTRO_MS = 170L;
+   private boolean closing;
+   private long closeAt;
+   private Category dragging;
+   private boolean lock;
+
+   private static boolean animOn() {
+      ClickGui var0 = gui();
+      return var0 == null || var0.animations.get();
+   }
+
+   private float outro(long var1) {
+      return this.closing ? 1.0F - Anim.easeOutCubic((float)(var1 - this.closeAt) / (float)OUTRO_MS) : 1.0F;
+   }
+
+   private float intro(long var1, int var3) {
+      return animOn() ? Anim.easeOutCubic((float)(var1 - this.openedAt - var3 * STAGGER_MS) / (float)INTRO_MS) : 1.0F;
+   }
+
    public void method_25419() {
+      if (!this.closing) {
+         if (animOn()) {
+            this.closing = true;
+            this.closeAt = System.currentTimeMillis();
+         } else {
+            this.finishClose();
+         }
+      }
+   }
+
+   private void finishClose() {
       save();
       DIHClient.config().save();
       super.method_25419();
@@ -242,15 +277,9 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
          super.method_25420(var1, var2, var3, var4);
       }
 
-      float var6 = Anim.easeOutCubic((float)(System.currentTimeMillis() - this.openedAt) / 250.0F);
-      var1.method_25296(
-         0,
-         0,
-         this.field_22789,
-         this.field_22790,
-         Skin.active() ? Skin.dimTop(var6) : (int)(var6 * 90.0F) << 24,
-         Skin.active() ? Skin.dimBottom(var6) : (int)(var6 * 140.0F) << 24
-      );
+      long var6 = System.currentTimeMillis();
+      float var8 = (animOn() ? Anim.easeOutCubic((float)(var6 - this.openedAt) / 300.0F) : 1.0F) * this.outro(var6);
+      var1.method_25296(0, 0, this.field_22789, this.field_22790, Skin.dimTop(var8), Skin.dimBottom(var8));
    }
 
    public void method_25394(class_332 var1, int var2, int var3, float var4) {
@@ -259,228 +288,332 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
       try {
          this.renderSkinned(var1, var2, var3, var4);
       } finally {
+         Gfx.setFade(1.0F);
          Skin.end();
       }
    }
 
    private void renderSkinned(class_332 var1, int var2, int var3, float var4) {
-      super.method_25394(var1, var2, var3, var4);
-      ClickGui var5 = gui();
-      if (var5 != null) {
-         Anim.setEnabled(var5.animations.get());
+      if (this.closing && System.currentTimeMillis() - this.closeAt >= OUTRO_MS) {
+         this.finishClose();
+      } else {
+         super.method_25394(var1, var2, var3, var4);
+         ClickGui var5 = gui();
+         if (var5 != null) {
+            Anim.setEnabled(var5.animations.get());
+         }
+
+         this.hits.clear();
+         this.tooltip = null;
+         float var6 = scale();
+         this.sw = (int)(this.field_22789 / var6);
+         this.sh = (int)(this.field_22790 / var6);
+         this.mouseX = var2 / var6;
+         this.mouseY = var3 / var6;
+         this.placeDefaults();
+         var1.method_51448().pushMatrix();
+         var1.method_51448().scale(var6, var6);
+         this.renderTopBar(var1);
+
+         for (Category var8 : ORDER) {
+            this.renderPanel(var1, var8);
+         }
+
+         this.renderBottomBar(var1);
+         this.renderTooltip(var1);
+         var1.method_51448().popMatrix();
       }
-
-      this.hits.clear();
-      this.tooltip = null;
-      float var6 = scale();
-      this.sw = (int)(this.field_22789 / var6);
-      this.sh = (int)(this.field_22790 / var6);
-      this.mouseX = var2 / var6;
-      this.mouseY = var3 / var6;
-      this.placeDefaults();
-      var1.method_51448().pushMatrix();
-      var1.method_51448().scale(var6, var6);
-      this.renderTopBar(var1);
-
-      for (Category var8 : ORDER) {
-         this.renderPanel(var1, var8);
-      }
-
-      this.renderBottomBar(var1);
-      this.renderTooltip(var1);
-      var1.method_51448().popMatrix();
    }
 
    private void renderTopBar(class_332 var1) {
-      short var2 = 150;
-      int var3 = (this.sw - var2) / 2;
-      byte var4 = 6;
-      float var5 = Anim.get(this, "mSearchFocus", !this.searchFocused && this.search.isEmpty() ? 0.0F : 1.0F, 14.0F);
-      Gfx.rect(var1, var3, var4, var2, 16, 8, Skin.c(-535555048));
-      Gfx.outline(var1, var3, var4, var2, 16, 8, var5 > 0.01F ? Theme.withAlpha(Theme.accent(), Math.max(0.25F, var5)) : Skin.c(872415231));
-      String var6 = this.search.isEmpty() ? "Search modules…" : this.search + (this.searchFocused && System.currentTimeMillis() / 500L % 2L == 0L ? "_" : "");
-      Gfx.text(var1, "⌕", var3 + 6, var4 + 4, Skin.c(-10788238));
-      Gfx.text(var1, Gfx.trim(var6, var2 - 22), var3 + 16, var4 + 4, this.search.isEmpty() ? Skin.c(-10788238) : Skin.c(-1446670));
-      this.hit(var3, var4, var2, 16, (var1x, var3x, var5x) -> {
+      long var2 = System.currentTimeMillis();
+      float var4 = this.intro(var2, 0) * this.outro(var2);
+      Gfx.setFade(var4);
+      this.lock = var4 < 0.9F;
+      int var5 = 176;
+      int var6 = (this.sw - var5) / 2;
+      int var7 = 8 + Math.round((1.0F - var4) * -8.0F);
+      float var8 = Anim.get(this, "mSearchFocus", !this.searchFocused && this.search.isEmpty() ? 0.0F : 1.0F, 14.0F);
+      Gfx.softShadow(var1, var6, var7, var5, 20, Skin.radius(5), 12, 0.9F * Skin.shadow());
+      Gfx.rect(var1, var6, var7, var5, 20, 5, Skin.c(-535555048));
+      Gfx.outline(var1, var6, var7, var5, 20, 5, ColorUtil.blend(Skin.c(587202559), Theme.withAlpha(Theme.accent(), 0.85F), var8));
+      String var9 = this.search.isEmpty() ? "Search modules…" : this.search + (this.searchFocused && System.currentTimeMillis() / 500L % 2L == 0L ? "_" : "");
+      Gfx.text(var1, "⌕", var6 + 9, var7 + 6, ColorUtil.blend(Skin.c(-10788238), Theme.accent(), var8));
+      Gfx.text(var1, Gfx.trim(var9, var5 - 30), var6 + 21, var7 + 6, this.search.isEmpty() ? Skin.c(-10788238) : Skin.c(-1446670));
+      this.hit(var6, var7, var5, 20, (var1x, var3x, var5x) -> {
          this.searchFocused = true;
          if (var5x == 1) {
             this.search = "";
          }
       });
       if (this.binding != null) {
-         String var7 = "Press a key for " + this.binding.name() + "  ·  Esc = unbind";
-         int var8 = Gfx.width(var7) + 16;
-         int var9 = (this.sw - var8) / 2;
-         Gfx.rect(var1, var9, var4 + 22, var8, 16, 8, ColorUtil.withAlpha(Theme.accent(), 230));
-         Gfx.text(var1, var7, var9 + 8, var4 + 26, -1);
+         String var10 = "Press a key for " + this.binding.name() + "  ·  Esc = unbind";
+         int var11 = Gfx.width(var10) + 20;
+         int var12 = (this.sw - var11) / 2;
+         Gfx.softShadow(var1, var12, var7 + 26, var11, 18, Skin.radius(5), 10, 0.8F);
+         Gfx.rect(var1, var12, var7 + 26, var11, 18, 5, ColorUtil.withAlpha(Theme.accent(), 235));
+         Gfx.text(var1, var10, var12 + 10, var7 + 31, Skin.c(-233959403) | 0xFF000000);
       }
+
+      this.lock = false;
+      Gfx.setFade(1.0F);
    }
 
    private void renderBottomBar(class_332 var1) {
-      int var2 = this.sh - 20;
-      int var3 = this.sw - 8;
-      var3 = this.button(var1, var3, var2, "✎ HUD Editor", () -> {
+      long var2 = System.currentTimeMillis();
+      float var4 = this.intro(var2, 2) * this.outro(var2);
+      Gfx.setFade(var4);
+      this.lock = var4 < 0.9F;
+      int var5 = this.sh - 26 + Math.round((1.0F - var4) * 8.0F);
+      int var6 = this.sw - 10;
+      var6 = this.button(var1, var6, var5, "✎ HUD Editor", () -> {
          if (this.field_22787 != null) {
             this.field_22787.method_1507(new HudEditorScreen(this));
          }
-      });
-      this.button(var1, var3 - 4, var2, "↺ Reset", MeteorGuiScreen::resetLayout);
-      Gfx.text(var1, "L-Click: toggle  ·  R-Click: settings  ·  M-Click: bind  ·  drag headers to move", 8.0F, var2 + 5.0F, Skin.c(-10788238), 0.75F);
+      }, false);
+      var6 = this.button(var1, var6 - 6, var5, "↺ Reset", MeteorGuiScreen::resetLayout, false);
+      var6 = this.themeButton(var1, var6 - 6, var5);
+      Gfx.text(var1, "L-Click: toggle  ·  R-Click: settings  ·  M-Click: bind  ·  drag headers to move", 10.0F, var5 + 7.0F, Skin.c(-10788238), 0.75F);
+      this.lock = false;
+      Gfx.setFade(1.0F);
    }
 
-   private int button(class_332 var1, int var2, int var3, String var4, Runnable var5) {
-      int var6 = Gfx.width(var4) + 12;
-      int var7 = var2 - var6;
-      boolean var8 = Gfx.inside(this.mouseX, this.mouseY, var7, var3, var6, 15);
-      Gfx.rect(var1, var7, var3, var6, 15, 5, var8 ? Skin.c(-14341579) : Skin.c(-535555048));
-      Gfx.outline(var1, var7, var3, var6, 15, 5, Skin.c(872415231));
-      Gfx.text(var1, var4, var7 + 6, var3 + 4, var8 ? Skin.c(-1446670) : Skin.c(-7564380));
-      this.hit(var7, var3, var6, 15, (var2x, var4x, var6x) -> {
+   private int themeButton(class_332 var1, int var2, int var3) {
+      ClickGui var4 = gui();
+      if (var4 == null) {
+         return var2;
+      } else {
+         String var5 = Skin.profile().title();
+         int var6 = Gfx.width(var5) + 44;
+         int var7 = var2 - var6;
+         boolean var8 = !this.lock && Gfx.inside(this.mouseX, this.mouseY, var7, var3, var6, 20);
+         float var9 = Anim.get(this, "bTheme", var8 ? 1.0F : 0.0F, 16.0F);
+         Gfx.softShadow(var1, var7, var3, var6, 20, Skin.radius(5), 10, 0.8F * Skin.shadow());
+         Gfx.rect(var1, var7, var3, var6, 20, 5, ColorUtil.blend(Skin.c(-535555048), Skin.c(-14341579), var9));
+         Gfx.outline(var1, var7, var3, var6, 20, 5, Skin.c(587202559));
+         Gfx.rect(var1, var7 + 8, var3 + 7, 6, 6, 3, Theme.accent());
+         Gfx.text(var1, var5, var7 + 20, var3 + 6, ColorUtil.blend(Skin.c(-7564380), Skin.c(-1446670), var9));
+         Gfx.text(var1, "›", var7 + var6 - 11, var3 + 6, Skin.c(-10788238));
+         this.hit(var7, var3, var6, 20, (var2x, var4x, var6x) -> {
+            ClickGui.Look[] var7x = ClickGui.Look.values();
+            int var8x = var4.look.get().ordinal() + (var6x == 1 ? -1 : 1);
+            var4.look.set(var7x[(var8x + var7x.length) % var7x.length]);
+            DIHClient.config().markDirty();
+            this.sound();
+         });
+         return var7;
+      }
+   }
+
+   private int button(class_332 var1, int var2, int var3, String var4, Runnable var5, boolean var6) {
+      int var7 = Gfx.width(var4) + 20;
+      int var8 = var2 - var7;
+      boolean var9 = !this.lock && Gfx.inside(this.mouseX, this.mouseY, var8, var3, var7, 20);
+      float var10 = Anim.get(this, "b" + var4, var9 ? 1.0F : 0.0F, 16.0F);
+      Gfx.softShadow(var1, var8, var3, var7, 20, Skin.radius(5), 10, 0.8F * Skin.shadow());
+      Gfx.rect(var1, var8, var3, var7, 20, 5, ColorUtil.blend(Skin.c(-535555048), Skin.c(-14341579), var10));
+      Gfx.outline(var1, var8, var3, var7, 20, 5, Skin.c(587202559));
+      Gfx.text(var1, var4, var8 + 10, var3 + 6, ColorUtil.blend(Skin.c(-7564380), Skin.c(-1446670), var10));
+      this.hit(var8, var3, var7, 20, (var2x, var4x, var6x) -> {
          this.sound();
          var5.run();
       });
-      return var7;
+      return var8;
+   }
+
+   private int expandedHeightNow(Module var1) {
+      float var2 = Anim.get(var1, "mExp", EXPANDED.contains(var1) ? 1.0F : 0.0F, 15.0F);
+      return var2 <= 0.002F ? 0 : Math.max(1, Math.round(this.expandedHeight(var1) * var2));
    }
 
    private void renderPanel(class_332 var1, Category var2) {
       MeteorGuiScreen.Panel var3 = PANELS.get(var2);
       List<Module> var4 = this.modulesOf(var2);
       if (this.search.isEmpty() || !var4.isEmpty()) {
-         var3.x = Math.max(0, Math.min(this.sw - 118, var3.x));
-         var3.y = Math.max(0, Math.min(this.sh - 17, var3.y));
-         int var5 = var3.x;
-         int var6 = var3.y;
+         var3.x = Math.max(0, Math.min(this.sw - PANEL_W, var3.x));
+         var3.y = Math.max(0, Math.min(this.sh - HEADER_H, var3.y));
+         long var5 = System.currentTimeMillis();
          int var7 = var2.ordinal();
-         boolean var8 = var3.open || !this.search.isEmpty();
-         float var9 = Anim.get(var3, "open", var8 ? 1.0F : 0.0F, 14.0F);
-         int var10 = 0;
+         float var8 = this.intro(var5, var7 + 1);
+         float var9 = this.outro(var5);
+         float var10 = var8 * var9;
+         if (!(var10 <= 0.01F)) {
+            boolean var11 = var3.open || !this.search.isEmpty();
+            float var12 = Anim.get(var3, "open", var11 ? 1.0F : 0.0F, 14.0F);
+            float var13 = Anim.get(var3, "lift", this.drag != null && this.dragging == var2 ? 1.0F : 0.0F, 14.0F);
+            int var14 = 0;
 
-         for (Module var12 : var4) {
-            var10 += 14;
-            if (EXPANDED.contains(var12)) {
-               var10 += this.expandedHeight(var12);
+            for (Module var16 : var4) {
+               var14 += ROW_H + this.expandedHeightNow(var16);
             }
-         }
 
-         var10 += 2;
-         var3.contentH = var10;
-         int var26 = Math.max(40, this.sh - var6 - 17 - 26);
-         int var27 = (int)(Math.min(var10, var26) * var9);
-         var3.bodyTop = var6 + 17;
-         var3.bodyH = var27;
-         var3.scrollTarget = Math.max(0.0F, Math.min(var3.scrollTarget, (float)Math.max(0, var10 - var26)));
-         var3.scroll = Anim.get(var3, "scroll", var3.scrollTarget, 18.0F);
-         int var13 = 17 + var27;
-         Gfx.shadow(var1, var5, var6, 118, var13, 4, 5, 0.9F);
-         Gfx.rect(var1, var5, var6, 118, var13, 4, Skin.c(-300937196));
-         int var14 = Theme.accentAt(var7 * 0.1);
-         Gfx.rectTop(var1, var5, var6, 118, 17, 4, ColorUtil.withAlpha(var14, 215));
-         Gfx.hFade(var1, var5 + 2, var6 + 1, 114, 8, ColorUtil.withAlpha(16777215, 46), ColorUtil.withAlpha(16777215, 4), 10);
-         Gfx.hFade(var1, var5, var6 + 16, 118, 1, ColorUtil.withAlpha(var14, 255), ColorUtil.withAlpha(Theme.accentAt(var7 * 0.1 + 0.4), 255), 12);
-         if (var27 <= 1) {
-            Gfx.rect(var1, var5, var6, 118, 17, 4, ColorUtil.withAlpha(var14, 215));
-         }
-
-         String var15 = var2.title;
-         Gfx.textCentered(var1, var15, var5 + 59, var6 + 5, -1);
-         long var16 = 0L;
-
-         for (Module var19 : DIHClient.modules().all()) {
-            if (var19.category() == var2 && !var19.isHidden() && var19.isEnabled() && var19.isToggleable()) {
-               var16++;
+            var14 += 8;
+            var3.contentH = var14;
+            int var17 = Math.max(40, this.sh - var3.y - HEADER_H - 38);
+            int var18 = Math.round(Math.min(var14, var17) * var12);
+            var3.bodyTop = var3.y + HEADER_H;
+            var3.bodyH = var18;
+            var3.scrollTarget = Math.max(0.0F, Math.min(var3.scrollTarget, (float)Math.max(0, var14 - var17)));
+            var3.scroll = Anim.get(var3, "scroll", var3.scrollTarget, 18.0F);
+            int var19 = var3.x;
+            int var20 = var3.y - Math.round(var13 * 2.0F);
+            int var21 = HEADER_H + var18;
+            float var22 = 0.965F + 0.035F * var10;
+            float var23 = (1.0F - var8) * 14.0F + (1.0F - var9) * 8.0F;
+            this.lock = var10 < 0.92F;
+            Gfx.setFade(var10);
+            var1.method_51448().pushMatrix();
+            var1.method_51448().translate(var19 + PANEL_W / 2.0F, var20 + var21 / 2.0F + var23);
+            var1.method_51448().scale(var22, var22);
+            var1.method_51448().translate(-(var19 + PANEL_W / 2.0F), -(var20 + var21 / 2.0F));
+            Skin.Profile var24 = Skin.profile();
+            int var25 = Theme.accentAt(var7 * 0.1);
+            Gfx.softShadow(var1, var19, var20, PANEL_W, var21, Skin.radius(6), 14 + Math.round(var13 * 6.0F), (0.95F + var13 * 0.6F) * var24.shadow());
+            int var26 = Skin.c(-300937196) & 16777215 | Skin.panelAlpha() << 24;
+            Gfx.rect(var1, var19, var20, PANEL_W, var21, 6, var26);
+            boolean var27 = var18 <= 1;
+            float var28 = Anim.get(var3, "hdr", !this.lock && Gfx.inside(this.mouseX, this.mouseY, var19, var20, PANEL_W, HEADER_H) ? 1.0F : 0.0F, 16.0F);
+            int var29 = ColorUtil.blend(Skin.c(-15592422), Skin.c(-15328992), var28);
+            if (var24.header() == Skin.Header.TINT) {
+               var29 = ColorUtil.blend(var29, ColorUtil.withAlpha(var25, 255), 0.13F + 0.06F * var28);
             }
-         }
 
-         if (var16 > 0L) {
-            Gfx.text(var1, Long.toString(var16), var5 + 5, var6 + 5, -855638017);
-         }
-
-         Gfx.text(var1, var8 ? "−" : "+", var5 + 118 - 10, var6 + 4, -1);
-         this.hit(var5, var6, 118, 17, (var4x, var6x, var8x) -> {
-            this.bringToFront(var2);
-            if (var8x == 1 || var8x == 0 && var4x >= var5 + 118 - 14) {
-               var3.open = !var3.open;
-               this.sound();
-            } else if (var8x == 0) {
-               int var9x = (int)var4x - var3.x;
-               int var10x = (int)var6x - var3.y;
-               this.drag = (var3xx, var5x) -> {
-                  var3.x = (int)var3xx - var9x;
-                  var3.y = (int)var5x - var10x;
-               };
+            if (var27) {
+               Gfx.rect(var1, var19, var20, PANEL_W, HEADER_H, 6, var29);
+            } else {
+               Gfx.rectTop(var1, var19, var20, PANEL_W, HEADER_H, Skin.radius(6), var29);
             }
-         });
-         if (var27 <= 1) {
-            Gfx.outline(var1, var5, var6, 118, var13, 4, Skin.c(587202559));
-         } else {
-            int var28 = var6 + 17;
-            int var29 = var28 + var27;
-            var1.method_44379(var5, var28, var5 + 118, var29);
-            int var20 = var28 - (int)var3.scroll;
-            boolean var21 = this.mouseY >= var28 && this.mouseY < var29;
 
-            for (int var22 = 0; var22 < var4.size(); var22++) {
-               Module var23 = (Module)var4.get(var22);
-               int var24 = EXPANDED.contains(var23) ? this.expandedHeight(var23) : 0;
-               if (var20 + 14 + var24 >= var28 && var20 <= var29) {
-                  this.renderModuleRow(var1, var23, var5, var20, var28, var29, var21, var7 + var22 * 0.05);
-                  if (var24 > 0) {
-                     this.renderExpanded(var1, var23, var5, var20 + 14, var24, var28, var29, var21);
+            if (var24.header() != Skin.Header.DOT) {
+               Gfx.hFade(var1, var19 + 6, var20 + HEADER_H - 1, PANEL_W - 12, 1, ColorUtil.withAlpha(var25, 200), ColorUtil.withAlpha(Theme.accentAt(var7 * 0.1 + 0.4), 0), 14);
+            }
+
+            int var30 = var19 + 10;
+            if (var24.header() == Skin.Header.DOT) {
+               Gfx.rect(var1, var19 + 9, var20 + 9, 5, 5, 2, var25);
+               var30 = var19 + 19;
+            }
+
+            Gfx.text(var1, var2.title, var30, var20 + 7, Skin.c(-1446670));
+            long var31 = 0L;
+
+            for (Module var34 : DIHClient.modules().all()) {
+               if (var34.category() == var2 && !var34.isHidden() && var34.isEnabled() && var34.isToggleable()) {
+                  var31++;
+               }
+            }
+
+            int var45 = var19 + PANEL_W - 20;
+            Gfx.text(var1, var11 ? "▾" : "▸", var45 + 4, var20 + 7, Skin.c(-10788238));
+            if (var31 > 0L) {
+               String var35 = Long.toString(var31);
+               int var36 = Gfx.width(var35) + 9;
+               var45 -= var36 + 2;
+               Gfx.rect(var1, var45, var20 + 5, var36, 12, 5, ColorUtil.withAlpha(var25, 56));
+               Gfx.text(var1, var35, var45 + 4, var20 + 7, ColorUtil.blend(var25, Skin.c(-1446670), 0.45F));
+            }
+
+            this.hit(var19, var3.y, PANEL_W, HEADER_H, (var4x, var6x, var8x) -> {
+               this.bringToFront(var2);
+               if (var8x == 1 || var8x == 0 && var4x >= var3.x + PANEL_W - 22) {
+                  var3.open = !var3.open;
+                  this.sound();
+               } else if (var8x == 0) {
+                  int var9x = (int)var4x - var3.x;
+                  int var10x = (int)var6x - var3.y;
+                  this.dragging = var2;
+                  this.drag = (var3xx, var5x) -> {
+                     var3.x = (int)var3xx - var9x;
+                     var3.y = (int)var5x - var10x;
+                  };
+               }
+            });
+            if (!var27) {
+               int var46 = var20 + HEADER_H;
+               int var47 = var46 + var18;
+               var1.method_44379(var19, var46, var19 + PANEL_W, var47);
+               int var37 = var46 + 4 - (int)var3.scroll;
+               boolean var38 = this.mouseY >= var46 && this.mouseY < var47;
+
+               for (int var39 = 0; var39 < var4.size(); var39++) {
+                  Module var40 = (Module)var4.get(var39);
+                  int var41 = this.expandedHeightNow(var40);
+                  if (var37 + ROW_H + var41 >= var46 && var37 <= var47) {
+                     this.renderModuleRow(var1, var40, var19, var37, var46, var47, var38, var7 + var39 * 0.05, var24);
+                     if (var41 > 0) {
+                        this.renderExpanded(var1, var40, var19, var37 + ROW_H, var41, var46, var47, var38);
+                     }
                   }
+
+                  var37 += ROW_H + var41;
                }
 
-               var20 += 14 + var24;
+               var1.method_44380();
+               if (var14 > var18 && var18 > 10) {
+                  int var42 = Math.max(12, var18 * var18 / var14);
+                  int var43 = var46 + (int)((var18 - var42) * (var3.scroll / Math.max(1.0F, (float)(var14 - var18))));
+                  Gfx.rect(var1, var19 + PANEL_W - 4, var43 + 2, 2, var42 - 4, 1, Skin.c(1442840575));
+               }
             }
 
-            var1.method_44380();
-            if (var10 > var27 && var27 > 10) {
-               int var30 = Math.max(12, var27 * var27 / var10);
-               int var31 = var28 + (int)((var27 - var30) * (var3.scroll / Math.max(1.0F, (float)(var10 - var27))));
-               Gfx.rect(var1, var5 + 118 - 3, var31, 2, var30, 1, Skin.c(1442840575));
-            }
-
-            Gfx.outline(var1, var5, var6, 118, var13, 4, Skin.c(587202559));
+            Gfx.outline(var1, var19, var20, PANEL_W, var21, 6, Skin.c(587202559));
+            var1.method_51448().popMatrix();
+            this.lock = false;
+            Gfx.setFade(1.0F);
          }
       }
    }
 
-   private void renderModuleRow(class_332 var1, Module var2, int var3, int var4, int var5, int var6, boolean var7, double var8) {
-      boolean var10 = var7 && Gfx.inside(this.mouseX, this.mouseY, var3, var4, 118, 14);
-      boolean var11 = var2.isEnabled() && var2.isToggleable();
-      float var12 = Anim.get(var2, "mHover", var10 ? 1.0F : 0.0F, 16.0F);
-      float var13 = Anim.get(var2, "mOn", var11 ? 1.0F : 0.0F, 12.0F);
-      int var14 = Theme.accentAt(var8);
-      if (var13 > 0.01F) {
-         Gfx.hFade(var1, var3, var4, 118, 14, Theme.withAlpha(ColorUtil.withAlpha(var14, 110), var13), Theme.withAlpha(ColorUtil.withAlpha(var14, 12), var13), 8);
-         var1.method_25294(var3, var4 + 2, var3 + 2, var4 + 14 - 2, Theme.withAlpha(var14, var13));
+   private void renderModuleRow(class_332 var1, Module var2, int var3, int var4, int var5, int var6, boolean var7, double var8, Skin.Profile var9) {
+      int var10 = var3 + INSET;
+      int var11 = PANEL_W - INSET * 2;
+      boolean var12 = !this.lock && var7 && Gfx.inside(this.mouseX, this.mouseY, var3, var4, PANEL_W, ROW_H);
+      boolean var13 = var2.isEnabled() && var2.isToggleable();
+      float var14 = Anim.get(var2, "mHover", var12 ? 1.0F : 0.0F, 16.0F);
+      float var15 = Anim.get(var2, "mOn", var13 ? 1.0F : 0.0F, 12.0F);
+      int var16 = Theme.accentAt(var8);
+      if (var14 > 0.01F) {
+         Gfx.rect(var1, var10, var4 + 1, var11, ROW_H - 2, 4, Theme.withAlpha(Skin.c(419430399), var14));
       }
 
-      if (var12 > 0.01F) {
-         var1.method_25294(var3, var4, var3 + 118, var4 + 14, Theme.withAlpha(Skin.c(419430399), var12));
+      if (var15 > 0.01F) {
+         Gfx.rect(var1, var10, var4 + 1, var11, ROW_H - 2, 4, Theme.withAlpha(ColorUtil.withAlpha(var16, 52), var15));
+         if (var9.rows() == Skin.Rows.BAR) {
+            Gfx.rect(var1, var10 + 2, var4 + 4, 2, ROW_H - 8, 1, Theme.withAlpha(var16, var15));
+         } else {
+            Gfx.rect(var1, var10 + var11 - 6, var4 + 6, 4, 4, 2, Theme.withAlpha(var16, var15));
+         }
       }
 
-      int var15 = var11 ? Skin.onCard() : ColorUtil.blend(Skin.c(-7564380), Skin.c(-1446670), var12);
-      String var16 = this.binding == var2 ? "..." : (var2.keybind() >= 0 ? KeyUtil.keyName(var2.keybind()) : null);
-      int var17 = var3 + 118 - 6;
-      boolean var18 = EXPANDED.contains(var2);
-      Gfx.text(var1, var18 ? "▾" : "▸", var17 - 4, var4 + 3, var18 ? var14 : Skin.c(-10788238));
-      var17 -= 8;
-      if (var16 != null) {
-         int var19 = (int)(Gfx.width(var16) * 0.7F) + 2;
-         var17 -= var19;
-         Gfx.text(var1, var16, var17, var4 + 4.5F, this.binding == var2 ? var14 : Skin.c(-10788238), 0.7F);
-         var17 -= 3;
+      int var17 = ColorUtil.blend(ColorUtil.blend(Skin.c(-7564380), Skin.c(-1446670), var14), Skin.c(-1446670), var15);
+      String var18 = this.binding == var2 ? "..." : (var2.keybind() >= 0 ? KeyUtil.keyName(var2.keybind()) : null);
+      int var19 = var10 + var11 - 8;
+      boolean var20 = EXPANDED.contains(var2);
+      if (!var13 || var9.rows() == Skin.Rows.BAR) {
+         Gfx.text(var1, var20 ? "▾" : "▸", var19 - 4, var4 + 4, var20 ? var16 : Skin.c(-10788238));
+      } else {
+         Gfx.text(var1, var20 ? "▾" : "▸", var19 - 10, var4 + 4, var20 ? var16 : Skin.c(-10788238));
+         var19 -= 6;
       }
 
-      Gfx.text(var1, Gfx.trim(var2.name(), var17 - var3 - 8), var3 + 6, var4 + 3, var15);
-      if (var10) {
+      var19 -= 8;
+      if (var18 != null) {
+         int var21 = (int)(Gfx.width(var18) * 0.7F) + 2;
+         var19 -= var21;
+         Gfx.text(var1, var18, var19, var4 + 5.5F, this.binding == var2 ? var16 : Skin.c(-10788238), 0.7F);
+         var19 -= 3;
+      }
+
+      int var22 = var10 + (var9.rows() == Skin.Rows.BAR ? 8 : 7);
+      Gfx.text(var1, Gfx.trim(var2.name(), var19 - var22 - 2), var22, var4 + 4, var17);
+      if (var12) {
          this.tooltip = var2.description();
       }
 
       int var23 = Math.max(var4, var5);
-      int var20 = Math.min(var4 + 14, var6) - var23;
-      if (var20 > 0) {
-         this.hit(var3, var23, 118, var20, (var2x, var4x, var6x) -> {
+      int var24 = Math.min(var4 + ROW_H, var6) - var23;
+      if (var24 > 0) {
+         this.hit(var3, var23, PANEL_W, var24, (var2x, var4x, var6x) -> {
             if (var6x == 0) {
                if (var2.isToggleable()) {
                   var2.toggle();
@@ -508,7 +641,7 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
    }
 
    private int expandedHeight(Module var1) {
-      int var2 = 16;
+      int var2 = 20;
 
       for (Setting var4 : var1.settings()) {
          if (var4.isVisible()) {
@@ -516,7 +649,7 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
          }
       }
 
-      return var2 + 3;
+      return var2 + 6;
    }
 
    private int settingHeight(Setting<?> var1) {
@@ -532,44 +665,50 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
    }
 
    private void renderExpanded(class_332 var1, Module var2, int var3, int var4, int var5, int var6, int var7, boolean var8) {
-      int var9 = var3 + 4 + 2;
-      byte var10 = 106;
-      var1.method_25294(var3, var4, var3 + 118, var4 + var5, Skin.c(1711276032));
-      var1.method_25294(var3 + 4 - 1, var4 + 1, var3 + 4, var4 + var5 - 2, ColorUtil.withAlpha(Theme.accent(), 120));
-      String var11 = this.binding == var2 ? "press a key" : "Bind: " + KeyUtil.keyName(var2.keybind());
-      int var12 = (int)(Gfx.width(var11) * 0.8F) + 8;
-      boolean var13 = var8 && Gfx.inside(this.mouseX, this.mouseY, var9, var4 + 2, var12, 11);
+      int var9 = var3 + INSET;
+      int var10 = PANEL_W - INSET * 2;
+      int var11 = var9 + 6;
+      int var12 = var10 - 12;
+      int var13 = Math.min(var7, var4 + var5);
+      Gfx.rect(var1, var9, var4, var10, var5, 5, Skin.c(1711276032));
+      var1.method_44379(var9, Math.max(var4, var6), var9 + var10, Math.min(var4 + var5, var7));
+      String var14 = this.binding == var2 ? "press a key" : "Bind: " + KeyUtil.keyName(var2.keybind());
+      int var15 = (int)(Gfx.width(var14) * 0.8F) + 10;
+      int var16 = var4 + 4;
+      boolean var17 = !this.lock && var8 && Gfx.inside(this.mouseX, this.mouseY, var11, var16, var15, 12);
       Gfx.rect(
-         var1, var9, var4 + 2, var12, 11, 4, this.binding == var2 ? ColorUtil.withAlpha(Theme.accent(), 160) : (var13 ? Skin.c(-14341579) : Skin.c(-14868182))
+         var1, var11, var16, var15, 12, 5, this.binding == var2 ? ColorUtil.withAlpha(Theme.accent(), 160) : (var17 ? Skin.c(-14341579) : Skin.c(-14868182))
       );
-      Gfx.text(var1, var11, var9 + 4.0F, var4 + 4.5F, Skin.c(-1446670), 0.8F);
-      this.addClippedHit(var9, var4 + 2, var12, 11, var6, var7, (var2x, var4x, var6x) -> this.binding = var6x == 1 ? null : var2);
+      Gfx.text(var1, var14, var11 + 5.0F, var16 + 3.5F, Skin.c(-1446670), 0.8F);
+      this.addClippedHit(var11, var16, var15, 12, var6, var13, (var2x, var4x, var6x) -> this.binding = var6x == 1 ? null : var2);
       if (var2.isToggleable()) {
-         String var14 = var2.showToggleNotification() ? "♪ Toast" : "♪ Off";
-         int var15 = (int)(Gfx.width(var14) * 0.8F) + 8;
-         int var16 = var9 + var12 + 3;
-         boolean var17 = var8 && Gfx.inside(this.mouseX, this.mouseY, var16, var4 + 2, var15, 11);
-         Gfx.rect(var1, var16, var4 + 2, var15, 11, 4, var17 ? Skin.c(-14341579) : Skin.c(-14868182));
-         Gfx.text(var1, var14, var16 + 4.0F, var4 + 4.5F, var2.showToggleNotification() ? Skin.c(-1446670) : Skin.c(-10788238), 0.8F);
-         this.addClippedHit(var16, var4 + 2, var15, 11, var6, var7, (var2x, var4x, var6x) -> {
+         String var18 = var2.showToggleNotification() ? "♪ Toast" : "♪ Off";
+         int var19 = (int)(Gfx.width(var18) * 0.8F) + 10;
+         int var20 = var11 + var15 + 4;
+         boolean var21 = !this.lock && var8 && Gfx.inside(this.mouseX, this.mouseY, var20, var16, var19, 12);
+         Gfx.rect(var1, var20, var16, var19, 12, 5, var21 ? Skin.c(-14341579) : Skin.c(-14868182));
+         Gfx.text(var1, var18, var20 + 5.0F, var16 + 3.5F, var2.showToggleNotification() ? Skin.c(-1446670) : Skin.c(-10788238), 0.8F);
+         this.addClippedHit(var20, var16, var19, 12, var6, var13, (var2x, var4x, var6x) -> {
             var2.setShowToggleNotification(!var2.showToggleNotification());
             DIHClient.config().markDirty();
             this.sound();
          });
       }
 
-      int var18 = var4 + 14 + 2;
+      int var22 = var4 + 20;
 
-      for (Setting var20 : var2.settings()) {
-         if (var20.isVisible()) {
-            int var21 = this.settingHeight(var20);
-            if (var18 + var21 >= var6 && var18 <= var7) {
-               this.renderSetting(var1, var20, var9, var18, var10, var6, var7, var8);
+      for (Setting var24 : var2.settings()) {
+         if (var24.isVisible()) {
+            int var25 = this.settingHeight(var24);
+            if (var22 + var25 >= var6 && var22 <= var13) {
+               this.renderSetting(var1, var24, var11, var22, var12, var6, var13, var8);
             }
 
-            var18 += var21;
+            var22 += var25;
          }
       }
+
+      var1.method_44380();
    }
 
    private void addClippedHit(int var1, int var2, int var3, int var4, int var5, int var6, MeteorGuiScreen.ClickAction var7) {
@@ -604,14 +743,10 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
 
       if (var2 instanceof BoolSetting var13) {
          Gfx.text(var1, Gfx.trim(var12, (int)((var5 - 16) / 0.85F)), var3, var4 + 3.0F, var11, 0.85F);
-         int var19 = var3 + var5 - 9;
+         int var19 = var3 + var5 - 16;
          float var20 = Anim.get(var13, "mChk", var13.get() ? 1.0F : 0.0F, 16.0F);
-         Gfx.rect(var1, var19, var4 + 2, 9, 9, 2, Skin.c(-14868182));
-         if (var20 > 0.01F) {
-            Gfx.rect(var1, var19 + 1, var4 + 3, 7, 7, 2, Theme.withAlpha(var9, var20));
-         }
-
-         Gfx.outline(var1, var19, var4 + 2, 9, 9, 2, Skin.c(872415231));
+         Gfx.rect(var1, var19, var4 + 2, 16, 9, 4, ColorUtil.blend(Skin.c(-13881027), var9, var20));
+         Gfx.rect(var1, var19 + 1 + Math.round(var20 * 7.0F), var4 + 3, 7, 7, 3, Skin.c(-1446670));
          this.addClippedHit(var3, var4, var5, 12, var6, var7, (var2x, var4x, var6x) -> {
             if (var6x == 1) {
                var13.reset();
@@ -791,14 +926,18 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
    }
 
    private void renderTooltip(class_332 var1) {
-      if (this.tooltip != null && !this.tooltip.isEmpty() && this.drag == null) {
-         long var2 = System.currentTimeMillis();
-         if (this.tipLines == null || !this.tooltip.equals(this.tipText) || var2 - this.tipAt > 2000L) {
+      boolean var2 = this.tooltip != null && !this.tooltip.isEmpty() && this.drag == null && !this.closing;
+      if (var2) {
+         long var3 = System.currentTimeMillis();
+         if (this.tipLines == null || !this.tooltip.equals(this.tipText) || var3 - this.tipAt > 2000L) {
             this.tipText = this.tooltip;
             this.tipLines = wrap(this.tooltip, 170);
-            this.tipAt = var2;
+            this.tipAt = var3;
          }
+      }
 
+      float var14 = Anim.get(this, "tipFade", var2 ? 1.0F : 0.0F, 18.0F);
+      if (this.tipLines != null && var14 > 0.02F) {
          List<String> var4 = this.tipLines;
          int var5 = 0;
 
@@ -806,26 +945,30 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
             var5 = Math.max(var5, Gfx.width(var7));
          }
 
-         var5 += 10;
-         int var13 = var4.size() * 10 + 6;
-         int var14 = (int)this.mouseX + 10;
-         int var8 = (int)this.mouseY + 10;
-         if (var14 + var5 > this.sw - 2) {
-            var14 = (int)this.mouseX - var5 - 6;
+         var5 += 14;
+         int var13 = var4.size() * 10 + 10;
+         int var15 = (int)this.mouseX + 12;
+         int var8 = (int)this.mouseY + 12 + Math.round((1.0F - var14) * 4.0F);
+         if (var15 + var5 > this.sw - 2) {
+            var15 = (int)this.mouseX - var5 - 8;
          }
 
          if (var8 + var13 > this.sh - 2) {
-            var8 = (int)this.mouseY - var13 - 4;
+            var8 = (int)this.mouseY - var13 - 6;
          }
 
-         Gfx.rect(var1, var14, var8, var5, var13, 4, Skin.c(-267382764));
-         Gfx.outline(var1, var14, var8, var5, var13, 4, ColorUtil.withAlpha(Theme.accent(), 150));
-         int var9 = var8 + 4;
+         Gfx.setFade(var14);
+         Gfx.softShadow(var1, var15, var8, var5, var13, Skin.radius(4), 10, Skin.shadow());
+         Gfx.rect(var1, var15, var8, var5, var13, 4, Skin.c(-267382764));
+         Gfx.outline(var1, var15, var8, var5, var13, 4, ColorUtil.withAlpha(Theme.accent(), 120));
+         int var9 = var8 + 5;
 
          for (String var11 : var4) {
-            Gfx.text(var1, var11, var14 + 5, var9, Skin.c(-1446670));
+            Gfx.text(var1, var11, var15 + 7, var9, Skin.c(-1446670));
             var9 += 10;
          }
+
+         Gfx.setFade(1.0F);
       }
    }
 
@@ -861,6 +1004,10 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
    }
 
    public boolean method_25402(class_11909 var1, boolean var2) {
+      if (this.closing) {
+         return true;
+      }
+
       float var3 = scale();
       double var4 = var1.comp_4798() / var3;
       double var6 = var1.comp_4799() / var3;
@@ -900,6 +1047,7 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
       }
 
       this.drag = null;
+      this.dragging = null;
       return super.method_25406(var1);
    }
 
@@ -910,7 +1058,7 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
 
       for (int var14 = ORDER.size() - 1; var14 >= 0; var14--) {
          MeteorGuiScreen.Panel var15 = PANELS.get(ORDER.get(var14));
-         if (var10 >= var15.x && var10 < var15.x + 118 && var12 >= var15.y && var12 < var15.bodyTop + var15.bodyH) {
+         if (var10 >= var15.x && var10 < var15.x + PANEL_W && var12 >= var15.y && var12 < var15.bodyTop + var15.bodyH) {
             var15.scrollTarget -= (float)(var7 * 20.0);
             return true;
          }
@@ -920,6 +1068,10 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
    }
 
    public boolean method_25404(class_11908 var1) {
+      if (this.closing) {
+         return true;
+      }
+
       int var2 = var1.comp_4795();
       if (this.binding != null) {
          if (var2 != 256 && var2 != 261 && var2 != 259) {
@@ -963,6 +1115,10 @@ public class MeteorGuiScreen extends class_437 implements TextInputScreen {
    }
 
    public boolean method_25400(class_11905 var1) {
+      if (this.closing) {
+         return true;
+      }
+
       if (!var1.method_74227()) {
          return false;
       } else {

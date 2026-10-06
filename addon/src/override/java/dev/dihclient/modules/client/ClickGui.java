@@ -14,8 +14,16 @@ import dev.dihclient.util.BugReport;
 
 public class ClickGui extends Module {
     public final EnumSetting<Layout> layout = this.mode("Style", "The ClickGUI style.", Layout.METEOR).visibleWhen(() -> false);
-    public final ColorSetting accent = this.color("Accent", "Primary accent colour of GUI and HUD.", -1754827).legacy("accent");
-    public final ColorSetting accent2 = this.color("Accent 2", "Second colour for gradients.", -30147);
+    public final EnumSetting<Look> look = this.mode(
+            "Theme",
+            "Obsidian: near-black, silver · Graphite: soft dark grey, steel · Onyx: pure black, lavender · Ember: warm charcoal, copper · Midnight: deep blue-black, indigo · Moss: green-black, sage · Plum: aubergine-black, mauve · Abyss: dark teal-black, sea green. Applies to the GUI and the HUD.",
+            Look.OBSIDIAN);
+    public final BoolSetting customAccent = this.bool("Custom Accent", "Use your own accent colours below instead of the ones of the theme.", false);
+    public final ColorSetting accent = this.color("Accent", "Primary accent colour of GUI and HUD.", -1754827)
+            .legacy("accent")
+            .visibleWhen(this.customAccent::get);
+    public final ColorSetting accent2 = this.color("Accent 2", "Second colour for gradients.", -30147)
+            .visibleWhen(this.customAccent::get);
     public final EnumSetting<Theme.ColorMode> colorMode = this.mode(
             "Color Mode", "Static accent, flowing two-colour gradient or rainbow.", Theme.ColorMode.STATIC);
     public final DoubleSetting colorSpeed = this.dbl("Color Speed", "Speed of gradient / rainbow animation.", 1.0, 0.1, 4.0, 0.1)
@@ -59,6 +67,17 @@ public class ClickGui extends Module {
         MODERN,
         METEOR,
         GLASS;
+    }
+
+    public enum Look {
+        OBSIDIAN,
+        GRAPHITE,
+        ONYX,
+        EMBER,
+        MIDNIGHT,
+        MOSS,
+        PLUM,
+        ABYSS;
     }
 
     public enum SoundSet {

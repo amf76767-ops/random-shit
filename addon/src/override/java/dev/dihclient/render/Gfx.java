@@ -37,6 +37,41 @@ public final class Gfx {
     private Gfx() {
     }
 
+    private static float fade = 1.0F;
+
+    public static void setFade(float f) {
+        fade = f < 0.0F ? 0.0F : Math.min(f, 1.0F);
+    }
+
+    public static float fade() {
+        return fade;
+    }
+
+    private static int faded(int color) {
+        if (fade >= 0.999F) {
+            return color;
+        }
+        return (int) ((color >>> 24) * fade) << 24 | (color & 0xFFFFFF);
+    }
+
+    private static void fl(class_332 g, int x0, int y0, int x1, int y1, int color) {
+        if (x1 > x0 && y1 > y0) {
+            g.method_25294(x0, y0, x1, y1, faded(color));
+        }
+    }
+
+    private static void gr(class_332 g, int x0, int y0, int x1, int y1, int a, int b) {
+        g.method_25296(x0, y0, x1, y1, faded(a), faded(b));
+    }
+
+    public static void fill(class_332 g, int x, int y, int w, int h, int color) {
+        fl(g, x, y, x + w, y + h, color);
+    }
+
+    public static void fillGradient(class_332 g, int x, int y, int w, int h, int top, int bottom) {
+        gr(g, x, y, x + w, y + h, top, bottom);
+    }
+
     public static class_327 font() {
         return class_310.method_1551().field_1772;
     }
@@ -128,9 +163,9 @@ public final class Gfx {
             while (j < rows && in[j] == inset) {
                 j++;
             }
-            g.method_25294(x + inset, y + i, x + w - inset, y + j, color);
+            fl(g, x + inset, y + i, x + w - inset, y + j, color);
             if (bottom) {
-                g.method_25294(x + inset, y + h - j, x + w - inset, y + h - i, color);
+                fl(g, x + inset, y + h - j, x + w - inset, y + h - i, color);
             }
             i = j;
         }
@@ -147,15 +182,16 @@ public final class Gfx {
             while (j < r && in[j] == inset && Math.max(1, inset - (j + 1 < r ? in[j + 1] : 0)) == run) {
                 j++;
             }
-            g.method_25294(x + inset, y + i, x + inset + run, y + j, color);
-            g.method_25294(x + w - inset - run, y + i, x + w - inset, y + j, color);
-            g.method_25294(x + inset, y + h - j, x + inset + run, y + h - i, color);
-            g.method_25294(x + w - inset - run, y + h - j, x + w - inset, y + h - i, color);
+            fl(g, x + inset, y + i, x + inset + run, y + j, color);
+            fl(g, x + w - inset - run, y + i, x + w - inset, y + j, color);
+            fl(g, x + inset, y + h - j, x + inset + run, y + h - i, color);
+            fl(g, x + w - inset - run, y + h - j, x + w - inset, y + h - i, color);
             i = j;
         }
     }
 
     private static final int AA_BUDGET = 1500;
+    private static final int AA_BUDGET_GUI = 24000;
     private static class_332 pass;
     private static int budget;
 
@@ -165,7 +201,7 @@ public final class Gfx {
         }
         if (g != pass) {
             pass = g;
-            budget = AA_BUDGET;
+            budget = Skin.active() ? AA_BUDGET_GUI : AA_BUDGET;
         }
         if (budget < cost) {
             return false;
@@ -177,7 +213,7 @@ public final class Gfx {
     private static void dot(class_332 g, int x, int y, int color, float cover) {
         int a = (int) ((color >>> 24) * cover);
         if (a > 1) {
-            g.method_25294(x, y, x + 1, y + 1, a << 24 | (color & 0xFFFFFF));
+            fl(g, x, y, x + 1, y + 1, a << 24 | (color & 0xFFFFFF));
         }
     }
 
@@ -186,9 +222,9 @@ public final class Gfx {
         for (int i = 0; i < r; i++) {
             int f = k.first[i];
             if (x + f < x + w - f) {
-                g.method_25294(x + f, y + i, x + w - f, y + i + 1, color);
+                fl(g, x + f, y + i, x + w - f, y + i + 1, color);
                 if (bottom) {
-                    g.method_25294(x + f, y + h - 1 - i, x + w - f, y + h - i, color);
+                    fl(g, x + f, y + h - 1 - i, x + w - f, y + h - i, color);
                 }
             }
             for (int c = 0; c < f; c++) {
@@ -212,13 +248,13 @@ public final class Gfx {
             }
             r = Math.max(0, Math.min(r, Math.min(Math.min(w, h) / 2, 64)));
             if (r == 0) {
-                g.method_25294(x, y, x + w, y + h, color);
+                fl(g, x, y, x + w, y + h, color);
             } else if (color >>> 24 >= 40 && smoothCorners(g, r * 8)) {
                 fillRows(g, x, y, w, h, r, color, true);
-                g.method_25294(x, y + r, x + w, y + h - r, color);
+                fl(g, x, y + r, x + w, y + h - r, color);
             } else {
                 int rows = stepRows(g, x, y, w, h, r, color, true);
-                g.method_25294(x, y + rows, x + w, y + h - rows, color);
+                fl(g, x, y + rows, x + w, y + h - rows, color);
             }
         }
     }
@@ -226,13 +262,13 @@ public final class Gfx {
     public static void rectTop(class_332 g, int x, int y, int w, int h, int r, int color) {
         r = Math.max(0, Math.min(r, Math.min(Math.min(w, h) / 2, 64)));
         if (r == 0) {
-            g.method_25294(x, y, x + w, y + h, color);
+            fl(g, x, y, x + w, y + h, color);
         } else if (color >>> 24 >= 40 && smoothCorners(g, r * 4)) {
             fillRows(g, x, y, w, h, r, color, false);
-            g.method_25294(x, y + r, x + w, y + h, color);
+            fl(g, x, y + r, x + w, y + h, color);
         } else {
             int rows = stepRows(g, x, y, w, h, r, color, false);
-            g.method_25294(x, y + rows, x + w, y + h, color);
+            fl(g, x, y + rows, x + w, y + h, color);
         }
     }
 
@@ -242,10 +278,10 @@ public final class Gfx {
                 r = Skin.radius(r);
             }
             r = Math.max(0, Math.min(r, Math.min(Math.min(w, h) / 2, 64)));
-            g.method_25294(x + r, y, x + w - r, y + 1, color);
-            g.method_25294(x + r, y + h - 1, x + w - r, y + h, color);
-            g.method_25294(x, y + r, x + 1, y + h - r, color);
-            g.method_25294(x + w - 1, y + r, x + w, y + h - r, color);
+            fl(g, x + r, y, x + w - r, y + 1, color);
+            fl(g, x + r, y + h - 1, x + w - r, y + h, color);
+            fl(g, x, y + r, x + 1, y + h - r, color);
+            fl(g, x + w - 1, y + r, x + w, y + h - r, color);
             if (r == 0) {
                 return;
             }
@@ -277,14 +313,38 @@ public final class Gfx {
     }
 
     public static void shadow(class_332 g, int x, int y, int w, int h, int r, int size, float strength) {
+        if (Skin.active()) {
+            softShadow(g, x, y, w, h, r, size * 2, strength);
+            return;
+        }
         for (int i = size; i > 0; i--) {
             int a = (int) (strength * 60.0F * (1.0F - (float) i / (size + 1)) / size * 2.0F);
             if (a > 0) {
-
                 int rr = Math.max(0, Math.min(r + i, Math.min(w + i * 2, h + i * 2) / 2));
                 int rows = rr == 0 ? 0 : stepRows(g, x - i, y - i + 1, w + i * 2, h + i * 2, rr, a << 24, true);
-                g.method_25294(x - i, y - i + 1 + rows, x + w + i, y - i + 1 + h + i * 2 - rows, a << 24);
+                fl(g, x - i, y - i + 1 + rows, x + w + i, y - i + 1 + h + i * 2 - rows, a << 24);
             }
+        }
+    }
+
+    public static void softShadow(class_332 g, int x, int y, int w, int h, int r, int spread, float strength) {
+        if (strength <= 0.0F || spread <= 0 || fade < 0.02F) {
+            return;
+        }
+        int drop = Math.max(1, spread / 3);
+        int layers = Math.max(3, Math.min(8, spread / 2));
+        float step = (float) spread / layers;
+        for (int i = layers; i >= 1; i--) {
+            float t = 1.0F - (float) (i - 1) / layers;
+            int a = (int) (strength * 26.0F * t * t / layers * 3.0F);
+            if (a <= 0) {
+                continue;
+            }
+            int e = Math.round(i * step);
+            int rr = Math.max(0, Math.min(r + e, Math.min(w + e * 2, h + e * 2) / 2));
+            int sy = y - e + drop;
+            int rows = rr == 0 ? 0 : stepRows(g, x - e, sy, w + e * 2, h + e * 2, rr, a << 24, true);
+            fl(g, x - e, sy + rows, x + w + e, sy + h + e * 2 - rows, a << 24);
         }
     }
 
@@ -293,7 +353,7 @@ public final class Gfx {
             int step = Math.max(1, w / 48);
             for (int i = 0; i < w; i += step) {
                 int c = ColorUtil.blend(from, to, (float) i / Math.max(1, w - 1));
-                g.method_25294(x + i, y, x + Math.min(w, i + step), y + h, c);
+                fl(g, x + i, y, x + Math.min(w, i + step), y + h, c);
             }
         }
     }
@@ -305,20 +365,20 @@ public final class Gfx {
                 int x0 = x + w * i / n;
                 int x1 = x + w * (i + 1) / n;
                 if (x1 > x0) {
-                    g.method_25294(x0, y, x1, y + h, ColorUtil.blend(from, to, n == 1 ? 0.0F : (float) i / (n - 1)));
+                    fl(g, x0, y, x1, y + h, ColorUtil.blend(from, to, n == 1 ? 0.0F : (float) i / (n - 1)));
                 }
             }
         }
     }
 
     public static void vGradient(class_332 g, int x, int y, int w, int h, int from, int to) {
-        g.method_25296(x, y, x + w, y + h, from, to);
+        gr(g, x, y, x + w, y + h, from, to);
     }
 
     public static void accentBar(class_332 g, int x, int y, int w, int h, double phase) {
         int step = Math.max(1, w / 12);
         for (int i = 0; i < w; i += step) {
-            g.method_25294(x + i, y, x + Math.min(w, i + step), y + h, Theme.accentAt(phase + (double) i / Math.max(1, w) * 0.5));
+            fl(g, x + i, y, x + Math.min(w, i + step), y + h, Theme.accentAt(phase + (double) i / Math.max(1, w) * 0.5));
         }
     }
 
@@ -392,7 +452,8 @@ public final class Gfx {
     }
 
     private static void draw(class_332 g, String s, int x, int y, int color) {
-        boolean shadow = textShadow && !Skin.frost();
+        color = faded(color);
+        boolean shadow = textShadow;
         if (smooth()) {
             g.method_51430(font(), line(s).text, x, y, color, shadow);
         } else {
@@ -405,7 +466,7 @@ public final class Gfx {
             String plain = text.getString();
             g.method_51430(font, line(text.method_10866().method_10984() ? "\u00a7l" + plain : plain).text, x, y, color, shadow);
         } else {
-            g.method_51439(font, text, x, y, color, shadow);
+            g.method_51439(font, text, x, y, faded(color), shadow);
         }
     }
 
