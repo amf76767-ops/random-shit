@@ -240,6 +240,14 @@ public final class BlockScanner {
         }
     }
 
+    public int scannedCount() {
+        return this.scanned.size();
+    }
+
+    public int pending() {
+        return this.queue.size();
+    }
+
     public Map<Long, List<class_2338>> results() {
         return Collections.unmodifiableMap(this.results);
     }

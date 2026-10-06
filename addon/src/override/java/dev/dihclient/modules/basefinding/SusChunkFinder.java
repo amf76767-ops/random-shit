@@ -38,6 +38,7 @@ public class SusChunkFinder extends ChunkMarkModule {
       "Max Chunks", "Most sus chunks marked at the same time – only the strongest ones are shown (closest first on ties).", 10, 1, 100
    );
    public final BoolSetting kelp = this.bool("Kelp", "Fully grown kelp (age 25) – 1 point each.", true).legacy("sus.kelp");
+   public final IntSetting kelpAge = this.integer("Kelp Min Age", "Age a kelp must have to count. Kelp from world generation is 20 to 23, kelp that grew while a player was near is 25. Set to 0 to test: every kelp counts.", 25, 0, 25);
    public final BoolSetting vines = this.bool("Vines", "Vines hanging 6+ blocks – 1 point per vine.", true).legacy("sus.vines");
    public final BoolSetting cocoa = this.bool("Cocoa Beans", "Fully grown cocoa – 1/3 point (can generate grown).", true).legacy("sus.cocoa");
    public final BoolSetting amethyst = this.bool("Amethyst", "Amethyst geodes that anti-xray hides (bypass, see Method below) – 1 point per geode chunk, 1/4 point per hidden bud.", true).legacy("sus.amethyst");
@@ -66,6 +67,8 @@ public class SusChunkFinder extends ChunkMarkModule {
          var2.onChange(this::reset);
       }
 
+      this.kelpAge.onChange(this::reset);
+
       this.action("Clear", "Removes all marks and scans again.", this::reset);
    }
 
@@ -78,7 +81,7 @@ public class SusChunkFinder extends ChunkMarkModule {
 
    private boolean candidate(class_2680 var1) {
       class_2248 var2 = var1.method_26204();
-      if (this.kelp.get() && var2 == class_2246.field_9993 && (Integer)var1.method_11654(class_2393.field_22509) >= 25) {
+      if (this.kelp.get() && var2 == class_2246.field_9993 && (Integer)var1.method_11654(class_2393.field_22509) >= this.kelpAge.get()) {
          return true;
       } else if (this.amethyst.get() && amethystSource == null && var2 == class_2246.field_27161) {
          return true;
@@ -301,6 +304,7 @@ public class SusChunkFinder extends ChunkMarkModule {
          }
       }
 
+      var1.add("Scanned chunks: " + this.scanner.scannedCount() + " · waiting: " + this.scanner.pending() + " · candidate blocks: " + this.scanner.count());
       var1.add("Suspicious chunks: " + var2 + " · score needed: " + String.format("%.1f", this.needed()) + " · max " + this.maxChunks.get());
       this.scores
          .entrySet()

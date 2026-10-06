@@ -414,3 +414,9 @@ Nicht im Spiel getestet.
 ### 8.12.2: Alter Sus ChunkFinder zurück
 Nicht im Spiel getestet.
 - Der Sus ChunkFinder aus 8.11.1 (Krypton-Variante) ist wieder entfernt. Es ist wieder unser Sus ChunkFinder mit Punktewertung, Cocoa, Highlight Blocks und dem inkrementellen Block-Scanner (Stand 8.11.0). Der Dao Finder und die übrigen Änderungen bleiben.
+
+### 8.13.0: Fast Break, No Break Delay, Sus ChunkFinder zum Testen
+Nicht im Spiel getestet.
+- **Fast Break** (World): Blöcke gehen schneller kaputt. **Mode:** `Normal` (Abbaugeschwindigkeit mal **Modifier**, 1,0 bis 5,0), `Haste` (wie ein Haste-Effekt der Stufe **Haste Level**, jede Stufe +20 Prozent) und `Damage` (der Block ist fertig, sobald der Fortschritt **Damage** erreicht, z. B. 0,7). **Safe Limit** (Standard an) hält die Geschwindigkeit in dem, was ein normaler Server annimmt (etwa bis 1,4-fach, Damage nicht unter 0,7); ohne Safe Limit kommen abgebaute Blöcke oft zurück. **Only On Ground** wirkt nur am Boden. **No Break Delay** (Standard an) entfernt die Pause zwischen zwei Blöcken.
+- **No Break Delay** (World): eigenes Modul, das nur die Pause nach jedem abgebauten Block entfernt. **Delay** stellt die Pause in Ticks ein (0 bis 5, Spiel: 5).
+- **Sus ChunkFinder:** Neue Einstellung **Kelp Min Age** (Standard 25). Kelp aus der Weltgenerierung ist 20 bis 23 alt, nur Kelp, der mit einem Spieler in der Nähe gewachsen ist, hat 25. Zum Testen auf 0 stellen: Dann zählt jeder Kelp, und in jedem Kelpwald sollte eine Markierung erscheinen. Kommt dann nichts, ist der Scan kaputt, kommt etwas, gibt es auf deinem Server einfach keinen Kelp mit Alter 25. Im Info-Fenster des Moduls stehen jetzt gescannte Chunks, wartende Chunks und gefundene Blöcke.
