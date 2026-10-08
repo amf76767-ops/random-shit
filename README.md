@@ -446,3 +446,9 @@ Nicht im Spiel getestet.
 Nicht im Spiel getestet.
 - **Spinbot** (Render): Dreht nur dein Spielermodell auf deinem Bildschirm (Dritte-Person-Ansicht, Freecam, Spiegel). Deine Kamera und deine echte Blickrichtung bleiben unverändert, es wird nichts an den Server gesendet. **Mode:** `Spin` (dreht sich mit **Speed** Grad pro Tick), `Jitter` (springt alle **Jitter Interval** Ticks um **Jitter Angle** nach links und rechts) und `Backwards` (schaut entgegengesetzt). **Spin Head:** Kopf dreht mit. Aus = der Kopf schaut weiter, wohin du schaust. **Pitch:** Kopf auf dem Modell nach unten, oben oder wechselnd.
 - Hinweis: Andere Spieler sehen dein Modell nur dann gedreht, wenn der Server deine Rotation weitergibt. Dieses Modul ändert deine Rotation für andere nicht. Es wirkt nur auf deinem Bildschirm.
+
+### 8.18.0: Spinbot auch serverseitig
+Nicht im Spiel getestet.
+- **Spinbot → Server Side** (Standard an): Deine Bewegungspakete tragen jetzt die drehende Blickrichtung, und wenn du stehst, schickt das Modul jeden Tick ein eigenes Rotationspaket. Andere Spieler sehen deinen Kopf drehen und den Körper hinterherdrehen. Deine Kamera bleibt, wo sie ist. Beim Ausschalten bekommt der Server einmal deine echte Blickrichtung.
+- **Real While Using** (Standard an): Solange die Benutzen-Taste gedrückt ist (werfen, essen, schießen), bekommt der Server deine echte Rotation, damit Perlen und Pfeile dahin fliegen, wohin du zielst.
+- Achtung: Serverseitiges Drehen fällt Anticheats (Aim- und Rotations-Prüfungen) schnell auf und ist auf vielen Servern verboten, auf Donut nach den Regeln wohl auch. Mit Server Side aus bleibt es rein optisch.
