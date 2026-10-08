@@ -81,6 +81,10 @@ public abstract class ChunkMarkModule extends Module implements ChunkEvents.List
 
    public abstract Map<Long, Integer> chunkMarks();
 
+   public double markY(long var1) {
+      return this.chunkY(var1);
+   }
+
    protected String chunkLabel(long var1) {
       return null;
    }
