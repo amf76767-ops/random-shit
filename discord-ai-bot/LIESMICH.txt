@@ -3,9 +3,12 @@ Discord-KI-Bot mit Mistral (/ai)
 
 1. Discord-Bot anlegen
    - discord.com/developers -> New Application -> Bot -> Reset Token -> Token kopieren.
-   - Privileged Intents braucht der Bot nicht.
+   - WICHTIG: Unter Bot -> "Privileged Gateway Intents" den "Message Content Intent" einschalten
+     und speichern. Sonst kann der Bot Antworten und Erwähnungen nicht lesen und startet nicht.
    - OAuth2 -> URL Generator: Scopes "bot" und "applications.commands",
-     Bot Permissions "Send Messages". Link öffnen und den Bot auf deinen Server holen.
+     Bot Permissions: "Send Messages", "Read Message History", "Add Reactions"
+     und optional "Manage Messages" (damit er eure 🔄/➕/❌-Klicks wieder entfernen kann).
+     Link öffnen und den Bot auf deinen Server holen.
 
 2. Mistral API-Key
    - console.mistral.ai -> anmelden -> API Keys -> Create new key.
@@ -27,11 +30,26 @@ Discord-KI-Bot mit Mistral (/ai)
      (falls nicht: in der Konsole "pip install -r requirements.txt").
    - Server starten. In der Konsole steht dann "Online als ...".
 
-Befehle in Discord
+Benutzen in Discord
    /ai nachricht:<Text>   fragt Mistral und schickt die Antwort
-   /ai-reset              die KI vergisst euer bisheriges Gespräch
+   /ai-reset              die KI vergisst euer bisheriges Gespräch (nur für /ai)
+   @Bot <Text>            den Bot erwähnen, er antwortet direkt auf deine Nachricht
+   Antworten (Reply)      auf eine Bot-Nachricht antworten: er kennt den Verlauf der Antwortkette
+   DM                     im Privatchat antwortet er auf jede Nachricht
+   Reaktionen unter seinen Antworten:
+     🔄  neue Antwort auf dieselbe Frage
+     ➕  genauer und ausführlicher erklären
+     ❌  Antwort löschen (nur wer gefragt hat)
+   Der Bot setzt selbst manchmal ein passendes Emoji als Reaktion auf deine Nachricht.
+   ⏳ als Reaktion heißt: du warst zu schnell (Wartezeit).
+
+Schalter in config.json (true/false)
+   answer_mentions, answer_replies, answer_dms   worauf er antwortet
+   bot_reactions                                 ob er selbst Emojis setzt
+   reaction_buttons                              ob er 🔄 ➕ ❌ unter Antworten setzt
 
 Hinweise
+   - 🔄 ➕ ❌ funktionieren nur bei Antworten seit dem letzten Neustart des Bots.
    - Die Slash-Befehle können beim ersten Start bis zu ein paar Minuten brauchen, bis sie auftauchen.
    - Antworten über 2000 Zeichen werden auf mehrere Nachrichten aufgeteilt.
    - Die KI kann niemanden pingen (@everyone usw. sind abgeschaltet).
