@@ -117,6 +117,10 @@ public class AutomationSupervisor extends Module {
         List<Module> watch = this.resolve(this.watched.get() + ",Demolish");
         List<Module> guard = this.resolve(this.guarded.get());
         guard.removeAll(watch);
+        if (watch.stream().noneMatch(Module::isEnabled) && guard.stream().noneMatch(Module::isEnabled)
+                && this.engine.pausedIds().isEmpty()) {
+            return;
+        }
 
         List<SupervisorEngine.Sample> watchSamples = this.sample(watch);
         List<SupervisorEngine.Sample> guardSamples = this.sample(guard);

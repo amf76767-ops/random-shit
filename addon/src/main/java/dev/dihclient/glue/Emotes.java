@@ -56,6 +56,7 @@ public class Emotes extends Module {
     private volatile HttpURLConnection netConn;
     private long lastSend;
     private boolean announced;
+    private boolean used;
 
     public Emotes() {
         super("Emotes", Category.FUN, "Emotes on a key: dance, spin, flip, bow ... Everyone with DIHClient on the server sees them. Bind a key to this module.");
@@ -77,6 +78,7 @@ public class Emotes extends Module {
         if (mc.field_1724 == null || mc.field_1687 == null || mc.field_1755 != null) {
             return;
         }
+        this.used = true;
         Emote e = this.emote.get();
         String me = mc.field_1724.method_7334().name();
         ACTIVE.put(me.toLowerCase(Locale.ROOT), new Active(e, System.nanoTime()));
@@ -116,7 +118,7 @@ public class Emotes extends Module {
             return;
         }
         String address = serverAddress();
-        boolean want = this.others.get() && address != null;
+        boolean want = this.used && this.others.get() && address != null;
         if (!want) {
             this.stopNet();
         } else if (!this.netRun || !this.netTopic.equals(topic(address))) {

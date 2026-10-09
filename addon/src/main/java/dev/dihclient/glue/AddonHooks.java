@@ -84,9 +84,7 @@ public final class AddonHooks {
                     new dev.dihclient.port.packets.PacketLog(), new dev.dihclient.port.packets.SpawnerReader(),
                     new dev.dihclient.port.lag.LagFinder(), new dev.dihclient.port.dao.DaoFinder(), new dev.dihclient.port.tools.FastBreak(), new dev.dihclient.port.tools.NoBreakDelay(), new dev.dihclient.port.tools.NoGhostBlocks(), new dev.dihclient.port.tools.Spinbot(), new dev.dihclient.port.tools.GhostBlocks(), new dev.dihclient.port.tools.GhostItems(), new dev.dihclient.port.profile.FrameProfiler()}) {
                 add.invoke(modules, m);
-                if (m instanceof dev.dihclient.port.tools.SpearSwap) {
-                    m.setEnabledSilently(true);
-                }
+
             }
         });
         step("Click Attack option", () -> {

@@ -466,3 +466,12 @@ Nicht im Spiel getestet.
 - **Momentum:** Neuer Modus **Normal** mit **Multiplier** (1,0 bis 5,0): deine normale Geh- und Sprintgeschwindigkeit mal Multiplier, über den Bewegungs-Attributwert des Spiels, damit Beschleunigen und Bremsen normal bleiben. Beim Fliegen oder Gleiten ist er aus.
 - **ClickGUI (Right Shift) laggt nicht mehr so:** Seit 8.14.0 durfte die GUI pro Bild bis zu 24.000 einzelne Pixel für weiche Ecken zeichnen. Das Budget ist wieder 2.500. Wenn es noch ruckelt: **Blur** im ClickGUI aus.
 - **Schnelleres Joinen:** Der Licht-Tracker von **Player Bypass** lief bei jedem Chunk- und Lichtpaket mit und lud beim Weltwechsel seine Datei, auch wenn das Modul aus war. Jetzt nur noch, wenn Player Bypass an ist.
+
+### 8.20.1: Ohne aktive Module passiert nichts
+Nicht im Spiel getestet.
+- **Emotes:** Hört erst dann auf dem Relay (ntfy.sh) mit, wenn du in dieser Sitzung selbst ein Emote abgespielt hast. Vorher gibt es keine Verbindung.
+- **Automation Supervisor:** Arbeitet nur, wenn eines der überwachten Automations-Module an ist oder noch ein pausiertes Modul wartet.
+- **Spear Swap:** Wird beim Start nicht mehr eingeschaltet, erst wenn du die Lunge-Taste drückst.
+- **Build Guard:** Wertet die Zeit-Pakete (TPS) nur aus, wenn AutoBuild an ist.
+- **Player Bypass:** Der Licht-Tracker läuft nur, wenn das Modul an ist (seit 8.20.0).
+- Was weiter von selbst läuft: die Update-Prüfung auf GitHub beim Titelbildschirm, der Discord-Webhook (bleibt wie gewünscht unverändert) und die Grundfunktionen des Clients (HUD, Benachrichtigungen, Tastenbelegung). Die übrigen Hooks prüfen nur kurz, ob ihr Modul an ist.

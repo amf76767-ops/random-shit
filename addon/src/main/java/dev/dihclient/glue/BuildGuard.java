@@ -44,6 +44,10 @@ public class BuildGuard extends Module {
     }
 
     private boolean onPacket(class_2596<?> packet) {
+        if (!this.build.isEnabled()) {
+            this.lastGame = -1;
+            return false;
+        }
         if (packet instanceof class_2761 time) {
             long now = System.nanoTime();
             long game = time.comp_3219();
