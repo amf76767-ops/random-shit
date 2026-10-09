@@ -487,3 +487,7 @@ Nicht im Spiel getestet.
 - **Spinbot** ist jetzt unter Fun.
 - **Neue Kategorie Debug:** Frame Profiler, Packet Log und Spawner Reader.
 - Einstellungen der zusammengelegten Module werden aus der alten Config übernommen.
+
+### 8.21.1: Entfernte Module wieder weg
+Nicht im Spiel getestet.
+- In 8.21.0 stand **Xray** doppelt in der Liste der entfernten Module. Java bricht dabei ab, deshalb wurde gar kein Modul mehr entfernt: MoneyHUD, Xray, DIHChat und die anderen früher entfernten Module waren wieder da. Behoben, die Liste lädt wieder (31 Einträge, geprüft).

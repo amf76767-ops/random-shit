@@ -19,7 +19,7 @@ public final class Cleanup {
 
             "PlayerActivity", "Profiles",
 
-            "AutoWalk", "BowAimbot", "DiscoMode", "DrunkMode", "Xray");
+            "AutoWalk", "BowAimbot", "DiscoMode", "DrunkMode");
 
     static final Set<String> REMOVED_NAMES = Set.of("Glowstone Macro");
 
