@@ -15,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class ProfilerHookMixin {
     @Inject(method = "safe", at = @At("HEAD"), require = 0)
     private static void dih$tickStart(Module module, String what, Runnable action, CallbackInfo ci) {
+        dev.dihclient.port.tools.ClickAttack.enter(module);
         if (FrameProfiler.active() && "tick".equals(what)) {
             FrameProfiler.begin(module.name(), FrameProfiler.TICK);
         }
@@ -22,6 +23,7 @@ public abstract class ProfilerHookMixin {
 
     @Inject(method = "safe", at = @At("RETURN"), require = 0)
     private static void dih$tickEnd(Module module, String what, Runnable action, CallbackInfo ci) {
+        dev.dihclient.port.tools.ClickAttack.leave();
         if (FrameProfiler.active() && "tick".equals(what)) {
             FrameProfiler.end();
         }

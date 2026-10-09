@@ -89,6 +89,9 @@ public class SpearSwap extends Module {
 
     @Override
     public void onAction() {
+        if (!this.isEnabled()) {
+            this.setEnabledSilently(true);
+        }
         if (mc.field_1755 == null && mc.field_1724 != null && mc.field_1687 != null && !this.returning && !this.pending && this.ticks >= this.readyTick) {
             this.pending = true;
             this.pendingTicks = 0;

@@ -24,6 +24,11 @@ public final class PlayerBypassLightTracker {
     private static final ChunkEntryGuard ENTRY_GUARD = new ChunkEntryGuard();
     private static final PacketBus.Listener APPLIED = PlayerBypassLightTracker::onPacketApplied;
     private static class_638 lastLevel;
+    private static volatile boolean active;
+
+    public static void setActive(boolean on) {
+        active = on;
+    }
 
     private PlayerBypassLightTracker() {
     }
@@ -47,6 +52,9 @@ public final class PlayerBypassLightTracker {
     }
 
     public static void onTick() {
+        if (!active) {
+            return;
+        }
         try {
             class_310 mc = class_310.method_1551();
             syncLevel(mc);
@@ -62,6 +70,9 @@ public final class PlayerBypassLightTracker {
     }
 
     private static void onPacketApplied(class_2596<?> packet) {
+        if (!active) {
+            return;
+        }
         int chunkX;
         int chunkZ;
         class_6606 data;

@@ -41,12 +41,14 @@ public final class PlayerBypass extends Module {
 
     @Override
     protected void onEnable() {
+        PlayerBypassLightTracker.setActive(true);
         PlayerBypassLightTracker.setSpottedListener(this::onChunkSpotted);
     }
 
     @Override
     protected void onDisable() {
         PlayerBypassLightTracker.setSpottedListener(null);
+        PlayerBypassLightTracker.setActive(false);
         this.flagged.clear();
         this.drawn = new long[0];
     }

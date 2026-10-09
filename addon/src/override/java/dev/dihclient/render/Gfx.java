@@ -191,7 +191,7 @@ public final class Gfx {
     }
 
     private static final int AA_BUDGET = 1500;
-    private static final int AA_BUDGET_GUI = 24000;
+    private static final int AA_BUDGET_GUI = 2500;
     private static class_332 pass;
     private static int budget;
 

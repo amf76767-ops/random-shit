@@ -457,3 +457,12 @@ Nicht im Spiel getestet.
 Nicht im Spiel getestet.
 - **Ghost Blocks** (World): Rechtsklick setzt einen Block nur bei dir (den gehaltenen Block oder den aus **Block**), Linksklick nimmt ihn wieder weg. Der Server und andere Spieler sehen nichts, und jedes Block-Update vom Server ersetzt ihn wieder. **Clear All** und Ausschalten stellen alles wieder her.
 - **Ghost Items** (Misc): **Give** legt ein Item (**Item**, **Count**) in einen Hotbar-Slot (**Slot**, 0 = gehaltener Slot), nur bei dir. Der Server kennt es nicht, man kann es nicht benutzen, droppen, verkaufen oder geben, und das nächste Inventar-Update vom Server entfernt es. **Clear** stellt den alten Inhalt wieder her.
+
+### 8.20.0: Fehler behoben, keine neuen Module
+Nicht im Spiel getestet.
+- **Spear Swap:** Machte nichts, wenn das Modul in der Config als aus gespeichert war (es lässt sich nicht einschalten, und ausgeschaltet läuft sein Tick nicht). Die Lunge-Taste schaltet es jetzt selbst ein.
+- **Click Attack** ist kein eigenes Modul mehr, sondern eine Option **Click Attack** (Standard an) in KillAura, TriggerBot, Crystal Aura, Crystal Macro, MaceCombo, Surround, Shield Breaker, AutoClicker, Anchor Macro und Criticals. Sie wirkt nur auf Angriffe, die dieses Modul gerade auslöst. Deine eigenen Klicks laufen wie im normalen Spiel (vorher wurden sie doppelt verarbeitet).
+- **Flight:** Neue Option **No Fall Damage** (Standard an). Beim Fliegen sagt der Client dem Server, dass du auf dem Boden stehst, und setzt die Fallhöhe zurück, damit Runterfliegen mit Shift keinen Schaden mehr macht.
+- **Momentum:** Neuer Modus **Normal** mit **Multiplier** (1,0 bis 5,0): deine normale Geh- und Sprintgeschwindigkeit mal Multiplier, über den Bewegungs-Attributwert des Spiels, damit Beschleunigen und Bremsen normal bleiben. Beim Fliegen oder Gleiten ist er aus.
+- **ClickGUI (Right Shift) laggt nicht mehr so:** Seit 8.14.0 durfte die GUI pro Bild bis zu 24.000 einzelne Pixel für weiche Ecken zeichnen. Das Budget ist wieder 2.500. Wenn es noch ruckelt: **Blur** im ClickGUI aus.
+- **Schnelleres Joinen:** Der Licht-Tracker von **Player Bypass** lief bei jedem Chunk- und Lichtpaket mit und lud beim Weltwechsel seine Datei, auch wenn das Modul aus war. Jetzt nur noch, wenn Player Bypass an ist.

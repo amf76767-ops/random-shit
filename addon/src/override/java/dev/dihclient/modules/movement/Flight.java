@@ -21,6 +21,8 @@ public class Flight extends Module {
             .legacy("flight.glideSpeed").visibleWhen(() -> this.mode.get() == Flight.Mode.GLIDE);
     public final BoolSetting antiKick = this.bool("Anti Kick", "Small downward pulse every second to avoid fly kicks.", true)
             .legacy("flight.antiKick").visibleWhen(() -> this.mode.get() != Flight.Mode.PACKET);
+    public final BoolSetting noFall = this.bool("No Fall Damage", "No fall damage after flying down (the server is told you stand on the ground while flying).", true)
+            .visibleWhen(() -> this.mode.get() != Flight.Mode.PACKET);
     private boolean captured;
     private boolean oldNoGravity;
     private int antiKickTicks;
@@ -79,6 +81,13 @@ public class Flight extends Module {
         }
 
         mc.field_1724.method_18800(dir[0], vy, dir[1]);
+        if (this.noFall.get()) {
+            mc.field_1724.field_6017 = 0.0;
+        }
+    }
+
+    public boolean spoofsGround() {
+        return this.isEnabled() && this.mode.get() != Flight.Mode.PACKET && this.noFall.get();
     }
 
     private void releaseVanilla() {

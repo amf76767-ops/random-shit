@@ -82,10 +82,18 @@ public final class AddonHooks {
                     new dev.dihclient.port.donutd.AmethystBypassModule(),
                     new dev.dihclient.port.donutd.SpawnerNametagsModule(),
                     new dev.dihclient.port.packets.PacketLog(), new dev.dihclient.port.packets.SpawnerReader(),
-                    new dev.dihclient.port.lag.LagFinder(), new dev.dihclient.port.dao.DaoFinder(), new dev.dihclient.port.tools.FastBreak(), new dev.dihclient.port.tools.NoBreakDelay(), new dev.dihclient.port.tools.NoGhostBlocks(), new dev.dihclient.port.tools.ClickAttack(), new dev.dihclient.port.tools.Spinbot(), new dev.dihclient.port.tools.GhostBlocks(), new dev.dihclient.port.tools.GhostItems(), new dev.dihclient.port.profile.FrameProfiler()}) {
+                    new dev.dihclient.port.lag.LagFinder(), new dev.dihclient.port.dao.DaoFinder(), new dev.dihclient.port.tools.FastBreak(), new dev.dihclient.port.tools.NoBreakDelay(), new dev.dihclient.port.tools.NoGhostBlocks(), new dev.dihclient.port.tools.Spinbot(), new dev.dihclient.port.tools.GhostBlocks(), new dev.dihclient.port.tools.GhostItems(), new dev.dihclient.port.profile.FrameProfiler()}) {
                 add.invoke(modules, m);
-                if (m instanceof dev.dihclient.port.tools.SpearSwap || m instanceof dev.dihclient.port.tools.ClickAttack) {
+                if (m instanceof dev.dihclient.port.tools.SpearSwap) {
                     m.setEnabledSilently(true);
+                }
+            }
+        });
+        step("Click Attack option", () -> {
+            java.util.Set<String> names = java.util.Set.of("KillAura", "TriggerBot", "Crystal Aura", "Crystal Macro", "MaceCombo", "Surround", "Shield Breaker", "AutoClicker", "Anchor Macro", "Criticals");
+            for (dev.dihclient.module.Module m : modules.all()) {
+                if (names.contains(m.name())) {
+                    Merge.addSetting(m, dev.dihclient.port.tools.ClickAttack.option(m), false);
                 }
             }
         });
