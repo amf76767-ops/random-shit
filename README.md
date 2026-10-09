@@ -536,3 +536,8 @@ Im Spiel nicht getestet. Der Gateway- und REST-Teil ist gegen einen lokalen Fake
 - **Discord Alarm**: neue Einstellung **Send Via** (WEBHOOK/BOT). Bei BOT schickt dein Bot die Alarme als DM an dich (bzw. an alle Allowed Users). Der Webhook funktioniert wie vorher.
 - Einrichtung: discord.com/developers → New Application → Bot → Reset Token → Token ins Modul. Privileged Intents braucht der Bot nicht. Dann den Bot mit **Copy Invite Link** auf einen eigenen Server holen (damit ihr einen gemeinsamen Server habt und er dir DMs schicken kann) oder unter Installation „User Install“ aktivieren, dann gehen die Slash-Befehle überall.
 - Technisch: `java.net.http` WebSocket zum Discord-Gateway (v10, Intent DIRECT_MESSAGES), REST über `discord.com/api/v10`. Kein Nachladen von Code, keine Prozesse, keine Bildschirmfotos. Für den Build gibt es drei neue Compile-Stubs der Fabric API (`addon/stubs/net/fabricmc/fabric/api/...`), die nicht in die Jar kommen.
+
+### 8.25.0: Hand View
+Nicht im Spiel getestet.
+- **Hand View** (Render): Item in der Hand in der Ich-Ansicht verschieben (X links/rechts, Y hoch/runter, Z vor/zurück, negativ = weiter vorne), drehen (Rotate X/Y/Z in Grad) und vergrößern/verkleinern (Scale). Eigene Werte für Haupt- und Nebenhand, oder **Same For Both Hands** (Nebenhand gespiegelt). **Empty Hand** verschiebt auch den leeren Arm. **Reset** setzt alles zurück.
+- Technik: Mixin auf `HeldItemRenderer.renderFirstPersonItem` direkt vor `renderItem` bzw. `renderArmHoldingItem`, innerhalb des Push/Pop von Vanilla.
