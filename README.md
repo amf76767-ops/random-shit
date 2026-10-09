@@ -520,3 +520,8 @@ Nicht im Spiel getestet.
 Nicht im Spiel getestet.
 - **DihChat entfernt:** Die Klasse ist nicht mehr in der Jar (vorher nur ausgeblendet), ebenso die ungenutzte Pause-Seitenleiste (`PauseSidebar` und ihre drei Mixins), die als einzige noch DihChat benutzt hat. Der Chat-Hook im `ClientPlayNetworkHandlerMixin` ist gelöscht. `ntfy.sh` benutzen jetzt nur noch die Emotes.
 - **Gras-Fix:** VisualPack hat ein schon entpacktes Pack aus einer älteren Version weiterbenutzt, wenn die Schalter gleich waren (deshalb fehlte in 8.22.2 das flache Gras). Der Dateiname enthält jetzt eine Prüfsumme des Packs, neue Versionen bauen es neu.
+
+### 8.23.0: Region Map
+Nicht im Spiel getestet.
+- **Region Map** (Donut): Port des Meteor-Addons „Region Map“ 0.1.0 (Lizenz CC0, vorher geprüft: kein Netzwerk, kein Dateizugriff, keine Mixins). Zeigt die DonutSMP-Shard-Karte (36x36-Raster, 7 Regionen mit Goliath-Nummern) am Bildschirm, dazu deine Position und Blickrichtung in der Overworld (Karte geht von -225000 bis 225000).
+- Einstellungen wie im Original: Position (X/Y), Zellgröße, Legende, Goliath-Grenzen, Nummern (schrumpfen in kleinen Shards), Marker (Farbe, Länge, Dicke), eine Farbe pro Region. Statt Meteor-HUD-Element wird direkt über DIH gezeichnet, aus bei F1.
