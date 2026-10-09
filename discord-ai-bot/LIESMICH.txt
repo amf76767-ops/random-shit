@@ -1,0 +1,38 @@
+Discord-KI-Bot mit Mistral (/ai)
+================================
+
+1. Discord-Bot anlegen
+   - discord.com/developers -> New Application -> Bot -> Reset Token -> Token kopieren.
+   - Privileged Intents braucht der Bot nicht.
+   - OAuth2 -> URL Generator: Scopes "bot" und "applications.commands",
+     Bot Permissions "Send Messages". Link öffnen und den Bot auf deinen Server holen.
+
+2. Mistral API-Key
+   - console.mistral.ai -> anmelden -> API Keys -> Create new key.
+   - Für den Gratis-Plan ("Experiment") musst du evtl. deine Telefonnummer bestätigen.
+
+3. config.json ausfüllen
+   - "discord_token": dein Bot-Token
+   - "mistral_api_key": dein Mistral-Key
+   - Optional: "model" (Standard mistral-small-latest), "system_prompt",
+     "memory_messages" (wie viele alte Nachrichten die KI pro Nutzer behält, 0 = keine),
+     "cooldown_seconds" (Wartezeit pro Nutzer), "max_tokens" (maximale Antwortlänge).
+   - Den Token und den Key NIEMALS an andere weitergeben oder öffentlich hochladen.
+
+4. Auf bot-hosting.net
+   - Einen Python-Server erstellen.
+   - Im Dateimanager diese ZIP hochladen und entpacken (main.py muss direkt im Hauptordner liegen).
+   - Als Startdatei main.py einstellen (meist unter Startup -> "App py file" o. ä.).
+   - Die Pakete aus requirements.txt werden beim Start installiert
+     (falls nicht: in der Konsole "pip install -r requirements.txt").
+   - Server starten. In der Konsole steht dann "Online als ...".
+
+Befehle in Discord
+   /ai nachricht:<Text>   fragt Mistral und schickt die Antwort
+   /ai-reset              die KI vergisst euer bisheriges Gespräch
+
+Hinweise
+   - Die Slash-Befehle können beim ersten Start bis zu ein paar Minuten brauchen, bis sie auftauchen.
+   - Antworten über 2000 Zeichen werden auf mehrere Nachrichten aufgeteilt.
+   - Die KI kann niemanden pingen (@everyone usw. sind abgeschaltet).
+   - Gratis-Mistral hat ein Limit pro Minute. Der Bot wartet und versucht es dann nochmal.

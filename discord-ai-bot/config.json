@@ -1,0 +1,9 @@
+{
+  "discord_token": "",
+  "mistral_api_key": "",
+  "model": "mistral-small-latest",
+  "system_prompt": "Du bist ein hilfreicher Assistent in einem Discord-Server. Antworte kurz und in der Sprache der Frage.",
+  "memory_messages": 6,
+  "cooldown_seconds": 5,
+  "max_tokens": 800
+}
