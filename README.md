@@ -452,3 +452,8 @@ Nicht im Spiel getestet.
 - **Spinbot → Server Side** (Standard an): Deine Bewegungspakete tragen jetzt die drehende Blickrichtung, und wenn du stehst, schickt das Modul jeden Tick ein eigenes Rotationspaket. Andere Spieler sehen deinen Kopf drehen und den Körper hinterherdrehen. Deine Kamera bleibt, wo sie ist. Beim Ausschalten bekommt der Server einmal deine echte Blickrichtung.
 - **Real While Using** (Standard an): Solange die Benutzen-Taste gedrückt ist (werfen, essen, schießen), bekommt der Server deine echte Rotation, damit Perlen und Pfeile dahin fliegen, wohin du zielst.
 - Achtung: Serverseitiges Drehen fällt Anticheats (Aim- und Rotations-Prüfungen) schnell auf und ist auf vielen Servern verboten, auf Donut nach den Regeln wohl auch. Mit Server Side aus bleibt es rein optisch.
+
+### 8.19.0: Ghost Blocks, Ghost Items (nur auf deinem Bildschirm)
+Nicht im Spiel getestet.
+- **Ghost Blocks** (World): Rechtsklick setzt einen Block nur bei dir (den gehaltenen Block oder den aus **Block**), Linksklick nimmt ihn wieder weg. Der Server und andere Spieler sehen nichts, und jedes Block-Update vom Server ersetzt ihn wieder. **Clear All** und Ausschalten stellen alles wieder her.
+- **Ghost Items** (Misc): **Give** legt ein Item (**Item**, **Count**) in einen Hotbar-Slot (**Slot**, 0 = gehaltener Slot), nur bei dir. Der Server kennt es nicht, man kann es nicht benutzen, droppen, verkaufen oder geben, und das nächste Inventar-Update vom Server entfernt es. **Clear** stellt den alten Inhalt wieder her.
