@@ -515,3 +515,8 @@ Nicht im Spiel getestet.
 ### 8.22.2: Gras flach
 Nicht im Spiel getestet.
 - **Flat Blocks** macht jetzt auch Grasblöcke einfarbig: Oberseite eine Fläche (Biomfarbe bleibt), Seite Erde mit glattem grünem Streifen oben.
+
+### 8.22.3: DihChat komplett raus, Gras-Fix
+Nicht im Spiel getestet.
+- **DihChat entfernt:** Die Klasse ist nicht mehr in der Jar (vorher nur ausgeblendet), ebenso die ungenutzte Pause-Seitenleiste (`PauseSidebar` und ihre drei Mixins), die als einzige noch DihChat benutzt hat. Der Chat-Hook im `ClientPlayNetworkHandlerMixin` ist gelöscht. `ntfy.sh` benutzen jetzt nur noch die Emotes.
+- **Gras-Fix:** VisualPack hat ein schon entpacktes Pack aus einer älteren Version weiterbenutzt, wenn die Schalter gleich waren (deshalb fehlte in 8.22.2 das flache Gras). Der Dateiname enthält jetzt eine Prüfsumme des Packs, neue Versionen bauen es neu.

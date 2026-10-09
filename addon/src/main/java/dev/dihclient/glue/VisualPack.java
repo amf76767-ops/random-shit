@@ -172,7 +172,24 @@ public class VisualPack extends Module {
             }
         }
         String mood = look == Look.NONE ? "" : "-" + look.id().replaceAll("[^a-z0-9]", "");
-        return PREFIX + "-" + Integer.toHexString(0x1000 | bits) + mood + ".zip";
+        return PREFIX + "-" + stamp() + "-" + Integer.toHexString(0x1000 | bits) + mood + ".zip";
+    }
+
+    private static String stamp;
+
+    private static String stamp() {
+        if (stamp == null) {
+            java.util.zip.CRC32 crc = new java.util.zip.CRC32();
+            try (InputStream in = VisualPack.class.getResourceAsStream(RESOURCE)) {
+                if (in != null) {
+                    crc.update(in.readAllBytes());
+                }
+            } catch (IOException ignored) {
+
+            }
+            stamp = Long.toHexString(crc.getValue());
+        }
+        return stamp;
     }
 
     private void apply(boolean on) {

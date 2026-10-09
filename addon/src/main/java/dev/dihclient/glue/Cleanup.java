@@ -14,7 +14,7 @@ public final class Cleanup {
 
     static final Set<String> REMOVED = Set.of(
             "AutoPot", "MaceCombo", "Step", "ReverseStep", "AutoReconnect", "InvManager", "SurvivalAlerts", "MoneyHud",
-            "Xray", "Chams", "DamageNumbers", "Waypoints", "DihChat", "Friends", "Enemies", "NewChunks", "BaseTraces",
+            "Xray", "Chams", "DamageNumbers", "Waypoints", "Friends", "Enemies", "NewChunks", "BaseTraces",
             "Watchlist", "PacketBuffer", "PacketFly", "HammerTool", "Fullbright", "SafeWalk", "BoatNoClip", "AutoTrade",
 
             "PlayerActivity", "Profiles",

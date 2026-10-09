@@ -62,6 +62,7 @@ public final class Patcher {
         Files.createDirectories(out.toAbsolutePath().getParent());
         try (ZipFile zin = new ZipFile(base.toFile()); ZipOutputStream zout = new ZipOutputStream(Files.newOutputStream(out))) {
             boolean dih = false, mm = false, mod = false;
+            java.util.Set<String> dropped = new java.util.HashSet<>();
             Enumeration<? extends ZipEntry> en = zin.entries();
             while (en.hasMoreElements()) {
                 ZipEntry e = en.nextElement();
@@ -69,6 +70,11 @@ public final class Patcher {
                     throw new IllegalStateException("add-on class would overwrite " + e.getName());
                 }
                 if (e.getName().equals("assets/dihclient/lang/de_de.json")) {
+                    continue;
+                }
+                if (DROPPED.contains(e.getName())) {
+                    dropped.add(e.getName());
+                    System.out.println("dropped: " + e.getName());
                     continue;
                 }
                 byte[] data;
@@ -159,6 +165,9 @@ public final class Patcher {
                         if (e.getName().equals("dev/dihclient/modules/world/AutoBuild.class")) {
                             data = enforceBeforeTick(data);
                         }
+                        if (e.getName().equals("dev/dihclient/mixin/ClientPlayNetworkHandlerMixin.class")) {
+                            data = dropMethod(data, "dih$chat");
+                        }
                         if (e.getName().equals("dev/dihclient/mixin/PlayerEntityRendererMixin.class")) {
                             data = raiseMixinPriority(data, 2000);
                         }
@@ -172,6 +181,9 @@ public final class Patcher {
             }
             if (routed < 4) {
                 throw new IllegalStateException("fewer block clicks routed than expected: " + routed);
+            }
+            if (!dropped.equals(DROPPED)) {
+                throw new IllegalStateException("classes to drop not found: " + DROPPED);
             }
             if (!(dih && mm && mod)) {
                 throw new IllegalStateException("base jar is missing an expected file");
@@ -233,10 +245,42 @@ public final class Patcher {
         return write(cn);
     }
 
+    private static final java.util.Set<String> DROPPED = java.util.Set.of(
+            "dev/dihclient/modules/client/DihChat.class", "dev/dihclient/gui/PauseSidebar.class", "dev/dihclient/gui/PauseSidebar$Hit.class",
+            "dev/dihclient/mixin/PauseMenuMixin.class", "dev/dihclient/mixin/PauseMouseMixin.class", "dev/dihclient/mixin/PauseKeyboardMixin.class");
+
+    private static byte[] dropMethod(byte[] data, String name) {
+        ClassNode cn = read(data);
+        if (!cn.methods.removeIf(m -> m.name.equals(name))) {
+            throw new IllegalStateException(name + " not found in " + cn.name);
+        }
+        return write(cn);
+    }
+
     private static byte[] patchModuleManager(byte[] data) {
         ClassNode cn = read(data);
         MethodNode reg = method(cn, "registerAll", "()V");
         requireFresh(reg);
+        boolean chat = false;
+        for (AbstractInsnNode n : reg.instructions.toArray()) {
+            if (n.getOpcode() == Opcodes.NEW && ((org.objectweb.asm.tree.TypeInsnNode) n).desc.equals("dev/dihclient/modules/client/DihChat")) {
+                AbstractInsnNode load = n.getPrevious();
+                AbstractInsnNode dup = n.getNext();
+                AbstractInsnNode ctor = dup.getNext();
+                AbstractInsnNode add = ctor.getNext();
+                if (load.getOpcode() != Opcodes.ALOAD || dup.getOpcode() != Opcodes.DUP || ctor.getOpcode() != Opcodes.INVOKESPECIAL
+                        || add.getOpcode() != Opcodes.INVOKEVIRTUAL) {
+                    throw new IllegalStateException("unexpected DihChat registration");
+                }
+                for (AbstractInsnNode x : new AbstractInsnNode[]{load, n, dup, ctor, add}) {
+                    reg.instructions.remove(x);
+                }
+                chat = true;
+            }
+        }
+        if (!chat) {
+            throw new IllegalStateException("DihChat registration not found");
+        }
         for (AbstractInsnNode n : reg.instructions.toArray()) {
             if (n.getOpcode() == Opcodes.RETURN) {
                 InsnList call = new InsnList();
