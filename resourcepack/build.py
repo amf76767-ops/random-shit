@@ -109,6 +109,14 @@ def flat(color):
     return png(16, 16, [(color[0], color[1], color[2], 255)] * 256)
 
 
+def grass():
+    gray = (150, 150, 150, 255)
+    dirt = FLAT["dirt"] + (255,)
+    side = [(121, 169, 85, 255) if i < 48 else dirt for i in range(256)]
+    overlay = [gray if i < 48 else (0, 0, 0, 0) for i in range(256)]
+    return png(16, 16, [gray] * 256), png(16, 16, side), png(16, 16, overlay)
+
+
 def crosshair():
     px = [(0, 0, 0, 0)] * (15 * 15)
     for i in range(15):
@@ -189,6 +197,10 @@ def files():
             yield path.relative_to(ROOT / "static").as_posix(), path.read_bytes()
     for name, color in FLAT.items():
         yield mc + "textures/block/" + name + ".png", flat(color)
+    top, side, overlay = grass()
+    yield mc + "textures/block/grass_block_top.png", top
+    yield mc + "textures/block/grass_block_side.png", side
+    yield mc + "textures/block/grass_block_side_overlay.png", overlay
     normal, blocking = shield_models()
     yield mc + "models/item/shield.json", json.dumps(normal, indent=2).encode()
     yield mc + "models/item/shield_blocking.json", json.dumps(blocking, indent=2).encode()

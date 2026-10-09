@@ -42,14 +42,14 @@ public class VisualPack extends Module {
     private final DoubleSetting fireOffset = this.dbl("Fire Offset", "How far the burning flames move down.", 0.3, 0.05, 0.6, 0.05).visibleWhen(this.lowFire::get);
     private final BoolSetting lowShield = this.bool("Low Shield", "Your shield sits lower in first person and covers less.", true).onChange(this::changed);
     private final BoolSetting clearFog = this.bool("Clear Water & Lava", "Much less fog under water and in lava, so you see far (also less blindness fog).", true).onChange(this::changed);
-    private final BoolSetting flatBlocks = this.bool("Flat Blocks", "Gravel, sand, dirt, andesite, diorite, granite, tuff, clay, netherrack, soul sand and mud are one plain colour.", true).onChange(this::changed);
+    private final BoolSetting flatBlocks = this.bool("Flat Blocks", "Grass, gravel, sand, dirt, andesite, diorite, granite, tuff, clay, netherrack, soul sand and mud are one plain colour.", true).onChange(this::changed);
     private final BoolSetting smallItems = this.bool("Small Held Items", "Tools, weapons and blocks in your hand are smaller and lower.", true).onChange(this::changed);
     private final BoolSetting crosshair = this.bool("Clean Crosshair", "A thin cross with a dot in the middle.", true).onChange(this::changed);
     private final BoolSetting quiet = this.bool("Quiet Ambience", "No random cave sounds, rain and thunder are quieter, so you hear players better.", true).onChange(this::changed);
     public final DoubleSetting crystalSize = this.dbl("Crystal Size", "Size of end crystals (1.0 = normal). Works while VisualPack is on.", 0.6, 0.3, 1.0, 0.05);
 
     private static final String[] FLAT = {"gravel", "sand", "red_sand", "dirt", "coarse_dirt", "rooted_dirt", "andesite", "diorite", "granite",
-            "tuff", "clay", "netherrack", "soul_sand", "soul_soil", "mud"};
+            "tuff", "clay", "netherrack", "soul_sand", "soul_soil", "mud", "grass_block_top", "grass_block_side", "grass_block_side_overlay"};
 
     private static String[] flatPaths() {
         String[] out = new String[FLAT.length];

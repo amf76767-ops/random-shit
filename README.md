@@ -511,3 +511,7 @@ Nicht im Spiel getestet.
 - **Low Fire:** Vanilla-Feuertextur bleibt, das Feuer-Overlay wird nur weiter nach unten geschoben (`InGameOverlayRenderer.renderFireOverlay`). Neu: **Fire Offset** (0,05 bis 0,6, Standard 0,3).
 - **Flat Blocks:** Kies, Sand, roter Sand, Erde, grobe Erde, Wurzelerde, Andesit, Diorit, Granit, Tuff, Ton, Netherrack, Seelensand, Seelenerde und Schlamm sind je eine einfarbige Fläche (Kies einfach grau).
 - **Same Stone** (vorher Deepslate Stone): Stone und Deepslate haben dieselbe Textur.
+
+### 8.22.2: Gras flach
+Nicht im Spiel getestet.
+- **Flat Blocks** macht jetzt auch Grasblöcke einfarbig: Oberseite eine Fläche (Biomfarbe bleibt), Seite Erde mit glattem grünem Streifen oben.

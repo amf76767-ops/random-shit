@@ -16,7 +16,7 @@ Bauen: `python3 resourcepack/build.py` -> `dist/DIH-Visuals-1.21.11.zip`. Shader
 | `models/item/totem_of_undying.json` | Totem kleiner | |
 | `models/item/shield*.json` | Schild in der Ich-Ansicht tiefer | |
 | `shaders/include/fog.glsl` | Weniger Nebel unter Wasser, in Lava und bei Blindheit | `CLEAR_FOG = 1.0`, `CLEAR_FOG_MIN = 0.0` |
-| `textures/block/gravel.png`, `sand.png`, `dirt.png` … | Kies, Sand, Erde, Andesit, Diorit, Granit, Tuff, Ton, Netherrack, Seelensand, Schlamm als einfarbige Flächen | |
+| `textures/block/gravel.png`, `sand.png`, `dirt.png` … | Gras, Kies, Sand, Erde, Andesit, Diorit, Granit, Tuff, Ton, Netherrack, Seelensand, Schlamm als einfarbige Flächen | |
 | `models/item/generated.json`, `handheld.json`, `models/block/block.json` | Kleinere Items in der Hand | |
 | `textures/gui/sprites/hud/crosshair.png` | Dünnes Fadenkreuz mit Punkt | |
 | `sounds.json` | Keine Höhlengeräusche, Regen und Donner leiser | |
