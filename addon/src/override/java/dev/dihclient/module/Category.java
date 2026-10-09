@@ -11,7 +11,8 @@ public enum Category {
     DONUT("Donut"),
     MISC("Misc"),
     FUN("Fun"),
-    CLIENT("Client");
+    CLIENT("Client"),
+    DEBUG("Debug");
 
     public final String title;
 

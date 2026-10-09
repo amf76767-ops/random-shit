@@ -14,6 +14,15 @@ import dev.dihclient.modules.world.Tunnel;
 import dev.dihclient.port.donutc.AirStuck;
 import dev.dihclient.setting.BoolSetting;
 import dev.dihclient.setting.EnumSetting;
+import dev.dihclient.modules.fun.ModelReplacer;
+import dev.dihclient.modules.movement.NoFall;
+import dev.dihclient.modules.player.PacketMine;
+import dev.dihclient.port.donuta.DonutNoFall;
+import dev.dihclient.port.donuta.DonutSpeedMine;
+import dev.dihclient.port.tools.FastBreak;
+import dev.dihclient.port.trident.RiptideModule;
+import dev.dihclient.port.trident.TridentBoostModule;
+import dev.dihclient.port.trident.TridentUtilModule;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -93,6 +102,90 @@ public final class Hubs {
             Merge.rule(new ConfigMigration.Rule(smart.id(), this.id(), s, null, "mode", "SMART", true, false));
             Merge.link(this, () -> this.mode.get() == Mode.CLASSIC, classic, true);
             Merge.link(this, () -> this.mode.get() == Mode.SMART, smart, true);
+        }
+    }
+
+    public static final class NoFallHub extends Hub {
+        public enum Mode { NORMAL, DONUT }
+
+        public final EnumSetting<Mode> mode = this.mode("Mode", "Normal: spoofs the on-ground flag while you fall · Donut: the method made for DonutSMP.", Mode.NORMAL);
+
+        public NoFallHub(NoFall normal, DonutNoFall donut) throws ReflectiveOperationException {
+            super("NoFall", Category.MOVEMENT, "No fall damage: Normal or the DonutSMP method.");
+            this.active = () -> this.mode.get() == Mode.NORMAL ? normal : donut;
+            Merge.absorb(this, normal, "Normal", () -> this.mode.get() == Mode.NORMAL);
+            Map<String, String> d = Merge.absorb(this, donut, "Donut", () -> this.mode.get() == Mode.DONUT);
+            Merge.rule(new ConfigMigration.Rule(donut.id(), this.id(), d, null, "mode", "DONUT", true, false));
+            Merge.link(this, () -> this.mode.get() == Mode.NORMAL, normal, true);
+            Merge.link(this, () -> this.mode.get() == Mode.DONUT, donut, true);
+        }
+    }
+
+    public static final class FastBreakHub extends Hub {
+        public enum Engine { FAST, DONUT, PACKET }
+
+        public final EnumSetting<Engine> engine = this.mode("Engine",
+                "Fast: faster breaking with its own modes · Donut: finishes blocks early (made for DonutSMP) · Packet: keeps mining the block you started even when you look away.",
+                Engine.FAST);
+
+        public FastBreakHub(FastBreak fast, DonutSpeedMine donut, PacketMine packet) throws ReflectiveOperationException {
+            super("Fast Break", Category.WORLD, "Breaks blocks faster: Fast, Donut Speed Mine or Packet Mine in one module.");
+            this.active = () -> switch (this.engine.get()) {
+                case FAST -> fast;
+                case DONUT -> donut;
+                case PACKET -> packet;
+            };
+            Merge.absorb(this, fast, "Fast", () -> this.engine.get() == Engine.FAST);
+            Map<String, String> d = Merge.absorb(this, donut, "Donut", () -> this.engine.get() == Engine.DONUT);
+            Map<String, String> p = Merge.absorb(this, packet, "Packet", () -> this.engine.get() == Engine.PACKET);
+            Merge.rule(new ConfigMigration.Rule(donut.id(), this.id(), d, null, "engine", "DONUT", true, false));
+            Merge.rule(new ConfigMigration.Rule(packet.id(), this.id(), p, null, "engine", "PACKET", true, false));
+            Merge.link(this, () -> this.engine.get() == Engine.FAST, fast, true);
+            Merge.link(this, () -> this.engine.get() == Engine.DONUT, donut, true);
+            Merge.link(this, () -> this.engine.get() == Engine.PACKET, packet, true);
+        }
+    }
+
+    public static final class TridentHub extends Hub {
+        public enum Mode { BOOST, UTIL, RIPTIDE }
+
+        public final EnumSetting<Mode> mode = this.mode("Mode",
+                "Boost: more speed when you use riptide · Util: tridents out of water and faster charging · Riptide: uses a riptide trident while you hold right-click.",
+                Mode.BOOST);
+
+        public TridentHub(TridentBoostModule boost, TridentUtilModule util, RiptideModule riptide) throws ReflectiveOperationException {
+            super("Trident", Category.DONUT, "Everything for tridents in one module: Boost, Util or Riptide.");
+            this.active = () -> switch (this.mode.get()) {
+                case BOOST -> boost;
+                case UTIL -> util;
+                case RIPTIDE -> riptide;
+            };
+            Map<String, String> b = Merge.absorb(this, boost, "Boost", () -> this.mode.get() == Mode.BOOST);
+            Map<String, String> u = Merge.absorb(this, util, "Util", () -> this.mode.get() == Mode.UTIL);
+            Map<String, String> r = Merge.absorb(this, riptide, "Riptide", () -> this.mode.get() == Mode.RIPTIDE);
+            Merge.rule(new ConfigMigration.Rule(boost.id(), this.id(), b, null, "mode", "BOOST", true, false));
+            Merge.rule(new ConfigMigration.Rule(util.id(), this.id(), u, null, "mode", "UTIL", true, false));
+            Merge.rule(new ConfigMigration.Rule(riptide.id(), this.id(), r, null, "mode", "RIPTIDE", true, false));
+            Merge.link(this, () -> this.mode.get() == Mode.BOOST, boost, true);
+            Merge.link(this, () -> this.mode.get() == Mode.UTIL, util, true);
+            Merge.link(this, () -> this.mode.get() == Mode.RIPTIDE, riptide, true);
+        }
+    }
+
+    public static final class ModelHub extends Hub {
+        public enum Type { CUSTOM, MOBS }
+
+        public final EnumSetting<Type> type = this.mode("Type",
+                "Custom: your own 3D model (.glb / .obj) instead of players · Mobs: players and mobs look like other mobs (the old Model Replacer).", Type.CUSTOM);
+
+        public ModelHub(CustomModel custom, ModelReplacer mobs) throws ReflectiveOperationException {
+            super("CustomModel", Category.FUN, "Changes how players look: your own 3D model or other mobs. Only you see it.");
+            this.active = () -> this.type.get() == Type.CUSTOM ? custom : mobs;
+            Merge.absorb(this, custom, "Custom", () -> this.type.get() == Type.CUSTOM);
+            Map<String, String> m = Merge.absorb(this, mobs, "Mobs", () -> this.type.get() == Type.MOBS);
+            Merge.rule(new ConfigMigration.Rule(mobs.id(), this.id(), m, null, "type", "MOBS", true, false));
+            Merge.link(this, () -> this.type.get() == Type.CUSTOM, custom, true);
+            Merge.link(this, () -> this.type.get() == Type.MOBS, mobs, true);
         }
     }
 

@@ -53,7 +53,7 @@ public class SpawnerReader extends Module {
     private final PacketBus.Listener appliedListener = this::onApplied;
 
     public SpawnerReader() {
-        super("Spawner Reader", Category.BASEFINDING, "Reads the server's packets and reports spawners below a Y level.");
+        super("Spawner Reader", Category.DEBUG, "Reads the server's packets and reports spawners below a Y level.");
     }
 
     @Override

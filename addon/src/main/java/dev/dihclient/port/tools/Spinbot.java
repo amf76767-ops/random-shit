@@ -45,7 +45,7 @@ public class Spinbot extends Module {
     public final EnumSetting<PitchMode> pitch = this.mode("Pitch", "How the head tilts up and down on the model.", PitchMode.OFF);
 
     public Spinbot() {
-        super("Spinbot", Category.RENDER, "Spins your player model for everyone who looks at it. Only the model turns, your camera and your real rotation stay as they are.");
+        super("Spinbot", Category.FUN, "Spins your player model for everyone who looks at it. Only the model turns, your camera and your real rotation stay as they are.");
     }
 
     @Override

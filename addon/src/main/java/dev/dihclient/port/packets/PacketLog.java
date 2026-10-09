@@ -42,7 +42,7 @@ public class PacketLog extends Module {
     private volatile Entries entries = new Entries("", new String[0]);
 
     public PacketLog() {
-        super("Packet Log", Category.MISC, "Reads packets sent to and received from the server (chat and latest.log). Read-only.");
+        super("Packet Log", Category.DEBUG, "Reads packets sent to and received from the server (chat and latest.log). Read-only.");
     }
 
     @Override

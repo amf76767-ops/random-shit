@@ -46,7 +46,7 @@ public class FrameProfiler extends Module {
     private long frameWindow;
 
     public FrameProfiler() {
-        super("Frame Profiler", Category.CLIENT, "Shows which modules take the most time per second, to find what makes the game slow.");
+        super("Frame Profiler", Category.DEBUG, "Shows which modules take the most time per second, to find what makes the game slow.");
         this.action("Report", "Writes the biggest modules to the log and shows the top 5.", this::report);
     }
 

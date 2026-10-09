@@ -475,3 +475,15 @@ Nicht im Spiel getestet.
 - **Build Guard:** Wertet die Zeit-Pakete (TPS) nur aus, wenn AutoBuild an ist.
 - **Player Bypass:** Der Licht-Tracker läuft nur, wenn das Modul an ist (seit 8.20.0).
 - Was weiter von selbst läuft: die Update-Prüfung auf GitHub beim Titelbildschirm, der Discord-Webhook (bleibt wie gewünscht unverändert) und die Grundfunktionen des Clients (HUD, Benachrichtigungen, Tastenbelegung). Die übrigen Hooks prüfen nur kurz, ob ihr Modul an ist.
+
+### 8.21.0: Aufgeräumt, neue Kategorie Debug
+Nicht im Spiel getestet.
+- **NoFall:** NoFall und Donut NoFall sind ein Modul mit **Mode** `Normal` oder `Donut`.
+- **Fast Break:** Fast Break, Donut Speed Mine und PacketMine sind ein Modul mit **Engine** `Fast` (die bisherigen Fast-Break-Modi), `Donut` oder `Packet`.
+- **Trident** (Donut): Trident Boost, Trident Util und Riptide sind ein Modul mit **Mode** `Boost`, `Util` oder `Riptide`.
+- **CustomModel:** CustomModel und Model Replacer sind ein Modul mit **Type** `Custom` (eigenes 3D-Modell) oder `Mobs` (Spieler und Mobs sehen wie andere Mobs aus).
+- **Xray** ist entfernt (der Netherite Finder kann mehr).
+- **Block Notifier** und **Storage ESP** sind wieder eigene Module (vorher in Block ESP eingebaut).
+- **Spinbot** ist jetzt unter Fun.
+- **Neue Kategorie Debug:** Frame Profiler, Packet Log und Spawner Reader.
+- Einstellungen der zusammengelegten Module werden aus der alten Config übernommen.

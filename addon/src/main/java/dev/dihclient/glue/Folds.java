@@ -7,11 +7,8 @@ import dev.dihclient.module.Module;
 import dev.dihclient.module.ModuleManager;
 import dev.dihclient.modules.automation.FlipFinder;
 import dev.dihclient.modules.automation.StashSorter;
-import dev.dihclient.modules.basefinding.BlockNotifier;
 import dev.dihclient.modules.misc.AutoLog;
 import dev.dihclient.modules.movement.Blink;
-import dev.dihclient.modules.render.BlockEsp;
-import dev.dihclient.modules.render.StorageEsp;
 import dev.dihclient.port.donuta.AutoRelog;
 import dev.dihclient.port.donutc.AirStuck;
 import dev.dihclient.modules.movement.ElytraBot;
@@ -92,8 +89,41 @@ public final class Folds {
             Merge.hide(modules, freeze);
             add(modules, hub);
         });
-        step("Block ESP + Storage ESP + Block Notifier", () -> blockEsp(modules));
         step("Amethyst Bypass in Sus ChunkFinder", () -> amethyst(modules));
+        step("NoFall", () -> {
+            dev.dihclient.modules.movement.NoFall normal = modules.get(dev.dihclient.modules.movement.NoFall.class);
+            dev.dihclient.port.donuta.DonutNoFall donut = modules.get(dev.dihclient.port.donuta.DonutNoFall.class);
+            Hubs.NoFallHub hub = new Hubs.NoFallHub(normal, donut);
+            Merge.hide(modules, normal);
+            Merge.hide(modules, donut);
+            add(modules, hub);
+        });
+        step("Fast Break", () -> {
+            dev.dihclient.port.tools.FastBreak fast = modules.get(dev.dihclient.port.tools.FastBreak.class);
+            dev.dihclient.port.donuta.DonutSpeedMine donut = modules.get(dev.dihclient.port.donuta.DonutSpeedMine.class);
+            dev.dihclient.modules.player.PacketMine packet = modules.get(dev.dihclient.modules.player.PacketMine.class);
+            Hubs.FastBreakHub hub = new Hubs.FastBreakHub(fast, donut, packet);
+            Merge.hide(modules, fast);
+            Merge.hide(modules, donut);
+            Merge.hide(modules, packet);
+            add(modules, hub);
+        });
+        step("Trident", () -> {
+            Hubs.TridentHub hub = new Hubs.TridentHub(modules.get(dev.dihclient.port.trident.TridentBoostModule.class),
+                    modules.get(dev.dihclient.port.trident.TridentUtilModule.class), modules.get(dev.dihclient.port.trident.RiptideModule.class));
+            Merge.hide(modules, modules.get(dev.dihclient.port.trident.TridentBoostModule.class));
+            Merge.hide(modules, modules.get(dev.dihclient.port.trident.TridentUtilModule.class));
+            Merge.hide(modules, modules.get(dev.dihclient.port.trident.RiptideModule.class));
+            add(modules, hub);
+        });
+        step("CustomModel + Model Replacer", () -> {
+            CustomModel custom = modules.get(CustomModel.class);
+            dev.dihclient.modules.fun.ModelReplacer mobs = modules.get(dev.dihclient.modules.fun.ModelReplacer.class);
+            Hubs.ModelHub hub = new Hubs.ModelHub(custom, mobs);
+            Merge.hide(modules, custom);
+            Merge.hide(modules, mobs);
+            add(modules, hub);
+        });
         step("Auto Log + Auto Relog", () -> autoLog(modules));
         step("AutoFlipper", () -> {
             FlipFinder flip = modules.get(FlipFinder.class);
@@ -230,24 +260,6 @@ public final class Folds {
         Merge.rule(new ConfigMigration.Rule(bypass.id(), sus.id(), renamed, null, null, null, false, false));
         Merge.link(sus, sus.amethyst::get, bypass, false);
         dev.dihclient.modules.basefinding.SusChunkFinder.amethystSource = () -> bypass.isEnabled() ? bypass.perChunk() : null;
-    }
-
-    private static void blockEsp(ModuleManager modules) throws ReflectiveOperationException {
-        BlockEsp esp = modules.get(BlockEsp.class);
-        StorageEsp storage = modules.get(StorageEsp.class);
-        BlockNotifier notifier = modules.get(BlockNotifier.class);
-        BoolSetting storageOn = new BoolSetting("Storage", "Also highlights chests, barrels, shulkers and other containers (the old Storage ESP).", false);
-        BoolSetting notifyOn = new BoolSetting("Notify", "Tells you once when selected blocks or entity types show up (the old Block Notifier).", false);
-        Merge.addSetting(esp, storageOn, false);
-        Map<String, String> s = Merge.absorb(esp, storage, "Storage", storageOn::get);
-        Merge.addSetting(esp, notifyOn, false);
-        Map<String, String> n = Merge.absorb(esp, notifier, "Notify", notifyOn::get);
-        Merge.rule(new ConfigMigration.Rule(storage.id(), esp.id(), s, "storage", null, null, false, false));
-        Merge.rule(new ConfigMigration.Rule(notifier.id(), esp.id(), n, "notify", null, null, false, false));
-        Merge.link(esp, storageOn::get, storage, false);
-        Merge.link(esp, notifyOn::get, notifier, false);
-        Merge.hide(modules, storage);
-        Merge.hide(modules, notifier);
     }
 
     private static void autoLog(ModuleManager modules) throws ReflectiveOperationException {
