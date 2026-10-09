@@ -34,27 +34,27 @@ public class VisualPack extends Module {
     private final BoolSetting sky = this.bool("Sky Gradient", "Sky with a colour gradient, and at night a sky full of stars with a milky way (shader).", true).onChange(this::changed);
     private final BoolSetting noMoon = this.bool("No Moon", "The moon is not drawn, so the night is only stars.", true).onChange(this::changed);
     private final BoolSetting glint = this.bool("Colour Glint", "Enchant glint that changes its colour (shader and picture).", true).onChange(this::changed);
-    private final BoolSetting stone = this.bool("Deepslate Stone", "Stone looks like deepslate.", true).onChange(this::changed);
+    private final BoolSetting stone = this.bool("Same Stone", "Stone and deepslate share one texture.", true).onChange(this::changed);
     private final BoolSetting water = this.bool("Clear Water", "See-through, animated water.", true).onChange(this::changed);
     private final BoolSetting sun = this.bool("Round Sun", "Round sun with a glow.", true).onChange(this::changed);
     private final BoolSetting totem = this.bool("Small Totem", "The totem pop picture is smaller.", true).onChange(this::changed);
-    private final BoolSetting lowFire = this.bool("Low Fire", "The flames when you burn only fill the bottom of the screen.", true).onChange(this::changed);
+    private final BoolSetting lowFire = this.bool("Low Fire", "The flames when you burn sit lower on the screen (same texture).", true);
+    private final DoubleSetting fireOffset = this.dbl("Fire Offset", "How far the burning flames move down.", 0.3, 0.05, 0.6, 0.05).visibleWhen(this.lowFire::get);
     private final BoolSetting lowShield = this.bool("Low Shield", "Your shield sits lower in first person and covers less.", true).onChange(this::changed);
     private final BoolSetting clearFog = this.bool("Clear Water & Lava", "Much less fog under water and in lava, so you see far (also less blindness fog).", true).onChange(this::changed);
-    private final BoolSetting oreBorders = this.bool("Ore Borders", "Every ore gets a border in its own colour, so you spot it at once (only the texture, no x-ray).", true).onChange(this::changed);
+    private final BoolSetting flatBlocks = this.bool("Flat Blocks", "Gravel, sand, dirt, andesite, diorite, granite, tuff, clay, netherrack, soul sand and mud are one plain colour.", true).onChange(this::changed);
     private final BoolSetting smallItems = this.bool("Small Held Items", "Tools, weapons and blocks in your hand are smaller and lower.", true).onChange(this::changed);
     private final BoolSetting crosshair = this.bool("Clean Crosshair", "A thin cross with a dot in the middle.", true).onChange(this::changed);
     private final BoolSetting quiet = this.bool("Quiet Ambience", "No random cave sounds, rain and thunder are quieter, so you hear players better.", true).onChange(this::changed);
     public final DoubleSetting crystalSize = this.dbl("Crystal Size", "Size of end crystals (1.0 = normal). Works while VisualPack is on.", 0.6, 0.3, 1.0, 0.05);
 
-    private static final String[] ORES = {"coal_ore", "iron_ore", "copper_ore", "gold_ore", "redstone_ore", "lapis_ore", "diamond_ore", "emerald_ore",
-            "deepslate_coal_ore", "deepslate_iron_ore", "deepslate_copper_ore", "deepslate_gold_ore", "deepslate_redstone_ore", "deepslate_lapis_ore",
-            "deepslate_diamond_ore", "deepslate_emerald_ore", "nether_gold_ore", "nether_quartz_ore", "ancient_debris_"};
+    private static final String[] FLAT = {"gravel", "sand", "red_sand", "dirt", "coarse_dirt", "rooted_dirt", "andesite", "diorite", "granite",
+            "tuff", "clay", "netherrack", "soul_sand", "soul_soil", "mud"};
 
-    private static String[] orePaths() {
-        String[] out = new String[ORES.length];
-        for (int i = 0; i < ORES.length; i++) {
-            out[i] = MC + "textures/block/" + ORES[i];
+    private static String[] flatPaths() {
+        String[] out = new String[FLAT.length];
+        for (int i = 0; i < FLAT.length; i++) {
+            out[i] = MC + "textures/block/" + FLAT[i] + ".png";
         }
         return out;
     }
@@ -64,15 +64,14 @@ public class VisualPack extends Module {
             new Effect(this.clouds, MC + "shaders/core/rendertype_clouds.fsh"),
             new Effect(this.sky, MC + "shaders/core/sky.fsh", MC + "shaders/core/sky.vsh"),
             new Effect(this.glint, MC + "shaders/core/glint.fsh", MC + "textures/misc/enchanted_glint_"),
-            new Effect(this.stone, MC + "textures/block/stone.png"),
+            new Effect(this.stone, MC + "textures/block/stone.png", MC + "textures/block/deepslate.png", MC + "textures/block/deepslate_top.png"),
             new Effect(this.water, MC + "textures/block/water_"),
             new Effect(this.sun, MC + "textures/environment/celestial/sun.png"),
             new Effect(this.noMoon, MC + "textures/environment/celestial/moon/"),
             new Effect(this.totem, MC + "models/item/totem_of_undying.json"),
-            new Effect(this.lowFire, MC + "textures/block/fire_"),
             new Effect(this.lowShield, MC + "models/item/shield"),
             new Effect(this.clearFog, MC + "shaders/include/fog.glsl"),
-            new Effect(this.oreBorders, orePaths()),
+            new Effect(this.flatBlocks, flatPaths()),
             new Effect(this.smallItems, MC + "models/item/generated.json", MC + "models/item/handheld.json", MC + "models/block/block.json"),
             new Effect(this.crosshair, MC + "textures/gui/sprites/hud/crosshair.png"),
             new Effect(this.quiet, MC + "sounds.json"));
@@ -83,7 +82,7 @@ public class VisualPack extends Module {
 
     public VisualPack() {
         super("VisualPack", Category.RENDER,
-                "Resource pack and visuals: night vision, invisible rain, clear clouds and water, low fire and shield, ore borders, sky gradient, colour glint and more. Every part has a switch.");
+                "Resource pack and visuals: night vision, invisible rain, clear clouds and water, low fire and shield, flat blocks, sky gradient, colour glint and more. Every part has a switch.");
         instance = this;
     }
 
@@ -122,6 +121,11 @@ public class VisualPack extends Module {
     public static float crystalScale() {
         VisualPack v = instance;
         return v != null && v.isEnabled() ? v.crystalSize.get().floatValue() : 1.0F;
+    }
+
+    public static float fireOffset() {
+        VisualPack v = instance;
+        return v != null && v.isEnabled() && v.lowFire.get() ? v.fireOffset.get().floatValue() : 0.0F;
     }
 
     private static boolean ours(class_1293 e) {

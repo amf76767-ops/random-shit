@@ -97,87 +97,16 @@ def water(size, frames, flowing):
     return png(size, size * frames, px)
 
 
-ORES = [
-    ("coal_ore", "stone", (30, 30, 30), (70, 70, 70)),
-    ("deepslate_coal_ore", "deepslate", (30, 30, 30), (75, 75, 75)),
-    ("iron_ore", "stone", (216, 175, 147), (240, 210, 185)),
-    ("deepslate_iron_ore", "deepslate", (216, 175, 147), (240, 210, 185)),
-    ("copper_ore", "stone", (226, 120, 70), (120, 200, 160)),
-    ("deepslate_copper_ore", "deepslate", (226, 120, 70), (120, 200, 160)),
-    ("gold_ore", "stone", (252, 210, 50), (255, 245, 150)),
-    ("deepslate_gold_ore", "deepslate", (252, 210, 50), (255, 245, 150)),
-    ("redstone_ore", "stone", (230, 20, 20), (255, 110, 110)),
-    ("deepslate_redstone_ore", "deepslate", (230, 20, 20), (255, 110, 110)),
-    ("lapis_ore", "stone", (35, 70, 200), (110, 150, 255)),
-    ("deepslate_lapis_ore", "deepslate", (35, 70, 200), (110, 150, 255)),
-    ("diamond_ore", "stone", (60, 235, 225), (200, 255, 250)),
-    ("deepslate_diamond_ore", "deepslate", (60, 235, 225), (200, 255, 250)),
-    ("emerald_ore", "stone", (25, 200, 80), (140, 255, 170)),
-    ("deepslate_emerald_ore", "deepslate", (25, 200, 80), (140, 255, 170)),
-    ("nether_gold_ore", "netherrack", (252, 210, 50), (255, 245, 150)),
-    ("nether_quartz_ore", "netherrack", (235, 228, 215), (255, 255, 250)),
-]
+FLAT = {
+    "gravel": (131, 127, 126), "sand": (219, 207, 163), "red_sand": (190, 102, 33), "dirt": (134, 96, 67),
+    "coarse_dirt": (119, 85, 59), "rooted_dirt": (144, 103, 76), "andesite": (136, 136, 136), "diorite": (188, 188, 188),
+    "granite": (149, 103, 85), "tuff": (108, 109, 102), "clay": (160, 166, 179), "netherrack": (97, 38, 38),
+    "soul_sand": (81, 62, 50), "soul_soil": (75, 57, 46), "mud": (60, 57, 60),
+}
 
 
-def base_px(kind, seed):
-    if kind == "deepslate":
-        return stone_px((38, 38, 44), (74, 74, 82), seed)
-    if kind == "netherrack":
-        return stone_px((80, 28, 28), (128, 52, 50), seed)
-    return stone_px((92, 92, 96), (138, 138, 142), seed)
-
-
-def ore(kind, color, shine, seed, border=True):
-    rng = random.Random(seed)
-    px = base_px(kind, seed)
-    for _ in range(5):
-        cx, cy = rng.randint(2, 13), rng.randint(2, 13)
-        for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1), (-1, 0), (0, -1)):
-            if rng.random() < 0.8:
-                x, y = cx + dx, cy + dy
-                if 1 <= x <= 14 and 1 <= y <= 14:
-                    c = shine if (dx, dy) == (0, 0) else color
-                    px[y * 16 + x] = (c[0], c[1], c[2], 255)
-    if border:
-        for i in range(16):
-            for x, y in ((i, 0), (i, 15), (0, i), (15, i)):
-                px[y * 16 + x] = (color[0], color[1], color[2], 255)
-    return png(16, 16, px)
-
-
-def debris(top):
-    rng = random.Random(4242 + top)
-    px = []
-    for y in range(16):
-        for x in range(16):
-            ring = math.hypot(x - 7.5, y - 7.5) if top else abs(math.sin((y + rng.random() * 0.6) * 1.1))
-            v = clamp01(0.5 + 0.4 * math.sin(ring * 1.7) + 0.2 * rng.random())
-            c = lerp((70, 42, 36), (120, 82, 66), v)
-            px.append((c[0], c[1], c[2], 255))
-    for i in range(16):
-        for x, y in ((i, 0), (i, 15), (0, i), (15, i)):
-            px[y * 16 + x] = (255, 150, 60, 255)
-    return png(16, 16, px)
-
-
-def fire(seed):
-    rng = random.Random(seed)
-    frames = 32
-    px = []
-    cols = [rng.random() * 6.28 for _ in range(16)]
-    for f in range(frames):
-        for y in range(16):
-            for x in range(16):
-                flame = 0.5 + 0.5 * math.sin(cols[x] + f * 0.6 + y * 0.35)
-                height = 6.5 + 2.5 * flame
-                rise = 15 - y
-                if rise > height:
-                    px.append((0, 0, 0, 0))
-                    continue
-                t = rise / height
-                c = lerp((255, 235, 120), (230, 70, 10), t)
-                px.append((c[0], c[1], c[2], round(255 * clamp01(1.25 - t))))
-    return png(16, 16 * frames, px)
+def flat(color):
+    return png(16, 16, [(color[0], color[1], color[2], 255)] * 256)
 
 
 def crosshair():
@@ -240,6 +169,8 @@ def files():
     yield "pack.mcmeta", json.dumps({"pack": {"pack_format": FORMAT, "min_format": FORMAT, "max_format": FORMAT,
                                               "description": "DIH Visuals: deepslate-style stone, clear water, see-through clouds, starry night sky without moon, sky gradient, colour glint, small totem"}}, indent=2).encode()
     yield mc + "textures/block/stone.png", stone()
+    yield mc + "textures/block/deepslate.png", stone()
+    yield mc + "textures/block/deepslate_top.png", stone()
     yield mc + "textures/misc/enchanted_glint_item.png", glint()
     yield mc + "textures/misc/enchanted_glint_armor.png", glint()
     yield mc + "textures/block/water_still.png", water(16, 32, False)
@@ -256,13 +187,8 @@ def files():
     for path in sorted((ROOT / "static").rglob("*")):
         if path.is_file():
             yield path.relative_to(ROOT / "static").as_posix(), path.read_bytes()
-    for i, (name, kind, color, shine) in enumerate(ORES):
-        yield mc + "textures/block/" + name + ".png", ore(kind, color, shine, 900 + i)
-    yield mc + "textures/block/ancient_debris_side.png", debris(False)
-    yield mc + "textures/block/ancient_debris_top.png", debris(True)
-    for n, seed in (("fire_0", 11), ("fire_1", 12)):
-        yield mc + "textures/block/" + n + ".png", fire(seed)
-        yield mc + "textures/block/" + n + ".png.mcmeta", json.dumps({"animation": {}}).encode()
+    for name, color in FLAT.items():
+        yield mc + "textures/block/" + name + ".png", flat(color)
     normal, blocking = shield_models()
     yield mc + "models/item/shield.json", json.dumps(normal, indent=2).encode()
     yield mc + "models/item/shield_blocking.json", json.dumps(blocking, indent=2).encode()

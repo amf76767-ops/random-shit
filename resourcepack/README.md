@@ -9,15 +9,14 @@ Bauen: `python3 resourcepack/build.py` -> `dist/DIH-Visuals-1.21.11.zip`. Shader
 | `shaders/core/sky.fsh` + `sky.vsh` | Himmel mit Farbverlauf, nachts Sternenhimmel mit Milchstraße | `SKY_GRADIENT = 0.0`, `STAR_AMOUNT = 0.0` |
 | `textures/environment/celestial/moon/*.png` | Kein Mond (durchsichtig) | |
 | `shaders/core/glint.fsh` | Glanz wechselt die Farbe (Item und Rüstung) | `GLINT_SPEED = 0.0` |
-| `textures/block/stone.png` | Stone als Tiefenschiefer (eigene Textur) | |
+| `textures/block/stone.png`, `deepslate.png`, `deepslate_top.png` | Stone und Deepslate mit derselben eigenen Textur | |
 | `textures/block/water_*.png` | Wasser ca. 45 % deckend, animiert | |
 | `textures/environment/celestial/sun.png` | Runde Sonne mit Lichthof | |
 | `textures/misc/enchanted_glint_*.png` | Cyan-violetter Glanz | |
 | `models/item/totem_of_undying.json` | Totem kleiner | |
-| `textures/block/fire_0.png`, `fire_1.png` | Niedrige Flammen (auch das Feuer-Overlay) | |
 | `models/item/shield*.json` | Schild in der Ich-Ansicht tiefer | |
 | `shaders/include/fog.glsl` | Weniger Nebel unter Wasser, in Lava und bei Blindheit | `CLEAR_FOG = 1.0`, `CLEAR_FOG_MIN = 0.0` |
-| `textures/block/*_ore.png`, `ancient_debris_*.png` | Erze mit Rand in Erzfarbe (eigene Texturen) | |
+| `textures/block/gravel.png`, `sand.png`, `dirt.png` … | Kies, Sand, Erde, Andesit, Diorit, Granit, Tuff, Ton, Netherrack, Seelensand, Schlamm als einfarbige Flächen | |
 | `models/item/generated.json`, `handheld.json`, `models/block/block.json` | Kleinere Items in der Hand | |
 | `textures/gui/sprites/hud/crosshair.png` | Dünnes Fadenkreuz mit Punkt | |
 | `sounds.json` | Keine Höhlengeräusche, Regen und Donner leiser | |

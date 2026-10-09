@@ -504,3 +504,10 @@ Nicht im Spiel getestet.
 - **Quiet Ambience:** Keine zufälligen Höhlengeräusche, Regen und Donner leiser.
 - **Crystal Size** (0,3 bis 1,0, Standard 0,6): End-Kristalle werden kleiner gezeichnet, solange VisualPack an ist.
 - Jeder Teil hat einen eigenen Schalter im Modul VisualPack.
+
+### 8.22.1: Erze raus, Low Fire ohne eigene Textur, Flat Blocks
+Nicht im Spiel getestet.
+- **Ore Borders entfernt:** Erze haben wieder die normale Textur.
+- **Low Fire:** Vanilla-Feuertextur bleibt, das Feuer-Overlay wird nur weiter nach unten geschoben (`InGameOverlayRenderer.renderFireOverlay`). Neu: **Fire Offset** (0,05 bis 0,6, Standard 0,3).
+- **Flat Blocks:** Kies, Sand, roter Sand, Erde, grobe Erde, Wurzelerde, Andesit, Diorit, Granit, Tuff, Ton, Netherrack, Seelensand, Seelenerde und Schlamm sind je eine einfarbige Fläche (Kies einfach grau).
+- **Same Stone** (vorher Deepslate Stone): Stone und Deepslate haben dieselbe Textur.
