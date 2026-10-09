@@ -36,3 +36,13 @@ Hinweise
    - Antworten über 2000 Zeichen werden auf mehrere Nachrichten aufgeteilt.
    - Die KI kann niemanden pingen (@everyone usw. sind abgeschaltet).
    - Gratis-Mistral hat ein Limit pro Minute. Der Bot wartet und versucht es dann nochmal.
+
+Fehler "Mistral hat abgelehnt: ... 429 ..."
+   - Der Bot zeigt jetzt die echte Meldung von Mistral (steht auch in der Konsole als [Mistral] ...).
+   - "Service tier capacity exceeded": das Modell ist für Gratis-Konten gerade voll.
+     Der Bot versucht es dann automatisch mit den Modellen aus "fallback_models".
+   - "Requests rate limit exceeded" / "tokens per minute": zu viele Anfragen, kurz warten.
+   - Monatliches Token-Limit erreicht: erst nächsten Monat wieder oder Plan upgraden.
+   - Deine Limits siehst du auf console.mistral.ai unter Limits.
+   - 401/403: Key falsch oder auf console.mistral.ai noch kein Plan gewählt
+     (beim Gratis-Plan "Experiment" muss man ihn einmal aktivieren und die Telefonnummer bestätigen).

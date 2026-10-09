@@ -20,6 +20,7 @@ def load_config():
     cfg["discord_token"] = os.environ.get("DISCORD_TOKEN") or cfg.get("discord_token", "")
     cfg["mistral_api_key"] = os.environ.get("MISTRAL_API_KEY") or cfg.get("mistral_api_key", "")
     cfg.setdefault("model", "mistral-small-latest")
+    cfg.setdefault("fallback_models", ["ministral-8b-latest", "ministral-3b-latest"])
     cfg.setdefault("system_prompt", "Du bist ein hilfreicher Assistent in einem Discord-Server. Antworte kurz und in der Sprache der Frage.")
     cfg.setdefault("memory_messages", 6)
     cfg.setdefault("cooldown_seconds", 5)
@@ -59,31 +60,60 @@ class Bot(discord.Client):
 bot = Bot()
 
 
+def mistral_error(status, text):
+    try:
+        data = json.loads(text)
+        msg = data.get("message") or data.get("detail") or data.get("error") or text
+        if isinstance(msg, (dict, list)):
+            msg = json.dumps(msg)
+    except Exception:
+        msg = text
+    return f"{status}: {str(msg)[:200]}"
+
+
+async def call_model(model, messages):
+    payload = {"model": model, "messages": messages, "max_tokens": int(CFG["max_tokens"])}
+    headers = {"Authorization": "Bearer " + CFG["mistral_api_key"], "Content-Type": "application/json"}
+    waits = [2, 5, 10]
+    for attempt in range(len(waits) + 1):
+        wait = 1.1 - (time.monotonic() - last_call[0])
+        if wait > 0:
+            await asyncio.sleep(wait)
+        last_call[0] = time.monotonic()
+        async with bot.http_session.post(MISTRAL_URL, json=payload, headers=headers) as r:
+            text = await r.text()
+            if r.status == 200:
+                return json.loads(text)["choices"][0]["message"]["content"].strip()
+            err = mistral_error(r.status, text)
+            print(f"[Mistral] {model} -> {err}")
+            if r.status in (401, 403):
+                raise PermissionError("Der Mistral API-Key ist falsch oder dein Mistral-Konto hat noch keinen Plan (console.mistral.ai -> Billing/Plan aktivieren).")
+            if r.status in (429, 500, 502, 503) and attempt < len(waits):
+                retry = r.headers.get("Retry-After")
+                await asyncio.sleep(min(float(retry), 20) if retry else waits[attempt])
+                continue
+            raise RuntimeError(err)
+    raise RuntimeError("keine Antwort")
+
+
 async def ask_mistral(user_id, question):
     messages = [{"role": "system", "content": CFG["system_prompt"]}]
     messages += list(memory[user_id])
     messages.append({"role": "user", "content": question})
-    payload = {"model": CFG["model"], "messages": messages, "max_tokens": int(CFG["max_tokens"])}
-    headers = {"Authorization": "Bearer " + CFG["mistral_api_key"], "Content-Type": "application/json"}
+    models = [CFG["model"]] + [m for m in CFG["fallback_models"] if m != CFG["model"]]
+    errors = []
+    answer = None
     async with api_lock:
-        wait = 1.1 - (time.monotonic() - last_call[0])
-        if wait > 0:
-            await asyncio.sleep(wait)
-        for attempt in range(3):
-            last_call[0] = time.monotonic()
-            async with bot.http_session.post(MISTRAL_URL, json=payload, headers=headers) as r:
-                if r.status == 429 and attempt < 2:
-                    await asyncio.sleep(float(r.headers.get("Retry-After", 3 * (attempt + 1))))
-                    continue
-                text = await r.text()
-                if r.status == 401:
-                    raise RuntimeError("Der Mistral API-Key ist falsch.")
-                if r.status == 429:
-                    raise RuntimeError("Mistral-Limit erreicht, versuch es gleich nochmal.")
-                if r.status >= 300:
-                    raise RuntimeError(f"Mistral-Fehler {r.status}: {text[:200]}")
-                answer = json.loads(text)["choices"][0]["message"]["content"].strip()
+        for model in models:
+            try:
+                answer = await call_model(model, messages)
                 break
+            except PermissionError:
+                raise
+            except Exception as e:
+                errors.append(f"{model} ({e})")
+    if answer is None:
+        raise RuntimeError("Mistral hat abgelehnt: " + "; ".join(errors))
     memory[user_id].append({"role": "user", "content": question})
     memory[user_id].append({"role": "assistant", "content": answer})
     return answer or "(leere Antwort)"
