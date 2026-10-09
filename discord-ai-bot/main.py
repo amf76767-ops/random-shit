@@ -52,7 +52,7 @@ DATA_PATH = os.path.join(HERE, "data.json")
 NO_PINGS = discord.AllowedMentions.none()
 REACT_RE = re.compile(r"^\s*\[react:\s*([^\]\s]{1,16})\s*\]\s*")
 HEADER_RE = re.compile(r"^\*\*[^*\n]{1,100}:\*\* [^\n]*\n\n")
-REGENERATE, MORE, DELETE = "🔄", "➕", "❌"
+YES, REGENERATE, MORE, DELETE = "✅", "🔄", "➕", "❌"
 THINKING = "👀"
 MAX_IMAGES = 3
 MAX_IMAGE_BYTES = 8 * 1024 * 1024
@@ -123,8 +123,9 @@ def push_memory(user_id, question, answer):
     save_soon()
 
 
-def remember_answer(message_ids, asker_id, guild_id, history, question, answer):
-    entry = {"asker": asker_id, "guild": guild_id, "history": history, "question": question, "answer": answer, "ids": list(message_ids)}
+def remember_answer(message_ids, asker_id, guild_id, history, question, answer, trigger=None):
+    entry = {"asker": asker_id, "guild": guild_id, "history": history, "question": question, "answer": answer,
+             "ids": list(message_ids), "trigger": trigger}
     for mid in message_ids:
         answers[mid] = entry
         answers.move_to_end(mid)
@@ -401,11 +402,36 @@ async def add_reaction(message, emoji):
 async def add_buttons(messages):
     if not CFG["reaction_buttons"] or not messages:
         return
-    for e in (REGENERATE, MORE, DELETE):
+    for e in (YES, REGENERATE, MORE, DELETE):
         try:
             await messages[-1].add_reaction(e)
         except discord.HTTPException:
             return
+
+
+async def clear_reactions(channel, message_id):
+    try:
+        msg = await channel.fetch_message(message_id)
+    except discord.HTTPException:
+        return
+    try:
+        await msg.clear_reactions()
+        return
+    except discord.HTTPException:
+        pass
+    for r in msg.reactions:
+        if r.me:
+            try:
+                await msg.remove_reaction(r.emoji, bot.user)
+            except discord.HTTPException:
+                pass
+
+
+async def clear_old(entry, channel):
+    ids = list(entry.get("ids", []))
+    if entry.get("trigger"):
+        ids.append(entry["trigger"])
+    await asyncio.gather(*(clear_reactions(channel, mid) for mid in ids))
 
 
 def clean_question(message):
@@ -626,6 +652,8 @@ async def on_message(message: discord.Message):
             except discord.HTTPException:
                 ref = None
         replied = ref is not None and ref.author == bot.user
+    if replied and CFG["answer_replies"]:
+        await clear_old(answers.get(ref.id) or {"ids": [ref.id]}, message.channel)
     if not ((is_dm and CFG["answer_dms"]) or (mentioned and CFG["answer_mentions"]) or (replied and CFG["answer_replies"])):
         return
     question = clean_question(message)[:4000]
@@ -643,7 +671,7 @@ async def on_message(message: discord.Message):
     answer, emoji = await answer_live(live, history, question, gid, images, thinking_on=message)
     if answer is None:
         return
-    remember_answer([m.id for m in live.msgs], message.author.id, gid, history, with_image_note(question, images), answer)
+    remember_answer([m.id for m in live.msgs], message.author.id, gid, history, with_image_note(question, images), answer, trigger=message.id)
     await add_reaction(message, emoji)
     await add_buttons(live.msgs)
 
@@ -653,7 +681,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     if not CFG["reaction_buttons"] or bot.user is None or payload.user_id == bot.user.id:
         return
     emoji = str(payload.emoji)
-    if emoji not in (REGENERATE, MORE, DELETE):
+    if emoji not in (YES, REGENERATE, MORE, DELETE):
         return
     entry = answers.get(payload.message_id)
     if entry is None:
@@ -702,8 +730,9 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     if emoji == REGENERATE:
         history, question = entry["history"], entry["question"]
     else:
+        await clear_old(entry, channel)
         history = entry["history"] + [{"role": "user", "content": entry["question"]}, {"role": "assistant", "content": entry["answer"]}]
-        question = "Erklär das genauer und ausführlicher."
+        question = "Ja." if emoji == YES else "Erklär das genauer und ausführlicher."
     live = Live(lambda p: msg.reply(p, mention_author=False, allowed_mentions=NO_PINGS),
                 lambda p: channel.send(p, allowed_mentions=NO_PINGS))
     answer, react = await answer_live(live, history, question, gid, thinking_on=msg)

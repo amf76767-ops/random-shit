@@ -7,7 +7,7 @@ Discord-KI-Bot mit Mistral (/ai)
      und speichern. Sonst kann der Bot Antworten und Erwähnungen nicht lesen und startet nicht.
    - OAuth2 -> URL Generator: Scopes "bot" und "applications.commands",
      Bot Permissions: "Send Messages", "Read Message History", "Add Reactions"
-     und optional "Manage Messages" (damit er eure 🔄/➕/❌-Klicks wieder entfernen kann).
+     und optional "Manage Messages" (damit er eure Reaktionen wieder entfernen kann).
      Link öffnen und den Bot auf deinen Server holen.
 
 2. Mistral API-Key
@@ -41,9 +41,12 @@ Benutzen in Discord
    DM                     im Privatchat antwortet er auf jede Nachricht
    Bilder                 einfach ein Bild an die Nachricht hängen (max. 3, je max. 8 MB)
    Reaktionen unter seinen Antworten:
+     ✅  heißt einfach "Ja" (als hättest du Ja geantwortet)
      🔄  neue Antwort auf dieselbe Frage
      ➕  genauer und ausführlicher erklären
      ❌  Antwort löschen (nur wer gefragt hat)
+   Wenn du auf ihn antwortest (oder ✅/➕ drückst), räumt er alle Reaktionen an seiner alten
+   Antwort und deiner alten Nachricht weg (deine eigenen nur mit "Manage Messages").
    Während er nachdenkt, reagiert er mit 👀 auf deine Nachricht (verschwindet danach).
    Der Bot setzt selbst manchmal ein passendes Emoji als Reaktion auf deine Nachricht.
    ⏳ als Reaktion heißt: du warst zu schnell (Wartezeit).
