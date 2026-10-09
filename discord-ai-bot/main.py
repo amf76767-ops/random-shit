@@ -53,6 +53,7 @@ NO_PINGS = discord.AllowedMentions.none()
 REACT_RE = re.compile(r"^\s*\[react:\s*([^\]\s]{1,16})\s*\]\s*")
 HEADER_RE = re.compile(r"^\*\*[^*\n]{1,100}:\*\* [^\n]*\n\n")
 REGENERATE, MORE, DELETE = "🔄", "➕", "❌"
+THINKING = "👀"
 MAX_IMAGES = 3
 MAX_IMAGE_BYTES = 8 * 1024 * 1024
 
@@ -306,23 +307,22 @@ class Live:
         self.msgs = [message]
         self.shown = [message.content]
 
-    async def start(self):
-        if not self.msgs:
-            text = self.prefix + "💭 …"
-            self.msgs.append(await self.first_send(text))
-            self.shown.append(text)
-
     async def update(self, text, final=False):
         if not final and time.monotonic() - self.last < 1.2:
             return
+        body = text if final else visible(text)
+        if not body.strip():
+            return
         async with self.lock:
             self.last = time.monotonic()
-            body = text if final else visible(text)
-            parts = chunks(self.prefix + body) if body else [self.prefix + "💭 …"]
+            parts = chunks(self.prefix + body)
             if not final:
                 parts[-1] += " ▌"
             for i, p in enumerate(parts):
-                if i < len(self.msgs):
+                if i == 0 and not self.msgs:
+                    self.msgs.append(await self.first_send(p))
+                    self.shown.append(p)
+                elif i < len(self.msgs):
                     if self.shown[i] != p:
                         try:
                             await self.msgs[i].edit(content=p, allowed_mentions=NO_PINGS)
@@ -352,15 +352,33 @@ class Live:
                 await self.first_send(text[:1990])
 
 
-async def answer_live(live, history, question, guild_id, images=None):
-    await live.start()
+async def answer_live(live, history, question, guild_id, images=None, thinking_on=None):
+    if thinking_on is not None:
+        await add_status(thinking_on, THINKING)
     try:
         answer, emoji = await generate(history, question, guild_id, images, on_text=live.update)
     except Exception as e:
         await live.fail(e)
         return None, None
+    finally:
+        if thinking_on is not None:
+            await remove_status(thinking_on, THINKING)
     await live.update(answer, final=True)
     return answer, emoji
+
+
+async def add_status(message, emoji):
+    try:
+        await message.add_reaction(emoji)
+    except discord.HTTPException:
+        pass
+
+
+async def remove_status(message, emoji):
+    try:
+        await message.remove_reaction(emoji, bot.user)
+    except discord.HTTPException:
+        pass
 
 
 def cooldown_left(key, seconds):
@@ -622,7 +640,7 @@ async def on_message(message: discord.Message):
     gid = message.guild.id if message.guild else None
     live = Live(lambda p: message.reply(p, mention_author=False, allowed_mentions=NO_PINGS),
                 lambda p: message.channel.send(p, allowed_mentions=NO_PINGS))
-    answer, emoji = await answer_live(live, history, question, gid, images)
+    answer, emoji = await answer_live(live, history, question, gid, images, thinking_on=message)
     if answer is None:
         return
     remember_answer([m.id for m in live.msgs], message.author.id, gid, history, with_image_note(question, images), answer)
@@ -671,7 +689,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
         header = HEADER_RE.match(msg.content)
         live = Live(None, lambda p: channel.send(p, allowed_mentions=NO_PINGS), header.group(0) if header else "")
         live.adopt(msg)
-        answer, react = await answer_live(live, entry["history"], entry["question"], gid)
+        answer, react = await answer_live(live, entry["history"], entry["question"], gid, thinking_on=msg)
         if answer is None:
             return
         entry["answer"] = answer
@@ -688,7 +706,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
         question = "Erklär das genauer und ausführlicher."
     live = Live(lambda p: msg.reply(p, mention_author=False, allowed_mentions=NO_PINGS),
                 lambda p: channel.send(p, allowed_mentions=NO_PINGS))
-    answer, react = await answer_live(live, history, question, gid)
+    answer, react = await answer_live(live, history, question, gid, thinking_on=msg)
     if answer is None:
         return
     remember_answer([m.id for m in live.msgs], entry["asker"], gid, history, question, answer)

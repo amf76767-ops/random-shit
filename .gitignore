@@ -21,3 +21,4 @@ dist/dihclient-v8.23.0+mc1.21.11.jar
 dist/dihclient-v8.24.0+mc1.21.11.jar
 dist/dihclient-v8.25.0+mc1.21.11.jar
 __pycache__/
+discord-ai-bot/data.json

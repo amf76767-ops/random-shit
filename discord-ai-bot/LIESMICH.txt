@@ -44,6 +44,7 @@ Benutzen in Discord
      🔄  neue Antwort auf dieselbe Frage
      ➕  genauer und ausführlicher erklären
      ❌  Antwort löschen (nur wer gefragt hat)
+   Während er nachdenkt, reagiert er mit 👀 auf deine Nachricht (verschwindet danach).
    Der Bot setzt selbst manchmal ein passendes Emoji als Reaktion auf deine Nachricht.
    ⏳ als Reaktion heißt: du warst zu schnell (Wartezeit).
 
