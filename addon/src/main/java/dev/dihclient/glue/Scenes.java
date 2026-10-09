@@ -112,7 +112,7 @@ public class Scenes extends Module {
                 }
                 pack.setLook(s.look);
                 if (this.applyLight.get()) {
-                    pack.fullbright.set(s.fullbright);
+                    pack.nightVision.set(s.fullbright);
                 }
             } else if (pack != null) {
                 pack.setLook(Look.NONE);

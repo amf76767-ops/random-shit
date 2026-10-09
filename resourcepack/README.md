@@ -14,6 +14,13 @@ Bauen: `python3 resourcepack/build.py` -> `dist/DIH-Visuals-1.21.11.zip`. Shader
 | `textures/environment/celestial/sun.png` | Runde Sonne mit Lichthof | |
 | `textures/misc/enchanted_glint_*.png` | Cyan-violetter Glanz | |
 | `models/item/totem_of_undying.json` | Totem kleiner | |
+| `textures/block/fire_0.png`, `fire_1.png` | Niedrige Flammen (auch das Feuer-Overlay) | |
+| `models/item/shield*.json` | Schild in der Ich-Ansicht tiefer | |
+| `shaders/include/fog.glsl` | Weniger Nebel unter Wasser, in Lava und bei Blindheit | `CLEAR_FOG = 1.0`, `CLEAR_FOG_MIN = 0.0` |
+| `textures/block/*_ore.png`, `ancient_debris_*.png` | Erze mit Rand in Erzfarbe (eigene Texturen) | |
+| `models/item/generated.json`, `handheld.json`, `models/block/block.json` | Kleinere Items in der Hand | |
+| `textures/gui/sprites/hud/crosshair.png` | Dünnes Fadenkreuz mit Punkt | |
+| `sounds.json` | Keine Höhlengeräusche, Regen und Donner leiser | |
 
 Die Shader ändern nur die Fragment-Shader (und `sky.vsh`), alle Uniforms und Importe bleiben wie bei Vanilla.
 Sie laufen ohne Iris und Beryl. Gegen GLSL 330 geprüft (wie Vanilla). Im Spiel, auch mit VulkanMod, ungetestet.

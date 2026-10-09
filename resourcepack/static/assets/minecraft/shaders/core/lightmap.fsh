@@ -13,7 +13,7 @@ layout(std140) uniform LightmapInfo {
 } lightmapInfo;
 
 // DIH Visuals: Fullbright. Jede Lichtstufe wird mindestens so hell. 1.0 = alles voll hell, 0.0 = wieder Vanilla.
-const float FULLBRIGHT = 1.0;
+const float FULLBRIGHT = 0.0;
 // DIH Scenes: Farbstich des Lichts (1,1,1 = keiner). Wird zur Laufzeit vom Modul Scenes gesetzt.
 const vec3 LIGHT_TINT = vec3(1.0, 1.0, 1.0);
 

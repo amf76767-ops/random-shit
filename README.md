@@ -491,3 +491,16 @@ Nicht im Spiel getestet.
 ### 8.21.1: Entfernte Module wieder weg
 Nicht im Spiel getestet.
 - In 8.21.0 stand **Xray** doppelt in der Liste der entfernten Module. Java bricht dabei ab, deshalb wurde gar kein Modul mehr entfernt: MoneyHUD, Xray, DIHChat und die anderen früher entfernten Module waren wieder da. Behoben, die Liste lädt wieder (31 Einträge, geprüft).
+
+### 8.22.0: VisualPack erweitert, Night Vision statt Fullbright
+Nicht im Spiel getestet.
+- **Night Vision** ersetzt Fullbright: endloser Nachtsicht-Effekt nur bei dir (Server weiß nichts davon). Höhlen und Nächte sind hell, Farben bleiben normal. Der Lightmap-Shader ist nur noch für die Farbstimmung von Scenes da.
+- **Low Fire:** Die Flammen beim Brennen füllen nur noch den unteren Bildschirmrand (eigene Feuer-Textur, Feuerblöcke sehen dadurch auch niedriger aus).
+- **Low Shield:** Das Schild sitzt in der Ich-Ansicht tiefer.
+- **Clear Water & Lava:** Viel weniger Nebel unter Wasser und in Lava (auch Blindheits-Nebel ist schwächer). Shader gegen GLSL 330 geprüft.
+- **Ore Borders:** Jedes Erz (alle Erze, Deepslate- und Nether-Erze, Ancient Debris) hat einen Rand in seiner Farbe. Eigene Texturen, kein Xray.
+- **Small Held Items:** Werkzeuge, Waffen und Blöcke in der Hand sind kleiner und tiefer. Items mit eigenem Modell (z. B. Dreizack, Bogen) bleiben normal.
+- **Clean Crosshair:** Dünnes Kreuz mit Punkt.
+- **Quiet Ambience:** Keine zufälligen Höhlengeräusche, Regen und Donner leiser.
+- **Crystal Size** (0,3 bis 1,0, Standard 0,6): End-Kristalle werden kleiner gezeichnet, solange VisualPack an ist.
+- Jeder Teil hat einen eigenen Schalter im Modul VisualPack.
