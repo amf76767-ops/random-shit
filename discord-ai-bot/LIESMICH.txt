@@ -31,11 +31,15 @@ Discord-KI-Bot mit Mistral (/ai)
    - Server starten. In der Konsole steht dann "Online als ...".
 
 Benutzen in Discord
-   /ai nachricht:<Text>   fragt Mistral und schickt die Antwort
+   /ai nachricht:<Text> [bild]   fragt Mistral, optional mit Bild, die Antwort erscheint live
+   /zusammenfassen [anzahl]      fasst die letzten 10-200 Nachrichten im Channel zusammen
+   /ai-persona [text]            (nur Admins) wie der Bot auf dem Server redet, leer = zurücksetzen
+   /bild beschreibung:<Text>     die KI malt ein Bild (siehe Hinweis unten)
    /ai-reset              die KI vergisst euer bisheriges Gespräch (nur für /ai)
    @Bot <Text>            den Bot erwähnen, er antwortet direkt auf deine Nachricht
    Antworten (Reply)      auf eine Bot-Nachricht antworten: er kennt den Verlauf der Antwortkette
    DM                     im Privatchat antwortet er auf jede Nachricht
+   Bilder                 einfach ein Bild an die Nachricht hängen (max. 3, je max. 8 MB)
    Reaktionen unter seinen Antworten:
      🔄  neue Antwort auf dieselbe Frage
      ➕  genauer und ausführlicher erklären
@@ -49,7 +53,13 @@ Schalter in config.json (true/false)
    reaction_buttons                              ob er 🔄 ➕ ❌ unter Antworten setzt
 
 Hinweise
-   - 🔄 ➕ ❌ funktionieren nur bei Antworten seit dem letzten Neustart des Bots.
+   - Gedächtnis, 🔄 ➕ ❌ und Persönlichkeiten werden in data.json gespeichert und
+     überleben einen Neustart. data.json löschen = alles vergessen.
+   - /bild nutzt Mistrals Bild-Werkzeug (FLUX) über einen "Agent", den der Bot beim ersten Mal
+     selbst anlegt. Das ist bei Mistral sehr begrenzt oder kostet Guthaben. Wenn es mit einem
+     Fehler abbricht, steht die Meldung von Mistral dabei.
+   - Bilder lesen geht nur mit Modellen, die Bilder können ("vision_models" in config.json).
+   - "stream": false schaltet die Live-Antwort aus (dann kommt die Antwort auf einmal).
    - Die Slash-Befehle können beim ersten Start bis zu ein paar Minuten brauchen, bis sie auftauchen.
    - Antworten über 2000 Zeichen werden auf mehrere Nachrichten aufgeteilt.
    - Die KI kann niemanden pingen (@everyone usw. sind abgeschaltet).
